@@ -46,6 +46,6 @@ dependencies {
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)
 
-    implementation(platform(libs.firebase.bom))
+    api(platform(libs.firebase.bom))
     api(libs.bundles.firebase.dependencies)
 }

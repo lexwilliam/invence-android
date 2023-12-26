@@ -10,8 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.invence.ui.navigation.RootNavGraph
-import com.lexwilliam.invence.ui.theme.InvenceTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

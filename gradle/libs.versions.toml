@@ -18,7 +18,7 @@ compose-constraint-version = "1.0.1"
 compose-lifecycle-version = "2.6.1"
 
 # Firebase
-firebase-version = "32.6.0"
+firebase-version = "32.7.0"
 firebase-crashlytics-gradle-version = "2.9.8"
 
 # Coroutine versions
