@@ -3,6 +3,7 @@ buildscript {
     dependencies {
         classpath(libs.gms)
         classpath(libs.firebase.crashlytics.gradle)
+        classpath(libs.ktlint.gradle)
     }
 }
 
@@ -13,4 +14,5 @@ plugins {
     alias(libs.plugins.android.lib.plugin) apply false
     alias(libs.plugins.kotlin.plugin) apply false
     alias(libs.plugins.hilt.plugin) apply false
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }

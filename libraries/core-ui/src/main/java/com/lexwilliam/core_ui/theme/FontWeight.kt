@@ -8,5 +8,6 @@ class InvenceFontWeight {
     companion object {
         val Regular: FontWeight = FontWeight(400)
         val Medium: FontWeight = FontWeight(500)
+        val Brand: FontWeight = FontWeight(1000)
     }
 }

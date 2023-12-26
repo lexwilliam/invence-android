@@ -5,7 +5,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class LoginViewModel
+    @Inject
+    constructor() : ViewModel() {
+        fun onEvent(event: LoginUiEvent) {
+            when (event) {
+                LoginUiEvent.LoginTapped -> handleLoginTapped()
+            }
+        }
 
-): ViewModel() {
-}
+        private fun handleLoginTapped() {
+        }
+    }

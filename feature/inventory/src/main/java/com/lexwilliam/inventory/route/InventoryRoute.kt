@@ -4,7 +4,5 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun InventoryRoute(
-    viewModel: InventoryViewModel = hiltViewModel()
-) {
+fun InventoryRoute(viewModel: InventoryViewModel = hiltViewModel()) {
 }

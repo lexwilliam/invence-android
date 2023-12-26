@@ -23,37 +23,34 @@ internal val Neutral80 = Color(0xFF616161)
 internal val Neutral90 = Color(0xFF404040)
 internal val Neutral100 = Color(0xFF0A0A0A)
 
-internal val InvenceLightColors = InvenceColors(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = Tertiary,
-
-    success = Success,
-    error = Error,
-    danger = Danger,
-
-    neutral10 = Neutral10,
-    neutral20 = Neutral20,
-    neutral30 = Neutral30,
-    neutral40 = Neutral40,
-    neutral50 = Neutral50,
-    neutral60 = Neutral60,
-    neutral70 = Neutral70,
-    neutral80 = Neutral80,
-    neutral90 = Neutral90,
-    neutral100 = Neutral100,
-)
+internal val InvenceLightColors =
+    InvenceColors(
+        primary = Primary,
+        secondary = Secondary,
+        tertiary = Tertiary,
+        success = Success,
+        error = Error,
+        danger = Danger,
+        neutral10 = Neutral10,
+        neutral20 = Neutral20,
+        neutral30 = Neutral30,
+        neutral40 = Neutral40,
+        neutral50 = Neutral50,
+        neutral60 = Neutral60,
+        neutral70 = Neutral70,
+        neutral80 = Neutral80,
+        neutral90 = Neutral90,
+        neutral100 = Neutral100,
+    )
 
 @Immutable
 data class InvenceColors(
     val primary: Color,
     val secondary: Color,
     val tertiary: Color,
-
     val success: Color,
     val error: Color,
     val danger: Color,
-
     val neutral10: Color,
     val neutral20: Color,
     val neutral30: Color,
@@ -66,26 +63,24 @@ data class InvenceColors(
     val neutral100: Color,
 )
 
-
-internal val LocalInvenceColors = staticCompositionLocalOf {
-    InvenceColors(
-        primary = Color.Unspecified,
-        secondary = Color.Unspecified,
-        tertiary = Color.Unspecified,
-
-        success = Color.Unspecified,
-        error = Color.Unspecified,
-        danger = Color.Unspecified,
-
-        neutral10 = Color.Unspecified,
-        neutral20 = Color.Unspecified,
-        neutral30 = Color.Unspecified,
-        neutral40 = Color.Unspecified,
-        neutral50 = Color.Unspecified,
-        neutral60 = Color.Unspecified,
-        neutral70 = Color.Unspecified,
-        neutral80 = Color.Unspecified,
-        neutral90 = Color.Unspecified,
-        neutral100 = Color.Unspecified,
-    )
-}
+internal val LocalInvenceColors =
+    staticCompositionLocalOf {
+        InvenceColors(
+            primary = Color.Unspecified,
+            secondary = Color.Unspecified,
+            tertiary = Color.Unspecified,
+            success = Color.Unspecified,
+            error = Color.Unspecified,
+            danger = Color.Unspecified,
+            neutral10 = Color.Unspecified,
+            neutral20 = Color.Unspecified,
+            neutral30 = Color.Unspecified,
+            neutral40 = Color.Unspecified,
+            neutral50 = Color.Unspecified,
+            neutral60 = Color.Unspecified,
+            neutral70 = Color.Unspecified,
+            neutral80 = Color.Unspecified,
+            neutral90 = Color.Unspecified,
+            neutral100 = Color.Unspecified,
+        )
+    }

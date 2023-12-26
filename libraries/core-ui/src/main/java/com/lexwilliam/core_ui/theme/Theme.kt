@@ -4,14 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
-fun InvenceTheme(
-    content: @Composable () -> Unit,
-) {
+fun InvenceTheme(content: @Composable () -> Unit) {
     val colors = InvenceLightColors
     val typography = InvenceMobileTypography
     CompositionLocalProvider(
         LocalInvenceColors provides colors,
-        LocalInvenceTypography provides typography
+        LocalInvenceTypography provides typography,
     ) {
         content()
     }
