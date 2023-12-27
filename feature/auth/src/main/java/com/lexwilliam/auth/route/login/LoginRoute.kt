@@ -8,16 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.lexwilliam.core_ui.component.brand.InvenceLogoText
 import com.lexwilliam.core_ui.component.button.GoogleSignInButton
 import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
-fun LoginRoute(viewModel: LoginViewModel = hiltViewModel()) {
+fun LoginRoute(onGoogleSignInTapped: () -> Unit) {
     Scaffold(
         modifier =
             Modifier
@@ -42,7 +40,7 @@ fun LoginRoute(viewModel: LoginViewModel = hiltViewModel()) {
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                GoogleSignInButton(modifier = Modifier.fillMaxWidth(), onClick = { })
+                GoogleSignInButton(modifier = Modifier.fillMaxWidth(), onClick = onGoogleSignInTapped)
             }
         }
     }

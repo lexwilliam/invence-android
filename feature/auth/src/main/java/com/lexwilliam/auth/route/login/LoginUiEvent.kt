@@ -1,5 +1,7 @@
 package com.lexwilliam.auth.route.login
 
+import com.lexwilliam.auth.util.SignInResult
+
 sealed interface LoginUiEvent {
-    object LoginTapped : LoginUiEvent
+    data class SignIn(val result: SignInResult) : LoginUiEvent
 }

@@ -10,12 +10,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.auth.api.identity.Identity
+import com.lexwilliam.auth.util.GoogleAuthUiClient
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.invence.ui.navigation.RootNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val googleAuthUiClient by lazy {
+        GoogleAuthUiClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext),
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -25,7 +35,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    RootNavGraph()
+                    RootNavGraph(
+                        lifecycleScope = lifecycleScope,
+                        googleAuthUiClient = googleAuthUiClient,
+                    )
                 }
             }
         }

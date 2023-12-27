@@ -59,6 +59,10 @@ ktlint {
 dependencies {
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
+    implementation(project(":libraries:firebase"))
+
+    implementation(libs.google.play.service.auth)
+    implementation(libs.android.lifecycle.runtime)
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)

@@ -84,6 +84,8 @@ dependencies {
     implementation(libs.hilt.nav)
     kapt(libs.hilt.kapt)
 
+    implementation(libs.google.play.service.auth)
+
     testImplementation(libs.bundles.unit.test.dependencies)
     androidTestImplementation(libs.bundles.integration.test.dependencies)
 }

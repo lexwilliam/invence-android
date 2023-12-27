@@ -4,6 +4,8 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
@@ -28,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
@@ -51,6 +53,9 @@ dependencies {
     implementation(project(":domain:user"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:firebase"))
+
+    implementation(libs.hilt.library)
+    kapt(libs.hilt.kapt)
 
     implementation(libs.android.core)
     implementation(libs.android.appcompat)

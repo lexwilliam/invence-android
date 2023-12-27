@@ -51,6 +51,7 @@ ktlint {
 dependencies {
     implementation(project(":libraries:core"))
 
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.android.core)
     implementation(libs.android.appcompat)
     implementation(libs.material)
