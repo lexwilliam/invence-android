@@ -24,7 +24,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
         }
     }
@@ -32,8 +32,9 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.7"
     }
+    kotlinOptions.languageVersion = "1.9"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -57,8 +58,11 @@ ktlint {
 dependencies {
     api(libs.bundles.android.ui.dependencies)
     api(libs.bundles.compose.dependencies)
+
     implementation(libs.kotlinx.datetime)
+    implementation(libs.coil.library)
     api(libs.hilt.nav)
+
     testImplementation(libs.bundles.unit.test.dependencies)
     androidTestImplementation(libs.bundles.integration.test.dependencies)
     debugApi(libs.compose.tooling)

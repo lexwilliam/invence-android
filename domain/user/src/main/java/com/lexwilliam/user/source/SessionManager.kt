@@ -11,7 +11,7 @@ interface SessionManager {
 
     suspend fun saveSession(
         uuid: String,
-        branchUUID: String,
+        branchUUID: String
     ): Either<LoginFailure, Boolean>
 
     suspend fun clearSession(): Either<LogoutFailure, Boolean>

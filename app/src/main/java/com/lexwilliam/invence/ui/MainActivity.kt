@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext),
+            oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
 
@@ -33,11 +33,11 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     RootNavGraph(
                         lifecycleScope = lifecycleScope,
-                        googleAuthUiClient = googleAuthUiClient,
+                        googleAuthUiClient = googleAuthUiClient
                     )
                 }
             }
@@ -48,11 +48,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(
     name: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Text(
         text = "Hello $name!",
-        modifier = modifier,
+        modifier = modifier
     )
 }
 

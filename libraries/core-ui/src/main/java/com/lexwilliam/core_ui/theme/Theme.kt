@@ -9,7 +9,7 @@ fun InvenceTheme(content: @Composable () -> Unit) {
     val typography = InvenceMobileTypography
     CompositionLocalProvider(
         LocalInvenceColors provides colors,
-        LocalInvenceTypography provides typography,
+        LocalInvenceTypography provides typography
     ) {
         content()
     }

@@ -6,4 +6,9 @@ object FirestoreConfig {
     const val COLLECTION_USER = "user"
     const val COLLECTION_SUPPLIER = "supplier"
     const val COLLECTION_COMPANY = "company"
+
+    object Field {
+        const val BRANCH_UUID = "branch_uuid"
+        const val DELETED_AT = "deleted_at"
+    }
 }

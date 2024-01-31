@@ -40,7 +40,7 @@ internal val InvenceLightColors =
         neutral70 = Neutral70,
         neutral80 = Neutral80,
         neutral90 = Neutral90,
-        neutral100 = Neutral100,
+        neutral100 = Neutral100
     )
 
 @Immutable
@@ -60,7 +60,7 @@ data class InvenceColors(
     val neutral70: Color,
     val neutral80: Color,
     val neutral90: Color,
-    val neutral100: Color,
+    val neutral100: Color
 )
 
 internal val LocalInvenceColors =
@@ -81,6 +81,6 @@ internal val LocalInvenceColors =
             neutral70 = Color.Unspecified,
             neutral80 = Color.Unspecified,
             neutral90 = Color.Unspecified,
-            neutral100 = Color.Unspecified,
+            neutral100 = Color.Unspecified
         )
     }

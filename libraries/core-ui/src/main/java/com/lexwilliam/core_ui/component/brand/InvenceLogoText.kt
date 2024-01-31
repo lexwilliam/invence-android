@@ -6,5 +6,9 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
 fun InvenceLogoText() {
-    Text(text = "Invence", style = InvenceTheme.typography.brand, color = InvenceTheme.colors.primary)
+    Text(
+        text = "Invence",
+        style = InvenceTheme.typography.brand,
+        color = InvenceTheme.colors.primary
+    )
 }

@@ -4,16 +4,19 @@ import arrow.core.Either
 import arrow.core.right
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.lexwilliam.user.repository.UserRepository
 import com.lexwilliam.user.source.SessionManager
 import com.lexwilliam.user.util.LoginFailure
 import com.lexwilliam.user.util.LogoutFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.runBlocking
 
 fun firebaseSessionManager(
     auth: FirebaseAuth,
     crashlytics: FirebaseCrashlytics,
+    userRepository: UserRepository
 ) = object : SessionManager {
     override val sessionDataFlow: Flow<Session> =
         callbackFlow {
@@ -22,12 +25,20 @@ fun firebaseSessionManager(
                     firebaseAuth
                         .currentUser
                         ?.getIdToken(false)
-                        ?.addOnSuccessListener { result ->
+                        ?.addOnSuccessListener {
                             val userUUID = firebaseAuth.currentUser?.uid
-                            val session = Session(userUUID = userUUID)
+                            val userData =
+                                runBlocking { userUUID?.let { userRepository.fetchUser(it) } }
+                            val session =
+                                Session(
+                                    userUUID = userUUID,
+                                    branchUUID = userData?.getOrNull()?.branchUUID.toString()
+                                )
                             trySend(session)
                         }
-                        ?.addOnFailureListener { exception -> crashlytics.recordException(exception) }
+                        ?.addOnFailureListener { exception ->
+                            crashlytics.recordException(exception)
+                        }
                 }
             auth.addIdTokenListener(listener)
 
@@ -36,7 +47,7 @@ fun firebaseSessionManager(
 
     override suspend fun saveSession(
         uuid: String,
-        branchUUID: String,
+        branchUUID: String
     ): Either<LoginFailure, Boolean> = true.right()
 
     override suspend fun clearSession(): Either<LogoutFailure, Boolean> {

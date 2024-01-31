@@ -4,6 +4,8 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
@@ -24,7 +26,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
         }
     }
@@ -49,10 +51,13 @@ ktlint {
 }
 
 dependencies {
+    implementation(project(":libraries:core"))
 
-    implementation(libs.android.core)
-    implementation(libs.android.appcompat)
-    implementation(libs.material)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.hilt.library)
+    kapt(libs.hilt.kapt)
+
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)
     androidTestImplementation(libs.test.espresso.core)

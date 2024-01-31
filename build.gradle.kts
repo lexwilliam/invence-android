@@ -8,8 +8,8 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.21"
     alias(libs.plugins.android.app.plugin) apply false
     alias(libs.plugins.android.lib.plugin) apply false
     alias(libs.plugins.kotlin.plugin) apply false

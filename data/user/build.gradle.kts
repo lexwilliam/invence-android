@@ -25,7 +25,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
         }
     }
@@ -50,16 +50,12 @@ ktlint {
 }
 
 dependencies {
-    implementation(project(":domain:user"))
+    api(project(":domain:user"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:firebase"))
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)
-
-    implementation(libs.android.core)
-    implementation(libs.android.appcompat)
-    implementation(libs.material)
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)
     androidTestImplementation(libs.test.espresso.core)

@@ -20,7 +20,7 @@ fun LoginRoute(onGoogleSignInTapped: () -> Unit) {
         modifier =
             Modifier
                 .fillMaxSize(),
-        containerColor = InvenceTheme.colors.secondary,
+        containerColor = InvenceTheme.colors.secondary
     ) { innerPadding ->
         Column(
             modifier =
@@ -28,19 +28,23 @@ fun LoginRoute(onGoogleSignInTapped: () -> Unit) {
                     .fillMaxSize()
                     .padding(16.dp)
                     .padding(innerPadding),
-            verticalArrangement = Arrangement.SpaceAround,
+            verticalArrangement = Arrangement.SpaceAround
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 InvenceLogoText()
                 Text(
                     text =
-                        "Streamline inventory, warehousing, and boost efficiency with user-friendly " +
-                            "controls for real-time tracking and order fulfillment.",
-                    style = InvenceTheme.typography.bodyMedium,
+                        "Streamline inventory, warehousing, and boost " +
+                            "efficiency with user-friendly controls for real-time " +
+                            "tracking and order fulfillment.",
+                    style = InvenceTheme.typography.bodyMedium
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                GoogleSignInButton(modifier = Modifier.fillMaxWidth(), onClick = onGoogleSignInTapped)
+                GoogleSignInButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onGoogleSignInTapped
+                )
             }
         }
     }

@@ -1,0 +1,3 @@
+package com.lexwilliam.company.navigation
+
+class CompanyFormNavigationTarget

@@ -16,20 +16,27 @@ import com.lexwilliam.auth.route.login.LoginUiEvent
 import com.lexwilliam.auth.route.login.LoginViewModel
 import com.lexwilliam.auth.util.GoogleAuthUiClient
 import com.lexwilliam.core.navigation.Screen
+import com.lexwilliam.core_ui.component.ObserveAsEvents
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.loginNavigation(
     lifecycleScope: LifecycleCoroutineScope,
     googleAuthUiClient: GoogleAuthUiClient,
-    toInventory: () -> Unit,
+    toInventory: () -> Unit
 ) {
     composable(route = Screen.LOGIN) {
         val viewModel: LoginViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
 
+        ObserveAsEvents(flow = viewModel.navigation) { target ->
+            when (target) {
+                LoginNavigationTarget.Inventory -> toInventory()
+            }
+        }
+
         LaunchedEffect(key1 = Unit) {
             if (googleAuthUiClient.getSignedInUser() != null) {
-                toInventory()
+                viewModel.onEvent(LoginUiEvent.UserAlreadyAuthenticated)
             }
         }
 
@@ -41,18 +48,17 @@ fun NavGraphBuilder.loginNavigation(
                         lifecycleScope.launch {
                             val signInResult =
                                 googleAuthUiClient.signInWithIntent(
-                                    intent = result.data ?: return@launch,
+                                    intent = result.data ?: return@launch
                                 )
                             viewModel.onEvent(LoginUiEvent.SignIn(signInResult))
                         }
                     }
-                },
+                }
             )
 
-        LaunchedEffect(key1 = state.isSuccessful) {
-            if (state.isSuccessful) {
-                toInventory()
-                viewModel.resetState()
+        LaunchedEffect(key1 = state.isUserValid) {
+            if (state.isUserValid) {
+                viewModel.onEvent(LoginUiEvent.Success)
             }
         }
 
@@ -62,11 +68,11 @@ fun NavGraphBuilder.loginNavigation(
                     val signInIntentSender = googleAuthUiClient.signIn()
                     launcher.launch(
                         IntentSenderRequest.Builder(
-                            signInIntentSender ?: return@launch,
-                        ).build(),
+                            signInIntentSender ?: return@launch
+                        ).build()
                     )
                 }
-            },
+            }
         )
     }
 }
