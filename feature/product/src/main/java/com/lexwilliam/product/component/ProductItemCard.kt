@@ -8,8 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -25,18 +30,26 @@ fun ProductItemCard(
     quantity: String,
     readOnly: Boolean = true,
     onBuyPriceChanged: (String) -> Unit = {},
-    onQuantityChanged: (String) -> Unit = {}
+    onQuantityChanged: (String) -> Unit = {},
+    onRemoveItem: () -> Unit = {}
 ) {
     Column {
-        Text(
-            modifier = Modifier.padding(bottom = 4.dp),
-            text = "Item $itemId",
-            style = InvenceTheme.typography.bodyLarge
-        )
-        Text(
-            text = "Price",
-            style = InvenceTheme.typography.titleSmall
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier.padding(bottom = 4.dp),
+                text = "Item $itemId",
+                style = InvenceTheme.typography.bodyLarge
+            )
+            if (!readOnly) {
+                IconButton(onClick = onRemoveItem) {
+                    Icon(Icons.Default.Remove, contentDescription = "remove item icon")
+                }
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

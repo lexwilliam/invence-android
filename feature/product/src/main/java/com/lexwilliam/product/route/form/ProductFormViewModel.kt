@@ -218,6 +218,7 @@ class ProductFormViewModel
                 is ProductFormUiEvent.ScanBarcodeClicked -> handleScanBarcodeClicked()
                 is ProductFormUiEvent.TitleValueChanged -> handleTitleValueChanged(event.value)
                 ProductFormUiEvent.AddProductItem -> handleAddProductItem()
+                is ProductFormUiEvent.RemoveProductItem -> handleRemoveProductItem(event.itemId)
                 is ProductFormUiEvent.BuyPriceValueChanged ->
                     handleBuyPriceChanged(
                         event.itemId,
@@ -236,6 +237,16 @@ class ProductFormViewModel
                         event.value
                     )
                 is ProductFormUiEvent.SaveClicked -> handleSaveClicked()
+            }
+        }
+
+        private fun handleRemoveProductItem(itemId: Int) {
+            _state.update { old ->
+                old.copy(
+                    buyPriceList =
+                        old.buyPriceList
+                            .filterNot { entry -> entry.key == itemId }
+                )
             }
         }
 

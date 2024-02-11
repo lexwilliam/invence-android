@@ -14,6 +14,8 @@ sealed interface ProductFormUiEvent {
 
     data object AddProductItem : ProductFormUiEvent
 
+    data class RemoveProductItem(val itemId: Int) : ProductFormUiEvent
+
     data object ScanBarcodeClicked : ProductFormUiEvent
 
     data class TitleValueChanged(val value: String) : ProductFormUiEvent

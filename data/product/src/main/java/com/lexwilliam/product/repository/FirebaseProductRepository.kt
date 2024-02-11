@@ -94,7 +94,7 @@ internal fun firebaseProductRepository(
             val imageRef =
                 storage
                     .reference
-                    .child("category/$branchUUID/$categoryUUID.jpg}")
+                    .child("category/$branchUUID/$categoryUUID")
             when (format) {
                 is UploadImageFormat.WithUri -> {
                     imageRef.putFile(format.uri)

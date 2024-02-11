@@ -1,7 +1,6 @@
 package com.lexwilliam.product.route.form
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -62,9 +61,6 @@ fun ProductFormRoute(
     val productUUID by viewModel.productUUID.collectAsStateWithLifecycle()
     val product by viewModel.product.collectAsStateWithLifecycle()
     val categoryState by viewModel.categoryState.collectAsStateWithLifecycle()
-
-    Log.d("TAG", productUUID.toString())
-    Log.d("TAG", product.toString())
 
     ObserveAsEvents(viewModel.navigation) { target ->
         when (target) {
@@ -274,6 +270,11 @@ fun ProductFormRoute(
                             onQuantityChanged = {
                                 viewModel.onEvent(
                                     ProductFormUiEvent.QuantityValueChanged(item.key, it)
+                                )
+                            },
+                            onRemoveItem = {
+                                viewModel.onEvent(
+                                    ProductFormUiEvent.RemoveProductItem(item.key)
                                 )
                             },
                             readOnly = false
