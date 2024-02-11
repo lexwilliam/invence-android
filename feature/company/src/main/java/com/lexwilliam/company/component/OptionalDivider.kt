@@ -10,10 +10,8 @@ import androidx.compose.ui.Modifier
 import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
-fun OptionalDivider(
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+fun OptionalDivider(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Divider(modifier = Modifier.fillMaxWidth())
         Text(text = "Optional", style = InvenceTheme.typography.bodyMedium)
     }

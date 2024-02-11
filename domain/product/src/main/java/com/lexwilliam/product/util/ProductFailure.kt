@@ -6,6 +6,10 @@ sealed interface UpsertProductFailure
 
 sealed interface DeleteProductFailure
 
+sealed interface UploadImageFailure {
+    data class UploadFailure(val message: String?) : UploadImageFailure
+}
+
 data class UnknownFailure(
     val message: String?
-) : FetchProductFailure, UpsertProductFailure, DeleteProductFailure
+) : FetchProductFailure, UpsertProductFailure, DeleteProductFailure, UploadImageFailure

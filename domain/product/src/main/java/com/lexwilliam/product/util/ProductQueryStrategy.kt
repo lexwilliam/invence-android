@@ -1,8 +1,8 @@
-package com.lexwilliam.core.util
+package com.lexwilliam.product.util
 
 import java.util.UUID
 
-data class QueryStrategy(
+data class ProductQueryStrategy(
     val query: String = "",
     val filter: List<FilterStrategy> = emptyList(),
     val sortBy: SortStrategy? = null,

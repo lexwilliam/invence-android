@@ -55,9 +55,6 @@ ktlint {
 dependencies {
     implementation(project(":libraries:core"))
 
-    implementation(libs.android.core)
-    implementation(libs.android.appcompat)
-
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)
 

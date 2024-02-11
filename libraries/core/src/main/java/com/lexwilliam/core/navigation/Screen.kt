@@ -1,6 +1,7 @@
 package com.lexwilliam.core.navigation
 
 object Screen {
+    const val SPLASH = "splash"
     const val LOGIN = "login"
     const val SIGNUP = "signup"
     const val INVENTORY = "inventory"
@@ -10,4 +11,5 @@ object Screen {
     const val CATEGORY = "category"
     const val COMPANY_SEARCH = "company_search"
     const val COMPANY_FORM = "company_form"
+    const val BARCODE = "barcode"
 }

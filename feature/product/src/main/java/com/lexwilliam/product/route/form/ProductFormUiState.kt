@@ -1,14 +1,16 @@
 package com.lexwilliam.product.route.form
 
-import android.net.Uri
-import com.lexwilliam.product.model.UiCategory
+import com.lexwilliam.core.model.UploadImageFormat
+import com.lexwilliam.product.model.ProductCategory
+import com.lexwilliam.product.model.UiPriceAndQuantity
 
 data class ProductFormUiState(
+    val uuid: String? = null,
     val title: String = "",
-    val buyPrice: String = "",
     val sellPrice: String = "",
-    val quantity: Int = 0,
-    val selectedCategory: UiCategory? = null,
+    val buyPriceList: Map<Int, UiPriceAndQuantity> = mapOf(),
+    val selectedCategory: ProductCategory? = null,
     val description: String = "",
-    val imagePath: Uri? = null
+    val image: UploadImageFormat? = null,
+    val takePhoto: Boolean = false
 )

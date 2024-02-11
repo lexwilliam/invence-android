@@ -57,7 +57,9 @@ ktlint {
 }
 
 dependencies {
-    api(project(":data:product"))
+    implementation(project(":data:product"))
+    implementation(project(":data:user"))
+    implementation(project(":feature:barcode"))
     implementation(project(":feature:category"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))

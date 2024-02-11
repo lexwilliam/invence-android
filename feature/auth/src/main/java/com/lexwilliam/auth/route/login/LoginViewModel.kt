@@ -1,11 +1,13 @@
 package com.lexwilliam.auth.route.login
 
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.auth.navigation.LoginNavigationTarget
 import com.lexwilliam.auth.util.SignInResult
 import com.lexwilliam.user.model.User
+import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.UpsertUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -21,7 +23,8 @@ import javax.inject.Inject
 class LoginViewModel
     @Inject
     constructor(
-        private val upsertUser: UpsertUserUseCase
+        private val upsertUser: UpsertUserUseCase,
+        private val fetchUser: FetchUserUseCase
     ) : ViewModel() {
         private val _state = MutableStateFlow(LoginUiState())
         val state = _state.asStateFlow()
@@ -51,7 +54,8 @@ class LoginViewModel
                         User(
                             uuid = userData?.userId ?: "",
                             name = userData?.username ?: "",
-                            imageUrl = userData?.profilePictureUrl,
+                            email = userData?.email ?: "",
+                            imageUrl = userData?.profilePictureUrl?.toUri(),
                             createdAt = Clock.System.now()
                         ),
                     error = result.errorMessage
@@ -62,15 +66,23 @@ class LoginViewModel
         private fun handleSuccess() {
             viewModelScope.launch {
                 val user = _state.value.user ?: return@launch
-                upsertUser(user).fold(
-                    ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
-                    },
-                    ifRight = {
-                        _navigation.send(LoginNavigationTarget.Inventory)
-                        _state.update { LoginUiState() }
-                    }
-                )
+                Log.d("TAG", user.uuid)
+                val userDoc = fetchUser(user.uuid).getOrNull()
+                Log.d("TAG", userDoc.toString())
+                if (userDoc == null) {
+                    upsertUser(user).fold(
+                        ifLeft = { failure ->
+                            Log.d("TAG", failure.toString())
+                        },
+                        ifRight = {
+                            _navigation.send(LoginNavigationTarget.Inventory)
+                            _state.update { LoginUiState() }
+                        }
+                    )
+                } else {
+                    _navigation.send(LoginNavigationTarget.Inventory)
+                    _state.update { LoginUiState() }
+                }
             }
         }
     }

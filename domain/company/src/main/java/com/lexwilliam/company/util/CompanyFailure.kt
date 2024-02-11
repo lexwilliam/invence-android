@@ -1,6 +1,10 @@
 package com.lexwilliam.company.util
 
-sealed interface FetchCompanyFailure
+sealed interface FetchCompanyFailure {
+    data object CompanyIsNull : FetchCompanyFailure
+
+    data object DocumentNotFound : FetchCompanyFailure
+}
 
 sealed interface UpsertCompanyFailure
 

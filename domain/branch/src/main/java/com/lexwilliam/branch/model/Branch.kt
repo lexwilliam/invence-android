@@ -8,7 +8,5 @@ data class Branch(
     val uuid: UUID,
     val name: String,
     val logoUrl: Uri?,
-    val address: String,
-    val phone: String,
     val createdAt: Instant
 )

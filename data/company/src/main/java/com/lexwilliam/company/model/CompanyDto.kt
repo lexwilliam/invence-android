@@ -5,7 +5,6 @@ import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.firebase.toKtxInstant
 import com.lexwilliam.firebase.toTimestamp
 import kotlinx.datetime.Instant
-import java.util.UUID
 
 data class CompanyDto(
     val uuid: String? = null,

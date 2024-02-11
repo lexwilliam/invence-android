@@ -1,11 +1,12 @@
 package com.lexwilliam.category.dialog
 
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -18,16 +19,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.R
+import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.component.dialog.SizeAwareDialog
-import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.product.model.ProductCategory
@@ -39,14 +37,15 @@ fun SelectCategoryDialog(
     categories: List<ProductCategory>,
     query: String,
     onQueryChanged: (String) -> Unit,
-    formImagePath: Uri? = null,
+    onCategoryClicked: (ProductCategory) -> Unit,
+    isFormShown: Boolean,
+    showForm: (Boolean) -> Unit,
+    formImagePath: UploadImageFormat? = null,
     formInputImageChanged: (Uri?) -> Unit,
     formTitle: String,
     formTitleChanged: (String) -> Unit,
     formOnConfirm: () -> Unit
 ) {
-    var isFormDialogShown by remember { mutableStateOf(false) }
-
     SizeAwareDialog(
         onDismiss = onDismiss,
         title = { Text(text = "Select Category", style = InvenceTheme.typography.titleMedium) },
@@ -60,7 +59,7 @@ fun SelectCategoryDialog(
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { isFormDialogShown = true },
+                    onClick = { showForm(true) },
                     containerColor = InvenceTheme.colors.primary,
                     contentColor = InvenceTheme.colors.neutral10
                 ) {
@@ -73,14 +72,14 @@ fun SelectCategoryDialog(
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
                     InvenceSearchTextField(
                         modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .padding(end = 16.dp),
+                                .fillMaxWidth(),
                         value = query,
                         onValueChange = onQueryChanged,
                         placeholder = {
@@ -100,21 +99,27 @@ fun SelectCategoryDialog(
                     )
                 }
                 items(items = categories) { category ->
-                    Row(
-                        modifier = Modifier,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ColumnCardWithImage(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onCategoryClicked(category) },
+                        imageModifier = Modifier.size(64.dp),
+                        imagePath = null
                     ) {
-                        NetworkImage(imagePath = category.imageUrl)
-                        Text(text = category.name, style = InvenceTheme.typography.bodyLarge)
+                        Text(
+                            text = category.name,
+                            style = InvenceTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
         }
     }
 
-    if (isFormDialogShown) {
+    if (isFormShown) {
         CategoryFormDialog(
-            onDismiss = { isFormDialogShown = false },
+            onDismiss = { showForm(false) },
             isEditing = false,
             imagePath = formImagePath,
             onImageChanged = formInputImageChanged,

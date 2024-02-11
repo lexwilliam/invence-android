@@ -80,6 +80,7 @@ dependencies {
     implementation(project(":domain:product"))
     implementation(project(":domain:user"))
     implementation(project(":feature:auth"))
+    implementation(project(":feature:barcode"))
     implementation(project(":feature:category"))
     implementation(project(":feature:company"))
     implementation(project(":feature:inventory"))

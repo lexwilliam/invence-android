@@ -1,3 +1,5 @@
 package com.lexwilliam.product.route.detail
 
-class ProductDetailUiState
+data class ProductDetailUiState(
+    val itemExpanded: Boolean = true
+)

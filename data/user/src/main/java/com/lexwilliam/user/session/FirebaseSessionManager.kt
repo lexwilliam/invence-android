@@ -11,7 +11,6 @@ import com.lexwilliam.user.util.LogoutFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.runBlocking
 
 fun firebaseSessionManager(
     auth: FirebaseAuth,
@@ -27,12 +26,12 @@ fun firebaseSessionManager(
                         ?.getIdToken(false)
                         ?.addOnSuccessListener {
                             val userUUID = firebaseAuth.currentUser?.uid
-                            val userData =
-                                runBlocking { userUUID?.let { userRepository.fetchUser(it) } }
+//                            val userData =
+//                                runBlocking { userUUID?.let { userRepository.fetchUser(it) } }
                             val session =
                                 Session(
-                                    userUUID = userUUID,
-                                    branchUUID = userData?.getOrNull()?.branchUUID.toString()
+                                    userUUID = userUUID
+//                                    branchUUID = userData?.getOrNull()?.branchUUID?.toString()
                                 )
                             trySend(session)
                         }

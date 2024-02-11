@@ -1,7 +1,6 @@
 package com.lexwilliam.company.model
 
 import kotlinx.datetime.Instant
-import java.util.UUID
 
 data class Company(
     val uuid: String,

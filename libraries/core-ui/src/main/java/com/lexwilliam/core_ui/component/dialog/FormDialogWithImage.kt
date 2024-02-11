@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.component.image.InputImage
 import com.lexwilliam.core_ui.component.textfield.InvenceOutlineTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -18,8 +19,8 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 @Composable
 fun FormDialogWithImage(
     onDismiss: () -> Unit,
-    imagePath: Uri?,
-    inputImageLabel: String,
+    imagePath: UploadImageFormat?,
+    inputImageLabel: String = "Upload Image",
     onImageChanged: (Uri?) -> Unit,
     title: String,
     label: String,
@@ -42,10 +43,10 @@ fun FormDialogWithImage(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 InputImage(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    imageModifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
                     imagePath = imagePath,
                     label = inputImageLabel,
                     onImageChanged = onImageChanged

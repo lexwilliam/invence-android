@@ -56,12 +56,17 @@ ktlint {
 }
 
 dependencies {
+    implementation(project(":libraries:core"))
     api(libs.bundles.android.ui.dependencies)
     api(libs.bundles.compose.dependencies)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.coil.library)
     api(libs.hilt.nav)
+
+    implementation(libs.accompanist.permissions)
+    implementation(libs.bundles.camera.dependencies)
+    implementation(libs.mlkit.barcode.scanning)
 
     testImplementation(libs.bundles.unit.test.dependencies)
     androidTestImplementation(libs.bundles.integration.test.dependencies)

@@ -5,20 +5,18 @@ import android.content.Intent
 import android.content.IntentSender
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.lexwilliam.auth.R
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
 class GoogleAuthUiClient(
     private val context: Context,
     private val oneTapClient: SignInClient
 ) {
-    @Inject
-    private lateinit var auth: FirebaseAuth
+    private val auth = Firebase.auth
 
     suspend fun signIn(): IntentSender? {
         val result =
@@ -46,6 +44,7 @@ class GoogleAuthUiClient(
                         UserData(
                             userId = uid,
                             username = displayName,
+                            email = email,
                             profilePictureUrl = photoUrl?.toString()
                         )
                     },
@@ -76,7 +75,8 @@ class GoogleAuthUiClient(
             UserData(
                 userId = uid,
                 username = displayName,
-                profilePictureUrl = photoUrl?.toString()
+                profilePictureUrl = photoUrl?.toString(),
+                email = email
             )
         }
 

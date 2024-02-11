@@ -6,15 +6,17 @@ data class CompanyBranchDto(
     val uuid: String? = null,
     val name: String? = null
 ) {
-    fun toDomain(): CompanyBranch = CompanyBranch(
-        uuid = uuid.validateUUID(),
-        name = name ?: ""
-    )
+    fun toDomain(): CompanyBranch =
+        CompanyBranch(
+            uuid = uuid.validateUUID(),
+            name = name ?: ""
+        )
 
     companion object {
-        fun fromDomain(domain: CompanyBranch): CompanyBranchDto = CompanyBranchDto(
-            uuid = domain.uuid.toString(),
-            name = domain.name
-        )
+        fun fromDomain(domain: CompanyBranch): CompanyBranchDto =
+            CompanyBranchDto(
+                uuid = domain.uuid.toString(),
+                name = domain.name
+            )
     }
 }

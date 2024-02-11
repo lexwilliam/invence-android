@@ -23,8 +23,6 @@ data class BranchDto(
             uuid = uuid?.let { UUID.fromString(uuid) } ?: UUID.randomUUID(),
             name = name ?: "",
             logoUrl = logoUrl?.toUri(),
-            address = address ?: "",
-            phone = phone ?: "",
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )
 
@@ -34,8 +32,6 @@ data class BranchDto(
                 uuid = domain.uuid.toString(),
                 name = domain.name,
                 logoUrl = domain.logoUrl.toString(),
-                address = domain.address,
-                phone = domain.phone,
                 createdAt = domain.createdAt.toTimestamp()
             )
     }

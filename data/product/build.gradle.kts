@@ -57,6 +57,7 @@ dependencies {
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)
+
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)
     androidTestImplementation(libs.test.espresso.core)

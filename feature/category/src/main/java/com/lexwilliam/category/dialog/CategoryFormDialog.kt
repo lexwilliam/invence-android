@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.component.image.InputImage
 import com.lexwilliam.core_ui.component.textfield.InvenceOutlineTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -19,7 +20,7 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 fun CategoryFormDialog(
     onDismiss: () -> Unit,
     isEditing: Boolean,
-    imagePath: Uri?,
+    imagePath: UploadImageFormat?,
     onImageChanged: (Uri?) -> Unit,
     title: String,
     onTitleChanged: (String) -> Unit,
@@ -39,7 +40,7 @@ fun CategoryFormDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 InputImage(
-                    modifier =
+                    imageModifier =
                         Modifier
                             .fillMaxWidth()
                             .height(200.dp),

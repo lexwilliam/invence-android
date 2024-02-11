@@ -1,3 +1,5 @@
 package com.lexwilliam.company.navigation
 
-class CompanyFormNavigationTarget
+sealed interface CompanyFormNavigationTarget {
+    data object Inventory : CompanyFormNavigationTarget
+}

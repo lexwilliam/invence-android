@@ -1,13 +1,13 @@
 package com.lexwilliam.company.route.form.dialog
 
-import android.net.Uri
+import com.lexwilliam.core.model.UploadImageFormat
 
 sealed interface CompanyFormDialogEvent {
-    data class ImageChanged(val uri: Uri?): CompanyFormDialogEvent
+    data class ImageChanged(val format: UploadImageFormat?) : CompanyFormDialogEvent
 
-    data class NameChanged(val value: String): CompanyFormDialogEvent
+    data class NameChanged(val value: String) : CompanyFormDialogEvent
 
-    data object Dismiss: CompanyFormDialogEvent
+    data object Dismiss : CompanyFormDialogEvent
 
-    data object Confirm: CompanyFormDialogEvent
+    data object Confirm : CompanyFormDialogEvent
 }

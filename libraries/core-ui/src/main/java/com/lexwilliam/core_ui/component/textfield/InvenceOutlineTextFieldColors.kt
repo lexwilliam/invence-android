@@ -22,7 +22,7 @@ fun OutlinedTextFieldDefaults.invenceTextFieldColors(
     unfocusedTrailingIconColor: Color = InvenceTheme.colors.neutral70,
     disabledTrailingIconColor: Color = InvenceTheme.colors.neutral60,
     errorTrailingIconColor: Color = InvenceTheme.colors.neutral70,
-    containerColor: Color = Color.Transparent,
+    containerColor: Color = InvenceTheme.colors.neutral10,
     focusedLabelColor: Color = InvenceTheme.colors.neutral100,
     unfocusedLabelColor: Color = InvenceTheme.colors.neutral60,
     disabledLabelColor: Color = InvenceTheme.colors.neutral60,

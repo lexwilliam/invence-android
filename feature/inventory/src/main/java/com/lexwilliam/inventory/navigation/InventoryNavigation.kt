@@ -6,12 +6,17 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.inventory.route.InventoryRoute
-import java.util.UUID
 
-fun NavGraphBuilder.inventoryNavigation(toProductForm: (UUID?) -> Unit) {
+fun NavGraphBuilder.inventoryNavigation(
+    toProductForm: (String?) -> Unit,
+    toProductDetail: (String) -> Unit,
+    toBarcode: () -> Unit
+) {
     composable(route = Screen.INVENTORY) {
         InventoryRoute(
-            toProductForm = toProductForm
+            toProductForm = toProductForm,
+            toProductDetail = toProductDetail,
+            toBarcode = toBarcode
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.lexwilliam.core_ui.component.button
+package com.lexwilliam.core_ui.component.button.defaults
 
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable

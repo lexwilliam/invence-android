@@ -1,5 +1,7 @@
 package com.lexwilliam.product.model.dto
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
@@ -7,8 +9,8 @@ import com.lexwilliam.firebase.toKtxInstant
 import com.lexwilliam.firebase.toTimestamp
 import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
-import java.util.UUID
 
+@RequiresApi(Build.VERSION_CODES.O)
 data class ProductDto(
     val uuid: String? = null,
     val name: String? = null,
@@ -27,7 +29,7 @@ data class ProductDto(
 ) {
     fun toDomain() =
         Product(
-            uuid = uuid?.let { UUID.fromString(uuid) } ?: UUID.randomUUID(),
+            uuid = uuid ?: "",
             name = name ?: "",
             description = description ?: "",
             categoryName = categoryName ?: "",
@@ -41,7 +43,7 @@ data class ProductDto(
     companion object {
         fun fromDomain(domain: Product) =
             ProductDto(
-                uuid = domain.uuid.toString(),
+                uuid = domain.uuid,
                 name = domain.name,
                 description = domain.description,
                 categoryName = domain.categoryName,

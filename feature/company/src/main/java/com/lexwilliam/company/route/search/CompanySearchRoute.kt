@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -15,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.company.navigation.CompanySearchNavigationTarget
+import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.button.InvenceSecondaryButton
@@ -41,7 +44,8 @@ fun CompanySearchRoute(
     Column(
         modifier =
             Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
+                .width(300.dp)
                 .background(InvenceTheme.colors.secondary),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically)
@@ -51,16 +55,40 @@ fun CompanySearchRoute(
             style = InvenceTheme.typography.brand,
             color = InvenceTheme.colors.primary
         )
-        InvenceSearchTextField(value = uiState.query, onValueChange = {
-            viewModel.onEvent(CompanySearchUiEvent.QueryChanged(it))
-        })
+        InvenceSearchTextField(
+            modifier =
+                Modifier
+                    .width(300.dp),
+            value = uiState.query,
+            onValueChange = { viewModel.onEvent(CompanySearchUiEvent.QueryChanged(it)) },
+            placeholder = {
+                Text(
+                    text = "Search",
+                    style = InvenceTheme.typography.bodyLarge
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = "search icon",
+                    tint = InvenceTheme.colors.primary
+                )
+            },
+            singleLine = true
+        )
         InvencePrimaryButton(
+            modifier =
+                Modifier
+                    .width(300.dp),
             onClick = { viewModel.onEvent(CompanySearchUiEvent.CreateCompanyClicked) }
         ) {
             Text(text = "Confirm", style = InvenceTheme.typography.labelLarge)
         }
         Spacer(modifier = Modifier.size(16.dp))
         InvenceSecondaryButton(
+            modifier =
+                Modifier
+                    .width(300.dp),
             onClick = { viewModel.onEvent(CompanySearchUiEvent.CreateCompanyClicked) }
         ) {
             Row(
