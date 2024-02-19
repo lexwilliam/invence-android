@@ -8,5 +8,6 @@ data class Branch(
     val uuid: UUID,
     val name: String,
     val logoUrl: Uri?,
+    val branchPaymentMethods: List<BranchPaymentMethod>,
     val createdAt: Instant
 )

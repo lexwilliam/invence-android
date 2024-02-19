@@ -54,7 +54,7 @@ class InventoryViewModel
                 }
             }
 
-        val filteredUiProducts =
+        val uiProducts =
             _state.flatMapLatest { state ->
                 branchUUID.flatMapLatest {
                     when (it) {
@@ -78,18 +78,6 @@ class InventoryViewModel
                 SharingStarted.WhileSubscribed(5_000),
                 emptyList()
             )
-
-        val uiProducts =
-            categories.map { categories ->
-                categories.flatMap { category ->
-                    category.products.map { product ->
-                        UiProduct(
-                            category = category,
-                            product = product
-                        )
-                    }
-                }
-            }
 
         fun onEvent(event: InventoryUiEvent) {
             when (event) {

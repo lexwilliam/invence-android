@@ -16,12 +16,21 @@ import com.lexwilliam.company.navigation.companyFormNavigation
 import com.lexwilliam.company.navigation.companySearchNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
 import com.lexwilliam.core.navigation.Screen
+import com.lexwilliam.home.navigation.homeNavigation
 import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
+import com.lexwilliam.order.cart.navigation.cartNavigation
+import com.lexwilliam.order.cart.navigation.navigateToCart
+import com.lexwilliam.order.checkout.navigation.checkOutNavigation
+import com.lexwilliam.order.checkout.navigation.navigateToCheckOut
+import com.lexwilliam.order.order.navigation.navigateToOrder
+import com.lexwilliam.order.order.navigation.orderNavigation
 import com.lexwilliam.product.navigation.navigateToProductDetail
 import com.lexwilliam.product.navigation.navigateToProductForm
 import com.lexwilliam.product.navigation.productDetailNavigation
 import com.lexwilliam.product.navigation.productFormNavigation
+import com.lexwilliam.transaction.detail.navigation.navigateToTransactionDetail
+import com.lexwilliam.transaction.detail.navigation.transactionDetailNavigation
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -39,6 +48,10 @@ fun RootNavGraph(
             lifecycleScope = lifecycleScope,
             googleAuthUiClient = googleAuthUiClient,
             toInventory = navController::navigateToInventory
+        )
+        homeNavigation(
+            toInventory = navController::navigateToInventory,
+            toCart = navController::navigateToCart
         )
         inventoryNavigation(
             toProductForm = { productUUID ->
@@ -84,6 +97,18 @@ fun RootNavGraph(
                 )
             }
         )
+        cartNavigation(
+            toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) }
+        )
+        orderNavigation(
+            toCheckOut = { orderUUID -> navController.navigateToCheckOut(orderUUID) }
+        )
+        checkOutNavigation(
+            onBackStack = navController::navigateUp,
+            toCart = navController::navigateToCart,
+            toTransactionDetail = navController::navigateToTransactionDetail
+        )
+        transactionDetailNavigation()
         composable(route = Screen.SPLASH) {}
     }
 }

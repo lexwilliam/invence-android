@@ -1,6 +1,7 @@
 package com.lexwilliam.invence.ui
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,16 +23,20 @@ fun InvenceApp(
     googleAuthUiClient: GoogleAuthUiClient
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
-    val hasBranchUUID by viewModel.hasBranchUUID.collectAsStateWithLifecycle()
+    val branchUUID by viewModel.branchUUID.collectAsStateWithLifecycle()
+    val userUUID by viewModel.userUUID.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = isLoggedIn, key2 = hasBranchUUID) {
-        when {
-            !isLoggedIn -> navController.navigate(Screen.LOGIN)
-            isLoggedIn && !hasBranchUUID ->
+    Log.d("TAG", isLoggedIn.toString())
+
+    LaunchedEffect(key1 = isLoggedIn) {
+        when (isLoggedIn) {
+            AuthState.NO_ACCOUNT -> navController.navigate(Screen.LOGIN)
+            AuthState.NO_BRANCH ->
                 navController.navigate(
                     Screen.COMPANY_SEARCH
                 )
-            else -> navController.navigate(Screen.INVENTORY)
+            AuthState.NONE -> navController.navigate(Screen.SPLASH)
+            else -> navController.navigate(Screen.HOME)
         }
     }
 

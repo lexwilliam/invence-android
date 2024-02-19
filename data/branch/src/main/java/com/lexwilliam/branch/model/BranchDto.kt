@@ -15,6 +15,7 @@ data class BranchDto(
     val logoUrl: String? = null,
     val address: String? = null,
     val phone: String? = null,
+    val paymentMethods: Map<String, PaymentMethodDto>? = null,
     @JvmField @PropertyName("created_at")
     val createdAt: Timestamp? = null
 ) {
@@ -23,6 +24,7 @@ data class BranchDto(
             uuid = uuid?.let { UUID.fromString(uuid) } ?: UUID.randomUUID(),
             name = name ?: "",
             logoUrl = logoUrl?.toUri(),
+            branchPaymentMethods = paymentMethods?.values?.map { it.toDomain() } ?: emptyList(),
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )
 
@@ -32,6 +34,8 @@ data class BranchDto(
                 uuid = domain.uuid.toString(),
                 name = domain.name,
                 logoUrl = domain.logoUrl.toString(),
+                paymentMethods = domain.branchPaymentMethods
+                    .associate { it.uuid.toString() to PaymentMethodDto.fromDomain(it) },
                 createdAt = domain.createdAt.toTimestamp()
             )
     }

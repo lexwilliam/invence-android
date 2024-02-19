@@ -12,4 +12,10 @@ object Screen {
     const val COMPANY_SEARCH = "company_search"
     const val COMPANY_FORM = "company_form"
     const val BARCODE = "barcode"
+    const val HOME = "home"
+    const val ORDER = "order"
+    const val CART = "cart"
+    const val CHECK_OUT = "check_out"
+    const val TRANSACTION_DETAIL = "transaction_detail"
+    const val TRANSACTION_HISTORY = "transaction_history"
 }

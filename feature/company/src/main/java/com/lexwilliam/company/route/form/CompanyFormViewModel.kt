@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.branch.model.Branch
+import com.lexwilliam.branch.model.BranchPaymentMethod
 import com.lexwilliam.branch.usecase.UpsertBranchUseCase
 import com.lexwilliam.company.model.Company
 import com.lexwilliam.company.model.CompanyBranch
@@ -66,12 +67,19 @@ class CompanyFormViewModel
                         branches = _state.value.branchList,
                         createdAt = Clock.System.now()
                     )
+                val cashPaymentMethod = BranchPaymentMethod(
+                    uuid = UUID.randomUUID(),
+                    group = "CASH",
+                    name = "Tunai",
+                    fee = null
+                )
                 val branches =
                     _state.value.branchList.map { branch ->
                         Branch(
                             uuid = branch.uuid,
                             name = branch.name,
                             logoUrl = null,
+                            branchPaymentMethods = listOf(cashPaymentMethod),
                             createdAt = Clock.System.now()
                         )
                     }

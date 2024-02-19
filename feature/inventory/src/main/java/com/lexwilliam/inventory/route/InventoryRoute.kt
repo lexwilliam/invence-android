@@ -42,7 +42,7 @@ fun InventoryRoute(
     toBarcode: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val uiProducts by viewModel.filteredUiProducts.collectAsStateWithLifecycle(
+    val uiProducts by viewModel.uiProducts.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
 

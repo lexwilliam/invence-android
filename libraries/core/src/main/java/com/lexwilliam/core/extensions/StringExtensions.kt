@@ -8,5 +8,6 @@ fun Double.toCurrency(): String {
     val localeIndonesia = Locale("id", "ID")
     val currencyFormat = NumberFormat.getCurrencyInstance(localeIndonesia)
     currencyFormat.currency = Currency.getInstance("IDR")
-    return currencyFormat.format(this)
+    val result = currencyFormat.format(this)
+    return result.substring(0, result.length - 3)
 }
