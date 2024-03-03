@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
 interface BranchRepository {
-    fun observeBranch(branchUUID: UUID): Flow<Branch>
+    fun observeBranch(branchUUID: UUID): Flow<Branch?>
 
     suspend fun upsertBranch(branch: Branch): Either<UpsertBranchFailure, Branch>
 

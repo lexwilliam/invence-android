@@ -6,12 +6,14 @@ import com.lexwilliam.transaction.repository.TransactionRepository
 import com.lexwilliam.transaction.util.DeleteTransactionFailure
 import javax.inject.Inject
 
-class DeleteTransactionUseCase @Inject constructor(
-    private val repository: TransactionRepository
-) {
-    suspend operator fun invoke(
-        transaction: Transaction
-    ): Either<DeleteTransactionFailure, Transaction> {
-        return repository.deleteTransaction(transaction)
+class DeleteTransactionUseCase
+    @Inject
+    constructor(
+        private val repository: TransactionRepository
+    ) {
+        suspend operator fun invoke(
+            transaction: Transaction
+        ): Either<DeleteTransactionFailure, Transaction> {
+            return repository.deleteTransaction(transaction)
+        }
     }
-}

@@ -20,13 +20,18 @@ fun firebaseTransactionRepository(
     store: FirebaseFirestore,
     analytics: FirebaseCrashlytics
 ) = object : TransactionRepository {
-    override fun observeTransaction(branchUUID: UUID): Flow<List<Transaction>> =
+    override fun observeTransaction(
+        branchUUID: UUID,
+        limit: Int?
+    ): Flow<List<Transaction>> =
         callbackFlow {
-            val reference =
+            var reference =
                 store
                     .collection(FirestoreConfig.COLLECTION_TRANSACTION)
                     .whereEqualTo(FirestoreConfig.Field.BRANCH_UUID, branchUUID.toString())
                     .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
+
+            if (limit != null) reference = reference.limit(limit.toLong())
 
             val registration =
                 reference.addSnapshotListener { value, error ->
@@ -48,7 +53,7 @@ fun firebaseTransactionRepository(
         callbackFlow {
             val reference =
                 store
-                    .collection(FirestoreConfig.COLLECTION_PRODUCT_CATEGORY)
+                    .collection(FirestoreConfig.COLLECTION_TRANSACTION)
                     .document(uuid.toString())
 
             val registration =
@@ -67,7 +72,9 @@ fun firebaseTransactionRepository(
             awaitClose { registration.remove() }
         }
 
-    override suspend fun upsertTransaction(transaction: Transaction): Either<UpsertTransactionFailure, Transaction> =
+    override suspend fun upsertTransaction(
+        transaction: Transaction
+    ): Either<UpsertTransactionFailure, Transaction> =
         either {
             catch({
                 store
@@ -82,7 +89,9 @@ fun firebaseTransactionRepository(
             transaction
         }
 
-    override suspend fun deleteTransaction(transaction: Transaction): Either<DeleteTransactionFailure, Transaction> =
+    override suspend fun deleteTransaction(
+        transaction: Transaction
+    ): Either<DeleteTransactionFailure, Transaction> =
         either {
             catch({
                 store
@@ -96,5 +105,4 @@ fun firebaseTransactionRepository(
             }
             transaction
         }
-
 }

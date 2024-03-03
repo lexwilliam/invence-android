@@ -11,7 +11,7 @@ class ObserveBranchUseCase
     constructor(
         private val branchRepository: BranchRepository
     ) {
-        operator fun invoke(branchUUID: UUID): Flow<Branch> {
+        operator fun invoke(branchUUID: UUID): Flow<Branch?> {
             return branchRepository.observeBranch(branchUUID)
         }
     }

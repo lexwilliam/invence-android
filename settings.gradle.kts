@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
@@ -43,5 +43,5 @@ include(":data:order")
 include(":domain:order")
 include(":data:transaction")
 include(":domain:transaction")
-include(":libraries:db")
 include(":feature:transaction")
+include(":libraries:db")

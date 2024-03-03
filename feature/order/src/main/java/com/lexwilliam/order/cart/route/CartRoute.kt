@@ -1,7 +1,9 @@
 package com.lexwilliam.order.cart.route
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,7 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,19 +62,37 @@ fun CartRoute(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-            items(items = orderGroup) { group ->
-                CartCard(
-                    orderGroup = group,
-                    onClick = { viewModel.onEvent(CartUiEvent.CartClicked(group)) },
-                    onRemoveClick = { viewModel.onEvent(CartUiEvent.RemoveCartClicked(group)) }
+        if (orderGroup.isNotEmpty()) {
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
+            ) {
+                items(items = orderGroup) { group ->
+                    CartCard(
+                        orderGroup = group,
+                        onClick = { viewModel.onEvent(CartUiEvent.CartClicked(group)) },
+                        onRemoveClick = { viewModel.onEvent(CartUiEvent.RemoveCartClicked(group)) }
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier =
+                    Modifier
+                        .padding(innerPadding)
+                        .padding(32.dp)
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "You have no order, you can add it by clicking the + button",
+                    style = InvenceTheme.typography.bodyMedium,
+                    color = InvenceTheme.colors.neutral60,
+                    textAlign = TextAlign.Center
                 )
             }
         }

@@ -16,4 +16,6 @@ data class Transaction(
     val createdBy: String,
     val createdAt: Instant,
     val deletedAt: Instant? = null
-)
+) {
+    val total = orderGroup.totalPrice
+}

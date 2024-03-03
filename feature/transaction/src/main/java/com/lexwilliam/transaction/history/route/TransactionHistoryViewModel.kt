@@ -1,10 +1,9 @@
-package com.lexwilliam.home.route
+package com.lexwilliam.transaction.history.route
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.core.extensions.toFormatString
-import com.lexwilliam.home.navigation.HomeNavigationTarget
-import com.lexwilliam.transaction.model.Transaction
+import com.lexwilliam.transaction.history.navigation.TransactionHistoryNavigationTarget
 import com.lexwilliam.transaction.usecase.ObserveTransactionUseCase
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
@@ -22,14 +21,14 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class HomeViewModel
+class TransactionHistoryViewModel
     @Inject
     constructor(
-        private val fetchUser: FetchUserUseCase,
+        observeTransaction: ObserveTransactionUseCase,
         observeSession: ObserveSessionUseCase,
-        observeTransaction: ObserveTransactionUseCase
+        private val fetchUser: FetchUserUseCase
     ) : ViewModel() {
-        private val _navigation = Channel<HomeNavigationTarget>()
+        private val _navigation = Channel<TransactionHistoryNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
 
         private val user =
@@ -45,7 +44,7 @@ class HomeViewModel
             branchUUID.flatMapLatest { uuid ->
                 when (uuid) {
                     null -> flowOf(emptyList())
-                    else -> observeTransaction(uuid, 10)
+                    else -> observeTransaction(uuid)
                 }
             }
 
@@ -60,31 +59,9 @@ class HomeViewModel
                 emptyMap()
             )
 
-        fun onHomeIconClicked(label: String) {
+        fun handleBackStackClicked() {
             viewModelScope.launch {
-                when (label) {
-                    "Inventory" -> _navigation.send(HomeNavigationTarget.Inventory)
-                    "Order" -> _navigation.send(HomeNavigationTarget.Cart)
-                    else -> {}
-                }
-            }
-        }
-
-        fun seeAllClicked() {
-            viewModelScope.launch {
-                _navigation.send(HomeNavigationTarget.TransactionHistory)
-            }
-        }
-
-        fun transactionClicked(transaction: Transaction) {
-            viewModelScope.launch {
-                _navigation.send(HomeNavigationTarget.TransactionDetail(transaction.uuid))
-            }
-        }
-
-        fun historyClicked() {
-            viewModelScope.launch {
-                _navigation.send(HomeNavigationTarget.TransactionHistory)
+                _navigation.send(TransactionHistoryNavigationTarget.BackStack)
             }
         }
     }

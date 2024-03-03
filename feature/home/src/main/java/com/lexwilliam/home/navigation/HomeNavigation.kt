@@ -6,15 +6,20 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.home.route.HomeRoute
+import java.util.UUID
 
 fun NavGraphBuilder.homeNavigation(
     toInventory: () -> Unit,
-    toCart: () -> Unit
+    toCart: () -> Unit,
+    toTransactionDetail: (UUID) -> Unit,
+    toTransactionHistory: () -> Unit
 ) {
     composable(route = Screen.HOME) {
         HomeRoute(
             toInventory = toInventory,
-            toCart = toCart
+            toCart = toCart,
+            toTransactionDetail = toTransactionDetail,
+            toTransactionHistory = toTransactionHistory
         )
     }
 }

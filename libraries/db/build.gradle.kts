@@ -2,8 +2,8 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
-    alias(libs.plugins.android.lib.plugin)
-    alias(libs.plugins.kotlin.plugin)
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
@@ -16,6 +16,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -49,5 +50,6 @@ ktlint {
 
 dependencies {
     implementation(project(":libraries:core"))
+
     api(libs.realm.library)
 }

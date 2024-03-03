@@ -27,33 +27,39 @@ data class TransactionDto(
     @JvmField @PropertyName("deleted_at")
     val deletedAt: Timestamp? = null
 ) {
-    fun toDomain() = Transaction(
-        uuid = uuid.validateUUID(),
-        branchUUID = branchUUID.validateUUID(),
-        orderGroup = orderGroup?.toDomain() ?: OrderGroupDto().toDomain(),
-        payments = payments?.map { it.value.toDomain() } ?: emptyList(),
-        refunds = refunds?.map { it.value.toDomain() } ?: emptyList(),
-        customer = customer ?: "",
-        fee = fee?.toDomain(),
-        tip = tip ?: 0.0,
-        createdBy = createdBy ?: "",
-        createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
-        deletedAt = deletedAt?.toKtxInstant()
-    )
+    fun toDomain() =
+        Transaction(
+            uuid = uuid.validateUUID(),
+            branchUUID = branchUUID.validateUUID(),
+            orderGroup = orderGroup?.toDomain() ?: OrderGroupDto().toDomain(),
+            payments = payments?.map { it.value.toDomain() } ?: emptyList(),
+            refunds = refunds?.map { it.value.toDomain() } ?: emptyList(),
+            customer = customer ?: "",
+            fee = fee?.toDomain(),
+            tip = tip ?: 0.0,
+            createdBy = createdBy ?: "",
+            createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
+            deletedAt = deletedAt?.toKtxInstant()
+        )
 
     companion object {
-        fun fromDomain(domain: Transaction) = TransactionDto(
-            uuid = domain.uuid.toString(),
-            branchUUID = domain.branchUUID.toString(),
-            orderGroup = OrderGroupDto.fromDomain(domain.orderGroup),
-            payments = domain.payments.associate { it.uuid.toString() to PaymentDto.fromDomain(it) },
-            refunds = domain.refunds.associate { it.uuid.toString() to RefundDto.fromDomain(it) },
-            customer = domain.customer,
-            fee = domain.fee?.let { TransactionFeeDto.fromDomain(it) },
-            tip = domain.tip,
-            createdBy = domain.createdBy,
-            createdAt = domain.createdAt.toTimestamp(),
-            deletedAt = domain.deletedAt?.toTimestamp()
-        )
+        fun fromDomain(domain: Transaction) =
+            TransactionDto(
+                uuid = domain.uuid.toString(),
+                branchUUID = domain.branchUUID.toString(),
+                orderGroup = OrderGroupDto.fromDomain(domain.orderGroup),
+                payments =
+                    domain.payments
+                        .associate { it.uuid.toString() to PaymentDto.fromDomain(it) },
+                refunds =
+                    domain.refunds
+                        .associate { it.uuid.toString() to RefundDto.fromDomain(it) },
+                customer = domain.customer,
+                fee = domain.fee?.let { TransactionFeeDto.fromDomain(it) },
+                tip = domain.tip,
+                createdBy = domain.createdBy,
+                createdAt = domain.createdAt.toTimestamp(),
+                deletedAt = domain.deletedAt?.toTimestamp()
+            )
     }
 }

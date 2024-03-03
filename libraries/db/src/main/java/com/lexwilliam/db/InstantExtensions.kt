@@ -1,4 +1,4 @@
-package com.example.db
+package com.lexwilliam.db
 
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject

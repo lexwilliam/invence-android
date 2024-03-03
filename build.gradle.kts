@@ -14,6 +14,6 @@ plugins {
     alias(libs.plugins.android.lib.plugin) apply false
     alias(libs.plugins.kotlin.plugin) apply false
     alias(libs.plugins.hilt.plugin) apply false
-    alias(libs.plugins.realm.plugin) apply false
+    alias(libs.plugins.realm.plugin)
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }

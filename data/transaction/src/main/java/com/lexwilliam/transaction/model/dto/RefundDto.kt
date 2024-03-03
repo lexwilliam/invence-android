@@ -19,23 +19,25 @@ data class RefundDto(
     @JvmField @PropertyName("deleted_at")
     val deletedAt: Timestamp? = null
 ) {
-    fun toDomain() = Refund(
-        uuid = uuid.validateUUID(),
-        total = total ?: 0.0,
-        refundedBy = refundedBy ?: "",
-        reason = reason ?: "",
-        createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
-        deletedAt = deletedAt?.toKtxInstant()
-    )
+    fun toDomain() =
+        Refund(
+            uuid = uuid.validateUUID(),
+            total = total ?: 0.0,
+            refundedBy = refundedBy ?: "",
+            reason = reason ?: "",
+            createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
+            deletedAt = deletedAt?.toKtxInstant()
+        )
 
     companion object {
-        fun fromDomain(domain: Refund) = RefundDto(
-            uuid = domain.uuid.toString(),
-            total = domain.total,
-            refundedBy = domain.refundedBy,
-            reason = domain.reason,
-            createdAt = domain.createdAt.toTimestamp(),
-            deletedAt = domain.deletedAt?.toTimestamp()
-        )
+        fun fromDomain(domain: Refund) =
+            RefundDto(
+                uuid = domain.uuid.toString(),
+                total = domain.total,
+                refundedBy = domain.refundedBy,
+                reason = domain.reason,
+                createdAt = domain.createdAt.toTimestamp(),
+                deletedAt = domain.deletedAt?.toTimestamp()
+            )
     }
 }

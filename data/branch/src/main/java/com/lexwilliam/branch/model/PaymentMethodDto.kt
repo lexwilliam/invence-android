@@ -8,19 +8,21 @@ data class PaymentMethodDto(
     val name: String? = null,
     val fee: PaymentMethodFeeDto? = null
 ) {
-    fun toDomain(): BranchPaymentMethod = BranchPaymentMethod(
-        uuid = uuid.validateUUID(),
-        group = group ?: "",
-        name = name ?: "",
-        fee = fee?.toDomain()
-    )
+    fun toDomain(): BranchPaymentMethod =
+        BranchPaymentMethod(
+            uuid = uuid.validateUUID(),
+            group = group ?: "",
+            name = name ?: "",
+            fee = fee?.toDomain()
+        )
 
     companion object {
-        fun fromDomain(domain: BranchPaymentMethod) = PaymentMethodDto(
-            uuid = domain.uuid.toString(),
-            group = domain.group,
-            name = domain.name,
-            fee = domain.fee?.let { PaymentMethodFeeDto.fromDomain(it) }
-        )
+        fun fromDomain(domain: BranchPaymentMethod) =
+            PaymentMethodDto(
+                uuid = domain.uuid.toString(),
+                group = domain.group,
+                name = domain.name,
+                fee = domain.fee?.let { PaymentMethodFeeDto.fromDomain(it) }
+            )
     }
 }

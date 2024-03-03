@@ -1,7 +1,7 @@
 package com.lexwilliam.order.model.local
 
-import com.example.db.toInstant
-import com.example.db.toRealmInstant
+import com.lexwilliam.db.toInstant
+import com.lexwilliam.db.toRealmInstant
 import com.lexwilliam.order.model.OrderGroup
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList

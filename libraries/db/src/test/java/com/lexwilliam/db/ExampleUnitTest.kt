@@ -1,4 +1,4 @@
-package com.example.db
+package com.lexwilliam.db
 
 import org.junit.Assert.*
 import org.junit.Test

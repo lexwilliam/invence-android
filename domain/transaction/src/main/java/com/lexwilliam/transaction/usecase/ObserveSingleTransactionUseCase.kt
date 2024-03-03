@@ -6,10 +6,12 @@ import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 import javax.inject.Inject
 
-class ObserveSingleTransactionUseCase @Inject constructor(
-    private val repository: TransactionRepository
-) {
-    operator fun invoke(uuid: UUID): Flow<Transaction?> {
-        return repository.observeSingleTransaction(uuid)
+class ObserveSingleTransactionUseCase
+    @Inject
+    constructor(
+        private val repository: TransactionRepository
+    ) {
+        operator fun invoke(uuid: UUID): Flow<Transaction?> {
+            return repository.observeSingleTransaction(uuid)
+        }
     }
-}

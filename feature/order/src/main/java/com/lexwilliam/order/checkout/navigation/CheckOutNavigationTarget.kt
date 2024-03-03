@@ -7,5 +7,5 @@ sealed interface CheckOutNavigationTarget {
 
     data object Cart : CheckOutNavigationTarget
 
-    data class TransactionDetail(val uuid: UUID): CheckOutNavigationTarget
+    data class TransactionDetail(val uuid: UUID) : CheckOutNavigationTarget
 }

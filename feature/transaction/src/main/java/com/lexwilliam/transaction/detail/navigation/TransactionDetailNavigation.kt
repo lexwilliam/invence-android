@@ -10,19 +10,19 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.transaction.detail.route.TransactionDetailRoute
 import java.util.UUID
 
-fun NavGraphBuilder.transactionDetailNavigation() {
+fun NavGraphBuilder.transactionDetailNavigation(onBackStack: () -> Unit) {
     composable(
-        route = "${Screen.TRANSACTION_HISTORY}?transactionUUID={transactionUUID}",
+        route = "${Screen.TRANSACTION_DETAIL}?transactionUUID={transactionUUID}",
         arguments =
-        listOf(
-            navArgument("transactionUUID") {
-                type = NavType.StringType
-                defaultValue = ""
-            }
-        )
+            listOf(
+                navArgument("transactionUUID") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
     ) {
         TransactionDetailRoute(
-
+            onBackStack = onBackStack
         )
     }
 }
@@ -31,5 +31,5 @@ fun NavController.navigateToTransactionDetail(
     transactionUUID: UUID,
     options: NavOptions? = null
 ) {
-    this.navigate("${Screen.TRANSACTION_HISTORY}?transactionUUID=$transactionUUID", options)
+    this.navigate("${Screen.TRANSACTION_DETAIL}?transactionUUID=$transactionUUID", options)
 }

@@ -5,6 +5,6 @@ data class BranchPaymentMethodFee(
     val percent: Float
 ) {
     fun calculate(total: Double): Double {
-        return total - fixed - (total * percent)
+        return total + fixed + (total * percent)
     }
 }

@@ -67,12 +67,13 @@ class CompanyFormViewModel
                         branches = _state.value.branchList,
                         createdAt = Clock.System.now()
                     )
-                val cashPaymentMethod = BranchPaymentMethod(
-                    uuid = UUID.randomUUID(),
-                    group = "CASH",
-                    name = "Tunai",
-                    fee = null
-                )
+                val cashPaymentMethod =
+                    BranchPaymentMethod(
+                        uuid = UUID.randomUUID(),
+                        group = "CASH",
+                        name = "Tunai",
+                        fee = null
+                    )
                 val branches =
                     _state.value.branchList.map { branch ->
                         Branch(

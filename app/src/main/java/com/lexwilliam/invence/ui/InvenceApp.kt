@@ -1,7 +1,6 @@
 package com.lexwilliam.invence.ui
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,10 +22,6 @@ fun InvenceApp(
     googleAuthUiClient: GoogleAuthUiClient
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
-    val branchUUID by viewModel.branchUUID.collectAsStateWithLifecycle()
-    val userUUID by viewModel.userUUID.collectAsStateWithLifecycle()
-
-    Log.d("TAG", isLoggedIn.toString())
 
     LaunchedEffect(key1 = isLoggedIn) {
         when (isLoggedIn) {

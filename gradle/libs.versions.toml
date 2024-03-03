@@ -21,6 +21,7 @@ compose-constraint-version = "1.0.1"
 compose-lifecycle-version = "2.7.0"
 
 # Realm
+realm-gradle-plugin = "10.15.1"
 realm-version = "1.10.0"
 
 # Firebase
@@ -151,6 +152,7 @@ okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.
 google-play-service-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "google-play-service-auth-version" }
 
 # Realm
+realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realm-gradle-plugin" }
 realm-library = { module = "io.realm.kotlin:library-base", version.ref = "realm-version" }
 
 # Datastore

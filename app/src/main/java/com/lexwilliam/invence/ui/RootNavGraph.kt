@@ -31,11 +31,13 @@ import com.lexwilliam.product.navigation.productDetailNavigation
 import com.lexwilliam.product.navigation.productFormNavigation
 import com.lexwilliam.transaction.detail.navigation.navigateToTransactionDetail
 import com.lexwilliam.transaction.detail.navigation.transactionDetailNavigation
+import com.lexwilliam.transaction.history.navigation.navigateToTransactionHistory
+import com.lexwilliam.transaction.history.navigation.transactionHistoryNavigation
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RootNavGraph(
-    startDestination: String = Screen.SPLASH,
+    startDestination: String = Screen.LOGIN,
     navController: NavHostController,
     lifecycleScope: LifecycleCoroutineScope,
     googleAuthUiClient: GoogleAuthUiClient
@@ -51,7 +53,11 @@ fun RootNavGraph(
         )
         homeNavigation(
             toInventory = navController::navigateToInventory,
-            toCart = navController::navigateToCart
+            toCart = navController::navigateToCart,
+            toTransactionHistory = navController::navigateToTransactionHistory,
+            toTransactionDetail = { transactionUUID ->
+                navController.navigateToTransactionDetail(transactionUUID)
+            }
         )
         inventoryNavigation(
             toProductForm = { productUUID ->
@@ -106,9 +112,22 @@ fun RootNavGraph(
         checkOutNavigation(
             onBackStack = navController::navigateUp,
             toCart = navController::navigateToCart,
-            toTransactionDetail = navController::navigateToTransactionDetail
+            toTransactionDetail = { transactionUUID ->
+                navController.navigateToTransactionDetail(
+                    transactionUUID = transactionUUID,
+                    options =
+                        NavOptions.Builder()
+                            .setPopUpTo(Screen.ORDER, true)
+                            .build()
+                )
+            }
         )
-        transactionDetailNavigation()
+        transactionDetailNavigation(
+            onBackStack = navController::navigateUp
+        )
+        transactionHistoryNavigation(
+            onBackStack = navController::navigateUp
+        )
         composable(route = Screen.SPLASH) {}
     }
 }

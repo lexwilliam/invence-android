@@ -39,6 +39,7 @@ fun firebaseSessionManager(
                             crashlytics.recordException(exception)
                         }
                 }
+
             auth.addIdTokenListener(listener)
 
             awaitClose { auth.removeIdTokenListener(listener) }
