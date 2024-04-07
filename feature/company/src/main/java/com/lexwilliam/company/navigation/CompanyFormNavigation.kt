@@ -7,12 +7,12 @@ import androidx.navigation.compose.composable
 import com.lexwilliam.company.route.form.CompanyFormRoute
 import com.lexwilliam.core.navigation.Screen
 
-fun NavGraphBuilder.companyFormNavigation(toInventory: () -> Unit) {
+fun NavGraphBuilder.companyFormNavigation(toHome: () -> Unit) {
     composable(
         route = Screen.COMPANY_FORM
     ) {
         CompanyFormRoute(
-            toInventory = toInventory
+            toHome = toHome
         )
     }
 }

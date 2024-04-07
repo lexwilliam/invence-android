@@ -38,6 +38,9 @@ fun firebaseSessionManager(
                         ?.addOnFailureListener { exception ->
                             crashlytics.recordException(exception)
                         }
+                    if (firebaseAuth.currentUser?.getIdToken(false) == null) {
+                        trySend(Session())
+                    }
                 }
 
             auth.addIdTokenListener(listener)

@@ -29,6 +29,7 @@ fun OrderProductCard(
     imagePath: Uri?,
     name: String,
     price: Double,
+    stock: Int,
     quantity: Int,
     onQuantityChanged: (Int) -> Unit
 ) {
@@ -60,6 +61,7 @@ fun OrderProductCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = name, style = InvenceTheme.typography.labelLarge)
+                Text(text = "Quantity: $stock pcs", style = InvenceTheme.typography.bodyMedium)
                 Text(
                     text = price.toCurrency(),
                     style = InvenceTheme.typography.bodyMedium

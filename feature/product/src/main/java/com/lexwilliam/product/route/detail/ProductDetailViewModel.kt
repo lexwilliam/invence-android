@@ -7,6 +7,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
+import com.lexwilliam.log.model.DataLog
+import com.lexwilliam.log.model.LogDelete
+import com.lexwilliam.log.model.LogRestock
+import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.navigation.ProductDetailNavigationTarget
@@ -32,6 +36,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import java.util.UUID
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,6 +47,7 @@ class ProductDetailViewModel
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
+        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
@@ -113,6 +119,7 @@ class ProductDetailViewModel
         private fun handleDeleteIconClicked() {
             viewModelScope.launch {
                 val category = category.firstOrNull() ?: return@launch
+                val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 upsertProductCategory(
                     category =
                         category.copy(
@@ -125,6 +132,18 @@ class ProductDetailViewModel
                         Log.d("TAG", failure.toString())
                     },
                     ifRight = {
+                        upsertLog(
+                            DataLog(
+                                uuid = UUID.randomUUID(),
+                                branchUUID = branchUUID,
+                                delete =
+                                    LogDelete(
+                                        uuid = UUID.randomUUID(),
+                                        product = product.value
+                                    ),
+                                createdAt = Clock.System.now()
+                            )
+                        )
                         _navigation.send(ProductDetailNavigationTarget.BackStack)
                     }
                 )
@@ -147,51 +166,10 @@ class ProductDetailViewModel
             }
         }
 
-//        private fun handleQuantityChanged(
-//            value: String,
-//            instant: Instant
-//        ) {
-//            _state.update { old ->
-//                old.copy(
-//                    buyPriceList =
-//                        old
-//                            .buyPriceList
-//                            .toMutableMap()
-//                            .apply {
-//                                this[instant] =
-//                                    UiPriceAndQuantity(
-//                                        price = this[instant]?.price ?: "0",
-//                                        quantity = value
-//                                    )
-//                            }
-//                )
-//            }
-//        }
-
         private fun handleItemExpanded() {
             _state.update { old -> old.copy(itemExpanded = !old.itemExpanded) }
         }
 
-//        private fun handleBuyPriceChanged(
-//            value: String,
-//            instant: Instant
-//        ) {
-//            _state.update { old ->
-//                old.copy(
-//                    buyPriceList =
-//                        old
-//                            .buyPriceList
-//                            .toMutableMap()
-//                            .apply {
-//                                this[instant] =
-//                                    UiPriceAndQuantity(
-//                                        price = value,
-//                                        quantity = this[instant]?.quantity ?: "0"
-//                                    )
-//                            }
-//                )
-//            }
-//        }
         private fun handleRestockClicked() {
             _dialogState.update { RestockDialogState() }
         }
@@ -210,6 +188,7 @@ class ProductDetailViewModel
 
         private fun handleDialogConfirm() {
             viewModelScope.launch {
+                val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 val dialogState = _dialogState.value ?: return@launch
                 val category = category.firstOrNull() ?: return@launch
                 val product = product.firstOrNull() ?: return@launch
@@ -234,6 +213,23 @@ class ProductDetailViewModel
                         Log.d("TAG", failure.toString())
                     },
                     ifRight = {
+                        upsertLog(
+                            log =
+                                DataLog(
+                                    uuid = UUID.randomUUID(),
+                                    branchUUID = branchUUID,
+                                    restock =
+                                        LogRestock(
+                                            uuid = UUID.randomUUID(),
+                                            productUUID = product.uuid,
+                                            name = product.name,
+                                            originalStock = product.quantity,
+                                            addedStock = productItem.quantity,
+                                            price = productItem.buyPrice
+                                        ),
+                                    createdAt = Clock.System.now()
+                                )
+                        )
                         _dialogState.update { null }
                     }
                 )

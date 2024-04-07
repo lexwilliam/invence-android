@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,7 @@ import com.lexwilliam.core_ui.component.chip.InvenceChip
 import com.lexwilliam.core_ui.component.chip.InvenceChipQuantityIndicator
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
+import com.lexwilliam.inventory.component.InventoryColumnCard
 import com.lexwilliam.inventory.navigation.InventoryNavigationTarget
 import com.lexwilliam.product.util.FilterStrategy
 import com.lexwilliam.product.util.ProductQueryStrategy
@@ -132,10 +134,15 @@ fun InventoryRoute(
                     onCategoryClick = { }
                 )
             }
-            inventoryProductList(
-                uiProducts = uiProducts,
-                onEvent = viewModel::onEvent
-            )
+            items(items = uiProducts) { product ->
+                InventoryColumnCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    product = product.product,
+                    onClick = {
+                        viewModel.onEvent(InventoryUiEvent.ProductClicked(product.product))
+                    }
+                )
+            }
             item {
                 Spacer(modifier = Modifier.size(24.dp))
             }

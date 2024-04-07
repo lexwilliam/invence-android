@@ -132,6 +132,7 @@ fun ProductFormRoute(
                                     horizontal = 16.dp,
                                     vertical = 16.dp
                                 ),
+                        enabled = !uiState.isLoading,
                         onClick = {
                             viewModel.onEvent(ProductFormUiEvent.SaveClicked)
                         }

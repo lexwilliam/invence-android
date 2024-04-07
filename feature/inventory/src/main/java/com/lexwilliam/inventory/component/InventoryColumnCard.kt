@@ -3,11 +3,10 @@ package com.lexwilliam.inventory.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.lexwilliam.core.extensions.toCurrency
 import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -24,7 +23,7 @@ fun InventoryColumnCard(
     ColumnCardWithImage(
         modifier =
             modifier.clickable(
-                interactionSource = MutableInteractionSource(),
+                interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
             ),
@@ -32,10 +31,18 @@ fun InventoryColumnCard(
         imagePath = product.imagePath
     ) {
         Column(
-            modifier = contentModifier.padding(vertical = 16.dp)
+            modifier = contentModifier
         ) {
-            Text(text = product.name, style = InvenceTheme.typography.bodyLarge)
-            Text(text = product.sellPrice.toCurrency(), style = InvenceTheme.typography.labelMedium)
+            Text(text = product.name, style = InvenceTheme.typography.titleMedium)
+            Text(
+                text = "Stock: ${product.quantity} pcs",
+                style = InvenceTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Sell: ${product.sellPrice.toCurrency()}",
+                style = InvenceTheme.typography.bodyMedium
+            )
+            Text(text = "Buy: ${product.buyPriceRange}", style = InvenceTheme.typography.bodyMedium)
         }
     }
 }

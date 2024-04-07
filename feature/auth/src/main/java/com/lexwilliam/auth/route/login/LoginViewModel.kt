@@ -42,7 +42,7 @@ class LoginViewModel
 
         private fun handleUserAlreadyAuthenticated() {
             viewModelScope.launch {
-                _navigation.send(LoginNavigationTarget.Inventory)
+                _navigation.send(LoginNavigationTarget.CompanySearch)
             }
         }
 
@@ -66,21 +66,19 @@ class LoginViewModel
         private fun handleSuccess() {
             viewModelScope.launch {
                 val user = _state.value.user ?: return@launch
-                Log.d("TAG", user.uuid)
                 val userDoc = fetchUser(user.uuid).getOrNull()
-                Log.d("TAG", userDoc.toString())
                 if (userDoc == null) {
                     upsertUser(user).fold(
                         ifLeft = { failure ->
                             Log.d("TAG", failure.toString())
                         },
                         ifRight = {
-                            _navigation.send(LoginNavigationTarget.Inventory)
+                            _navigation.send(LoginNavigationTarget.CompanySearch)
                             _state.update { LoginUiState() }
                         }
                     )
                 } else {
-                    _navigation.send(LoginNavigationTarget.Inventory)
+                    _navigation.send(LoginNavigationTarget.CompanySearch)
                     _state.update { LoginUiState() }
                 }
             }

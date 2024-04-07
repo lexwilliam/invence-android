@@ -73,18 +73,16 @@ class AppViewModel
 
         init {
             viewModelScope.launch {
-                Log.d("TAG", "LOL")
                 val user =
                     observeSession()
                         .map { session ->
-                            Log.d("TAG", session.toString())
                             session.userUUID
                                 ?.let { fetchUser(it) }
                                 ?.getOrNull()
                         }
                         .firstOrNull()
 
-                Log.d("TAG", "LOL1")
+                Log.d("TAG", "user: $user")
 
                 when {
                     user == null -> _destination.update { Screen.LOGIN }

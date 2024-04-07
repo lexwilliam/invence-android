@@ -15,8 +15,10 @@ import com.lexwilliam.auth.util.GoogleAuthUiClient
 import com.lexwilliam.company.navigation.companyFormNavigation
 import com.lexwilliam.company.navigation.companySearchNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
+import com.lexwilliam.company.navigation.navigateToCompanySearch
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.home.navigation.homeNavigation
+import com.lexwilliam.home.navigation.navigateToHome
 import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
 import com.lexwilliam.order.cart.navigation.cartNavigation
@@ -49,7 +51,7 @@ fun RootNavGraph(
         loginNavigation(
             lifecycleScope = lifecycleScope,
             googleAuthUiClient = googleAuthUiClient,
-            toInventory = navController::navigateToInventory
+            toCompanySearch = navController::navigateToCompanySearch
         )
         homeNavigation(
             toInventory = navController::navigateToInventory,
@@ -78,10 +80,11 @@ fun RootNavGraph(
             }
         )
         companySearchNavigation(
-            toCompanyForm = navController::navigateToCompanyForm
+            toCompanyForm = navController::navigateToCompanyForm,
+            toHome = navController::navigateToHome
         )
         companyFormNavigation(
-            toInventory = navController::navigateToInventory
+            toHome = navController::navigateToHome
         )
         barcodeNavigation(
             onBackStack = navController::navigateUp,

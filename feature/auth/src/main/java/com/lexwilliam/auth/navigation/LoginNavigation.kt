@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 fun NavGraphBuilder.loginNavigation(
     lifecycleScope: LifecycleCoroutineScope,
     googleAuthUiClient: GoogleAuthUiClient,
-    toInventory: () -> Unit
+    toCompanySearch: () -> Unit
 ) {
     composable(route = Screen.LOGIN) {
         val viewModel: LoginViewModel = hiltViewModel()
@@ -31,7 +31,7 @@ fun NavGraphBuilder.loginNavigation(
 
         ObserveAsEvents(flow = viewModel.navigation) { target ->
             when (target) {
-                LoginNavigationTarget.Inventory -> toInventory()
+                LoginNavigationTarget.CompanySearch -> toCompanySearch()
             }
         }
 

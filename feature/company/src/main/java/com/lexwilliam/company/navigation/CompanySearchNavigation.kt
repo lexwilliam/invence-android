@@ -7,12 +7,16 @@ import androidx.navigation.compose.composable
 import com.lexwilliam.company.route.search.CompanySearchRoute
 import com.lexwilliam.core.navigation.Screen
 
-fun NavGraphBuilder.companySearchNavigation(toCompanyForm: () -> Unit) {
+fun NavGraphBuilder.companySearchNavigation(
+    toCompanyForm: () -> Unit,
+    toHome: () -> Unit
+) {
     composable(
         route = Screen.COMPANY_SEARCH
     ) {
         CompanySearchRoute(
-            toCompanyForm = toCompanyForm
+            toCompanyForm = toCompanyForm,
+            toHome = toHome
         )
     }
 }

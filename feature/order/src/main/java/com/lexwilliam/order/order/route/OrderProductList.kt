@@ -20,6 +20,7 @@ fun LazyListScope.orderProductList(
             imagePath = product.product.imagePath,
             name = product.product.name,
             price = product.product.sellPrice,
+            stock = product.product.quantity,
             quantity =
                 cart
                     .firstOrNull { item -> item.product.uuid == product.product.uuid }

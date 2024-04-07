@@ -88,7 +88,7 @@ fun PaymentListDialog(
                                 style = InvenceTheme.typography.titleSmall
                             )
                             Text(
-                                text = method.fee?.calculate(subtotal)?.toCurrency() ?: "Invalid",
+                                text = method.fee?.calculate(subtotal)?.toCurrency() ?: "No Fee",
                                 style = InvenceTheme.typography.labelLarge
                             )
                         }

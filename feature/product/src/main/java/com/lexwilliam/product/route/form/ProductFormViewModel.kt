@@ -12,6 +12,9 @@ import com.example.barcode.model.BarcodeNavigationArg
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core.extensions.isFirebaseUri
 import com.lexwilliam.core.model.UploadImageFormat
+import com.lexwilliam.log.model.DataLog
+import com.lexwilliam.log.model.LogAdd
+import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.product.category.CategoryUiEvent
 import com.lexwilliam.product.category.CategoryUiState
 import com.lexwilliam.product.model.Product
@@ -62,6 +65,7 @@ class ProductFormViewModel
         private val observeTempProduct: ObserveTempProductUseCase,
         private val insertTempProduct: InsertTempProductUseCase,
         private val clearTempProduct: ClearTempProductUseCase,
+        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
@@ -385,6 +389,7 @@ class ProductFormViewModel
         }
 
         private fun handleSaveClicked() {
+            _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 val category = _state.value.selectedCategory ?: return@launch
                 val productUUID = productUUID.value ?: return@launch
@@ -451,6 +456,19 @@ class ProductFormViewModel
                     },
                     ifRight = {
                         clearTempProduct()
+                        upsertLog(
+                            DataLog(
+                                uuid = UUID.randomUUID(),
+                                branchUUID = branchUUID,
+                                add =
+                                    LogAdd(
+                                        uuid = UUID.randomUUID(),
+                                        product = product
+                                    ),
+                                createdAt = Clock.System.now()
+                            )
+                        )
+                        _state.update { old -> old.copy(isLoading = false) }
                         _navigation.send(ProductFormNavigationTarget.Inventory)
                     }
                 )

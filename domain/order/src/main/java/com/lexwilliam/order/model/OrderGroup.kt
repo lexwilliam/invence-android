@@ -4,13 +4,13 @@ import kotlinx.datetime.Instant
 import java.util.UUID
 
 data class OrderGroup(
-    val uuid: UUID,
-    val branchUUID: UUID,
-    val createdBy: String,
-    val orders: List<Order>,
-    val taxes: List<OrderTax>,
-    val discounts: List<OrderDiscount>,
-    val createdAt: Instant,
+    val uuid: UUID = UUID.randomUUID(),
+    val branchUUID: UUID = UUID.randomUUID(),
+    val createdBy: String = "",
+    val orders: List<Order> = emptyList(),
+    val taxes: List<OrderTax> = emptyList(),
+    val discounts: List<OrderDiscount> = emptyList(),
+    val createdAt: Instant = Instant.DISTANT_PAST,
     val deletedAt: Instant? = null,
     val completedAt: Instant? = null
 ) {

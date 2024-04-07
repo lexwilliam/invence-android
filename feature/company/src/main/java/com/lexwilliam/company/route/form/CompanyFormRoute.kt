@@ -46,14 +46,14 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 @Composable
 fun CompanyFormRoute(
     viewModel: CompanyFormViewModel = hiltViewModel(),
-    toInventory: () -> Unit
+    toHome: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
-            CompanyFormNavigationTarget.Inventory -> toInventory()
+            CompanyFormNavigationTarget.Home -> toHome()
         }
     }
 

@@ -12,5 +12,6 @@ data class ProductFormUiState(
     val selectedCategory: ProductCategory? = null,
     val description: String = "",
     val image: UploadImageFormat? = null,
-    val takePhoto: Boolean = false
+    val takePhoto: Boolean = false,
+    val isLoading: Boolean = false
 )

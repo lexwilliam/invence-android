@@ -1,5 +1,6 @@
 package com.lexwilliam.home.route
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +33,10 @@ import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.home.component.HomeIconButton
 import com.lexwilliam.home.component.ShiftCalendar
+import com.lexwilliam.home.model.Inbox
 import com.lexwilliam.home.model.homeIcons
 import com.lexwilliam.home.navigation.HomeNavigationTarget
+import com.lexwilliam.transaction.component.LogCard
 import com.lexwilliam.transaction.component.TransactionCard
 import java.util.UUID
 
@@ -46,7 +49,7 @@ fun HomeRoute(
     toTransactionDetail: (UUID) -> Unit,
     toTransactionHistory: () -> Unit
 ) {
-    val transactions by viewModel.groupedTransaction.collectAsStateWithLifecycle()
+    val inbox by viewModel.inbox.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
@@ -106,22 +109,36 @@ fun HomeRoute(
                     }
                 }
             }
-            transactions.forEach { entry ->
+            Log.d("TAG", inbox.toString())
+            inbox.forEach { entry ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(text = entry.key, style = InvenceTheme.typography.labelLarge)
                 }
                 items(
                     items = entry.value,
-                    span = { GridItemSpan(maxLineSpan) },
-                    key = { it.uuid }
-                ) { transaction ->
-                    TransactionCard(
-                        modifier = Modifier.clickable { viewModel.transactionClicked(transaction) },
-                        transaction = transaction
-                    )
+                    span = { GridItemSpan(maxLineSpan) }
+                ) { inbox ->
+                    when (inbox) {
+                        is Inbox.InboxTransaction -> {
+                            TransactionCard(
+                                modifier =
+                                    Modifier.clickable {
+                                        viewModel.transactionClicked(
+                                            inbox.transaction
+                                        )
+                                    },
+                                transaction = inbox.transaction
+                            )
+                        }
+                        is Inbox.InboxLog -> {
+                            LogCard(
+                                log = inbox.log
+                            )
+                        }
+                    }
                 }
             }
-            if (transactions.values.isNotEmpty()) {
+            if (inbox.values.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     TextButton(onClick = { viewModel.seeAllClicked() }) {
                         Text(
@@ -131,7 +148,8 @@ fun HomeRoute(
                                     .padding(16.dp),
                             text = "See All",
                             textAlign = TextAlign.Center,
-                            style = InvenceTheme.typography.titleMedium
+                            style = InvenceTheme.typography.titleMedium,
+                            color = InvenceTheme.colors.primary
                         )
                     }
                 }

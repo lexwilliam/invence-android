@@ -117,7 +117,7 @@ class CompanyFormViewModel
                                             },
                                             ifRight = {
                                                 _navigation.send(
-                                                    CompanyFormNavigationTarget.Inventory
+                                                    CompanyFormNavigationTarget.Home
                                                 )
                                             }
                                         )

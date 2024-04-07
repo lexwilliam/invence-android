@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/data/branch" />
             <option value="$PROJECT_DIR$/data/company" />
+            <option value="$PROJECT_DIR$/data/log" />
             <option value="$PROJECT_DIR$/data/order" />
             <option value="$PROJECT_DIR$/data/product" />
             <option value="$PROJECT_DIR$/data/transaction" />
@@ -20,6 +21,7 @@
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/branch" />
             <option value="$PROJECT_DIR$/domain/company" />
+            <option value="$PROJECT_DIR$/domain/log" />
             <option value="$PROJECT_DIR$/domain/order" />
             <option value="$PROJECT_DIR$/domain/product" />
             <option value="$PROJECT_DIR$/domain/transaction" />

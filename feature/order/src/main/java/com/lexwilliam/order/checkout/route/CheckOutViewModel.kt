@@ -8,12 +8,18 @@ import arrow.core.Either
 import arrow.core.right
 import com.lexwilliam.branch.model.BranchPaymentMethod
 import com.lexwilliam.branch.usecase.ObserveBranchUseCase
+import com.lexwilliam.log.model.DataLog
+import com.lexwilliam.log.model.LogSell
+import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
 import com.lexwilliam.order.usecase.ObserveSingleOrderGroupUseCase
 import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.order.util.UpsertGroupFailure
+import com.lexwilliam.product.model.Product
+import com.lexwilliam.product.model.ProductCategory
+import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
 import com.lexwilliam.transaction.model.Payment
@@ -54,6 +60,7 @@ class CheckOutViewModel
         private val observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val fetchUser: FetchUserUseCase,
+        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         observeBranch: ObserveBranchUseCase,
         savedStateHandle: SavedStateHandle
@@ -202,47 +209,12 @@ class CheckOutViewModel
                         createdBy = user.name,
                         createdAt = Clock.System.now()
                     )
-                val orderItemUUIDWithQuantityList =
-                    orders
-                        .associate { it.item.uuid to it.quantity }
 
-                categories.forEach { category ->
-                    var flag = false
-                    val modifiedCategory =
-                        category.copy(
-                            products =
-                                category.products.map { product ->
-                                    if (orderItemUUIDWithQuantityList.contains(product.uuid)) {
-                                        var count = orderItemUUIDWithQuantityList[product.uuid] ?: 0
-                                        val modifiedItem =
-                                            product.items.mapNotNull { item ->
-                                                val quantity = item.quantity - count
-                                                when {
-                                                    count == 0 -> item
-                                                    quantity > 0 -> {
-                                                        count = 0
-                                                        item.copy(quantity = quantity)
-                                                    }
-                                                    else -> {
-                                                        count -= item.quantity
-                                                        null
-                                                    }
-                                                }
-                                            }
-                                        flag = true
-                                        product.copy(items = modifiedItem)
-                                    } else {
-                                        product
-                                    }
-                                }
-                        )
-                    if (flag) {
-                        upsertProductCategory(modifiedCategory).isLeft { failure ->
-                            Log.d("TAG", failure.toString())
-                            true
-                        }
-                    }
-                }
+                val soldItemsWithProfit =
+                    decreaseProductItemQuantity(
+                        orders = orders,
+                        categories = categories
+                    )
 
                 when (val resultTransaction = upsertTransaction(transaction)) {
                     is Either.Left -> {
@@ -254,6 +226,21 @@ class CheckOutViewModel
                                 Log.d("TAG", result.value.toString())
                             }
                             is Either.Right -> {
+                                upsertLog(
+                                    log =
+                                        DataLog(
+                                            uuid = UUID.randomUUID(),
+                                            branchUUID = branchUUID,
+                                            sell =
+                                                LogSell(
+                                                    uuid = UUID.randomUUID(),
+                                                    orderGroup = orderGroup,
+                                                    soldProducts = soldItemsWithProfit.first,
+                                                    totalProfit = soldItemsWithProfit.second
+                                                ),
+                                            createdAt = Clock.System.now()
+                                        )
+                                )
                                 _navigation
                                     .send(
                                         CheckOutNavigationTarget.TransactionDetail(transactionUUID)
@@ -263,6 +250,57 @@ class CheckOutViewModel
                     }
                 }
             }
+        }
+
+        private suspend fun decreaseProductItemQuantity(
+            orders: List<Order>,
+            categories: List<ProductCategory>
+        ): Pair<List<Product>, Double> {
+            val orderItemUUIDWithQuantityList = orders.associate { it.item.uuid to it.quantity }
+            val soldProduct = mutableListOf<Product>()
+            var totalProfit = 0.0
+
+            categories.forEach { category ->
+                val modifiedProducts =
+                    category.products.map { product ->
+                        if (orderItemUUIDWithQuantityList.contains(product.uuid)) {
+                            var count = orderItemUUIDWithQuantityList[product.uuid] ?: 0
+                            val soldItems = mutableListOf<ProductItem>()
+                            val modifiedItems =
+                                product.items.mapNotNull { item ->
+                                    if (count == 0) return@mapNotNull null
+                                    val quantity = item.quantity - count
+                                    when {
+                                        quantity > 0 -> {
+                                            totalProfit += product.getProfit(item, count)
+                                            soldItems.add(item.copy(quantity = count))
+                                            count = 0
+                                            item.copy(quantity = quantity)
+                                        }
+                                        else -> {
+                                            if (count > 0) {
+                                                totalProfit += product.getProfit(item, count)
+                                                soldItems.add(item)
+                                            }
+                                            count -= item.quantity
+                                            null
+                                        }
+                                    }
+                                }
+                            soldProduct.add(product.copy(items = soldItems))
+                            product.copy(items = modifiedItems)
+                        } else {
+                            product
+                        }
+                    }
+
+                val modifiedCategory = category.copy(products = modifiedProducts)
+                upsertProductCategory(modifiedCategory).isLeft { failure ->
+                    Log.d("TAG", failure.toString())
+                    true
+                }
+            }
+            return soldProduct to totalProfit
         }
 
         private fun handleSaveForLaterClicked() {
