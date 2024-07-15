@@ -3,9 +3,9 @@ package com.lexwilliam.home.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -27,36 +27,24 @@ fun HomeIconButton(
     backgroundColor: Color,
     label: String
 ) {
-    Column(
+    Row(
         modifier =
             modifier
+                .fillMaxWidth()
+                .background(backgroundColor, RoundedCornerShape(8.dp))
+                .height(64.dp)
                 .clickable { onClick() },
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
     ) {
-        Box(
+        Icon(
             modifier =
                 Modifier
-                    .size(48.dp, 48.dp)
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(46.dp)
-                        .background(backgroundColor, RoundedCornerShape(8.dp))
-                        .align(Alignment.Center)
-            )
-            Icon(
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomEnd)
-                        .size(36.dp)
-                        .offset(4.dp, 6.dp),
-                imageVector = icon,
-                contentDescription = "feature icon",
-                tint = iconColor
-            )
-        }
-        Text(text = label, style = InvenceTheme.typography.labelMedium)
+                    .size(24.dp),
+            imageVector = icon,
+            contentDescription = "feature icon",
+            tint = iconColor
+        )
+        Text(text = label, style = InvenceTheme.typography.labelLarge)
     }
 }

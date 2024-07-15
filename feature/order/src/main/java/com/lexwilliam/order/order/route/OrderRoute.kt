@@ -46,6 +46,7 @@ fun OrderRoute(
     }
 
     Scaffold(
+        containerColor = InvenceTheme.colors.neutral10,
         topBar = {
             Row(
                 modifier =

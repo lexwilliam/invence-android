@@ -20,9 +20,8 @@ object UserModule {
     @Provides
     fun providesSessionManager(
         auth: FirebaseAuth,
-        crashlytics: FirebaseCrashlytics,
-        userRepository: UserRepository
-    ): SessionManager = firebaseSessionManager(auth, crashlytics, userRepository)
+        crashlytics: FirebaseCrashlytics
+    ): SessionManager = firebaseSessionManager(auth, crashlytics)
 
     @Singleton
     @Provides

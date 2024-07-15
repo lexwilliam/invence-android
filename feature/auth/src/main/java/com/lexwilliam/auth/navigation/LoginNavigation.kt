@@ -1,7 +1,6 @@
 package com.lexwilliam.auth.navigation
 
 import android.app.Activity.RESULT_OK
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,17 +34,10 @@ fun NavGraphBuilder.loginNavigation(
             }
         }
 
-//        LaunchedEffect(key1 = Unit) {
-//            if (googleAuthUiClient.getSignedInUser() != null) {
-//                viewModel.onEvent(LoginUiEvent.UserAlreadyAuthenticated)
-//            }
-//        }
-
         val launcher =
             rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartIntentSenderForResult(),
                 onResult = { result ->
-                    Log.d("TAG", "Activity")
                     if (result.resultCode == RESULT_OK) {
                         lifecycleScope.launch {
                             val signInResult =

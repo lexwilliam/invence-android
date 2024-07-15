@@ -1,7 +1,5 @@
 package com.lexwilliam.product.model.dto
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
@@ -10,7 +8,6 @@ import com.lexwilliam.firebase.toTimestamp
 import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
 
-@RequiresApi(Build.VERSION_CODES.O)
 data class ProductDto(
     val uuid: String? = null,
     val name: String? = null,

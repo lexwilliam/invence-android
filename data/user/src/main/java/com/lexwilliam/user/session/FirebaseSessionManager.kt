@@ -4,7 +4,6 @@ import arrow.core.Either
 import arrow.core.right
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.lexwilliam.user.repository.UserRepository
 import com.lexwilliam.user.source.SessionManager
 import com.lexwilliam.user.util.LoginFailure
 import com.lexwilliam.user.util.LogoutFailure
@@ -14,8 +13,7 @@ import kotlinx.coroutines.flow.callbackFlow
 
 fun firebaseSessionManager(
     auth: FirebaseAuth,
-    crashlytics: FirebaseCrashlytics,
-    userRepository: UserRepository
+    crashlytics: FirebaseCrashlytics
 ) = object : SessionManager {
     override val sessionDataFlow: Flow<Session> =
         callbackFlow {
@@ -26,12 +24,9 @@ fun firebaseSessionManager(
                         ?.getIdToken(false)
                         ?.addOnSuccessListener {
                             val userUUID = firebaseAuth.currentUser?.uid
-//                            val userData =
-//                                runBlocking { userUUID?.let { userRepository.fetchUser(it) } }
                             val session =
                                 Session(
                                     userUUID = userUUID
-//                                    branchUUID = userData?.getOrNull()?.branchUUID?.toString()
                                 )
                             trySend(session)
                         }

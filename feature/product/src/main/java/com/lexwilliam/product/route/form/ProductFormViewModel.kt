@@ -1,17 +1,23 @@
 package com.lexwilliam.product.route.form
 
 import android.graphics.Bitmap
+import android.graphics.RectF
 import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import androidx.camera.core.ExperimentalGetImage
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.barcode.model.BarcodeNavigationArg
+import com.example.barcode.analyzer.BarcodeImageAnalyzer
+import com.example.barcode.analyzer.BarcodeResultBoundaryAnalyzer
+import com.example.barcode.model.BarCodeResult
+import com.example.barcode.model.ScanningResult
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core.extensions.isFirebaseUri
 import com.lexwilliam.core.model.UploadImageFormat
+import com.lexwilliam.inventory.scan.ProductScanEvent
 import com.lexwilliam.log.model.DataLog
 import com.lexwilliam.log.model.LogAdd
 import com.lexwilliam.log.usecase.UpsertLogUseCase
@@ -20,19 +26,17 @@ import com.lexwilliam.product.category.CategoryUiState
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.model.ProductItem
-import com.lexwilliam.product.model.ProductWithImageFormat
 import com.lexwilliam.product.model.UiPriceAndQuantity
 import com.lexwilliam.product.navigation.ProductFormNavigationTarget
-import com.lexwilliam.product.usecase.ClearTempProductUseCase
-import com.lexwilliam.product.usecase.InsertTempProductUseCase
+import com.lexwilliam.product.route.form.scan.ProductScanBottomSheetState
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
-import com.lexwilliam.product.usecase.ObserveTempProductUseCase
 import com.lexwilliam.product.usecase.UploadProductCategoryUseCase
 import com.lexwilliam.product.usecase.UploadProductImageUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +56,7 @@ import kotlinx.datetime.Clock
 import java.util.UUID
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
+@ExperimentalGetImage
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProductFormViewModel
@@ -62,50 +66,17 @@ class ProductFormViewModel
         private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val uploadProductImage: UploadProductImageUseCase,
         private val uploadProductCategoryImage: UploadProductCategoryUseCase,
-        private val observeTempProduct: ObserveTempProductUseCase,
-        private val insertTempProduct: InsertTempProductUseCase,
-        private val clearTempProduct: ClearTempProductUseCase,
+        private val barcodeImageAnalyzer: BarcodeImageAnalyzer,
+        private val barcodeResultBoundaryAnalyzer: BarcodeResultBoundaryAnalyzer,
         private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
-        private val productUUIDFromArgs =
+        val productUUID =
             savedStateHandle
                 .getStateFlow<String?>("productUUID", null)
-
-        private val onlyID =
-            savedStateHandle
-                .getStateFlow<Boolean?>("onlyID", null)
-                .map { onlyID ->
-                    val id = onlyID ?: false
-                    if (id) {
-                        val product = observeTempProduct().firstOrNull() ?: return@map false
-                        val category =
-                            categories
-                                .firstOrNull()
-                                ?.firstOrNull { category -> category.name == product.name }
-                        _state.update { old -> old.copy(selectedCategory = category) }
-                        updateProductState(product)
-                    }
-                    id
-                }
-
-        val productUUID =
-            combine(
-                productUUIDFromArgs,
-                onlyID
-            ) { productUUID, onlyID ->
-                if (onlyID) {
-                    observeTempProduct().firstOrNull()?.uuid
-                } else {
-                    productUUID
-                }
-            }.stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                null
-            )
+                .onEach { _state.update { old -> old.copy(uuid = it) } }
 
         private val branchUUID =
             observeSession().map { session ->
@@ -115,7 +86,7 @@ class ProductFormViewModel
                     ?.branchUUID
             }
 
-        private val categories =
+        private val _categories =
             branchUUID.flatMapLatest {
                 when (it) {
                     null -> flowOf(emptyList())
@@ -124,7 +95,7 @@ class ProductFormViewModel
             }
 
         private val category =
-            categories.map { categories ->
+            _categories.map { categories ->
                 categories.firstOrNull { category ->
                     category.products.any { product ->
                         product.uuid == productUUID.firstOrNull()
@@ -173,45 +144,38 @@ class ProductFormViewModel
             }
         }
 
-        private fun updateProductState(product: ProductWithImageFormat) {
-            _state.update {
-                    old ->
-                old.copy(
-                    title = product.name,
-                    image = product.imagePath,
-                    sellPrice = product.sellPrice.toString(),
-                    buyPriceList =
-                        product.items.associate {
-                                item ->
-                            item.itemId to
-                                UiPriceAndQuantity(
-                                    item.buyPrice.toString(),
-                                    item.quantity.toString()
-                                )
-                        },
-                    description = product.description
-                )
+        private val _state = MutableStateFlow(ProductFormUiState())
+        val uiState = _state.asStateFlow()
+
+        init {
+            viewModelScope.launch {
+                _state.update { old -> old.copy(uuid = productUUID.firstOrNull()) }
             }
         }
-
-        private val _state = MutableStateFlow(ProductFormUiState())
-        val uiState =
-            combine(
-                onlyID,
-                _state
-            ) { _, state ->
-                state
-            }.stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                ProductFormUiState()
-            )
 
         private val _categoryState = MutableStateFlow<CategoryUiState?>(null)
         val categoryState = _categoryState.asStateFlow()
 
         private val _navigation = Channel<ProductFormNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
+
+        // Barcode Dialog
+        private val _scanningResult = MutableStateFlow<ScanningResult>(ScanningResult.Initial())
+        val scanningResult = _scanningResult.asStateFlow()
+
+        private val _freezeCameraPreview = Channel<Boolean>()
+        val freezeCameraPreview = _freezeCameraPreview.receiveAsFlow()
+
+        private val _resultBottomSheetState =
+            MutableStateFlow<ProductScanBottomSheetState>(ProductScanBottomSheetState.Hidden)
+        val resultBottomSheetState =
+            _resultBottomSheetState.asStateFlow()
+
+        private var loadingProductCode: String = ""
+        private var isResultBottomSheetShowing = false
+        private lateinit var barcodeResult: BarCodeResult
+
+        fun getBarcodeImageAnalyzer() = barcodeImageAnalyzer
 
         fun onEvent(event: ProductFormUiEvent) {
             when (event) {
@@ -289,38 +253,8 @@ class ProductFormViewModel
         }
 
         private fun handleScanBarcodeClicked() {
-            viewModelScope.launch {
-                val product =
-                    ProductWithImageFormat(
-                        uuid = productUUID.value ?: "",
-                        name = _state.value.title,
-                        description = _state.value.description,
-                        categoryName = _state.value.selectedCategory?.name ?: "",
-                        sellPrice =
-                            _state.value.sellPrice
-                                .let { if (it == "") 0.0 else it.toDouble() },
-                        items =
-                            _state.value.buyPriceList.map { (id, item) ->
-                                ProductItem(
-                                    itemId = id,
-                                    buyPrice =
-                                        item.price
-                                            .let { if (it == "") 0.0 else it.toDouble() },
-                                    quantity =
-                                        item.quantity
-                                            .let { if (it == "") 0 else it.toInt() },
-                                    createdAt = Clock.System.now()
-                                )
-                            },
-                        imagePath = _state.value.image,
-                        createdAt = Clock.System.now()
-                    )
-                Log.d("TAG", product.toString())
-                insertTempProduct(product)
-                _navigation.send(
-                    ProductFormNavigationTarget.Barcode(BarcodeNavigationArg.PRODUCT_FORM)
-                )
-            }
+            _state.update { old -> old.copy(isScanBarcodeShowing = true) }
+            setupImageAnalyzer()
         }
 
         private fun handleTitleValueChanged(value: String) {
@@ -376,9 +310,8 @@ class ProductFormViewModel
         private fun handleSelectCategoryClicked() {
             viewModelScope.launch {
                 _categoryState.update {
-                    Log.d("TAG", categories.firstOrNull().toString())
                     CategoryUiState(
-                        categories = categories.firstOrNull() ?: emptyList()
+                        categories = _categories.firstOrNull() ?: emptyList()
                     )
                 }
             }
@@ -392,7 +325,7 @@ class ProductFormViewModel
             _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 val category = _state.value.selectedCategory ?: return@launch
-                val productUUID = productUUID.value ?: return@launch
+                val productUUID = _state.value.uuid ?: return@launch
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 var product =
                     Product(
@@ -412,20 +345,22 @@ class ProductFormViewModel
                             },
                         createdAt = Clock.System.now()
                     )
-                if (_state.value.image != null && !_state.value.image.isFirebaseUri()) {
+                val format = _state.value.image
+                if (format != null && !format.isFirebaseUri()) {
                     uploadProductImage(
                         branchUUID = branchUUID,
                         productUUID = product.uuid,
-                        format = _state.value.image!!
+                        format = format
                     ).fold(
                         ifLeft = { failure ->
                             Log.d("TAG", failure.toString())
+                            _state.update { old -> old.copy(isLoading = false) }
+                        },
+                        ifRight = { uri ->
+                            product = product.copy(imagePath = uri)
                         }
-                    ) { uri ->
-                        product = product.copy(imagePath = uri)
-                    }
+                    )
                 }
-                val format = _state.value.image
                 if (format.isFirebaseUri()) {
                     when (format) {
                         is UploadImageFormat.WithUri ->
@@ -437,25 +372,17 @@ class ProductFormViewModel
                     category
                         .copy(
                             products =
-                                onlyID.firstOrNull()
-                                    ?.let {
-                                        category.products
-                                            .addOrUpdateDuplicate(product) { e, n ->
-                                                Log.d("TAG", "${e.name} ${n.name}")
-                                                e.name == n.name
-                                            }
-                                    } ?: category.products
+                                category.products
                                     .addOrUpdateDuplicate(product) { e, n ->
                                         e.uuid == n.uuid
                                     }
                         )
-                Log.d("TAG", modifiedCategory.toString())
                 upsertProductCategory(modifiedCategory).fold(
                     ifLeft = { failure ->
                         Log.d("TAG", failure.toString())
+                        _state.update { old -> old.copy(isLoading = false) }
                     },
                     ifRight = {
-                        clearTempProduct()
                         upsertLog(
                             DataLog(
                                 uuid = UUID.randomUUID(),
@@ -469,7 +396,7 @@ class ProductFormViewModel
                             )
                         )
                         _state.update { old -> old.copy(isLoading = false) }
-                        _navigation.send(ProductFormNavigationTarget.Inventory)
+                        _navigation.send(ProductFormNavigationTarget.BackStack)
                     }
                 )
             }
@@ -581,5 +508,138 @@ class ProductFormViewModel
 
         private fun handleCategoryQueryChanged(value: String) {
             _categoryState.update { old -> old?.copy(query = value) }
+        }
+
+        fun onScanEvent(event: ProductScanEvent) {
+            when (event) {
+                is ProductScanEvent.BottomSheetDialogStateChanged ->
+                    handleBottomSheetDialogStateChanged(
+                        event.expanded
+                    )
+                is ProductScanEvent.CameraBoundaryReady ->
+                    handleCameraBoundaryReady(
+                        event.cameraBoundary
+                    )
+                ProductScanEvent.Dismiss -> handleDismiss()
+                is ProductScanEvent.ScanningAreaReady -> handleScanningAreaReady(event.scanningArea)
+                ProductScanEvent.BottomSheetDismiss -> handleBottomSheetDismiss()
+                ProductScanEvent.ConfirmClicked -> handleScanConfirmClicked()
+            }
+        }
+
+        private fun handleScanConfirmClicked() {
+            val scanningResult = _scanningResult.value
+            val barcode = scanningResult.barCodeResult?.barCode?.displayValue ?: return
+            _state.update { old -> old.copy(uuid = barcode, isScanBarcodeShowing = false) }
+            _resultBottomSheetState.update { ProductScanBottomSheetState.Hidden }
+        }
+
+        private fun handleBottomSheetDismiss() {
+            _resultBottomSheetState.update { ProductScanBottomSheetState.Hidden }
+        }
+
+        private fun handleBottomSheetDialogStateChanged(expanded: Boolean) {
+            isResultBottomSheetShowing =
+                when {
+                    expanded -> {
+                        true
+                    }
+                    else -> {
+                        freezeCameraPreview(false)
+                        false
+                    }
+                }
+        }
+
+        private fun handleCameraBoundaryReady(cameraBoundary: RectF) {
+            barcodeResultBoundaryAnalyzer.onCameraBoundaryReady(cameraBoundary)
+        }
+
+        private fun handleDismiss() {
+            _state.update { old -> old.copy(isScanBarcodeShowing = false) }
+        }
+
+        private fun handleScanningAreaReady(scanningArea: RectF) {
+            barcodeResultBoundaryAnalyzer.onBarcodeScanningAreaReady(scanningArea)
+        }
+
+        private fun setupImageAnalyzer() {
+            barcodeImageAnalyzer.setProcessListener(
+                listener =
+                    object : BarcodeImageAnalyzer.ProcessListenerAdapter() {
+                        override fun onSucceed(
+                            results: List<Barcode>,
+                            inputImage: InputImage
+                        ) {
+                            super.onSucceed(results, inputImage)
+                            handleBarcodeResults(results, inputImage)
+                        }
+                    }
+            )
+        }
+
+        private fun handleBarcodeResults(
+            results: List<Barcode>,
+            inputImage: InputImage
+        ) {
+            viewModelScope.launch(
+                CoroutineExceptionHandler { _, exception ->
+                    notifyErrorResult(exception)
+                    Log.e("TAG", "$exception")
+                }
+            ) {
+                if (isResultBottomSheetShowing) {
+                    // skip the analyzer process if the result bottom sheet is showing
+                    return@launch
+                }
+
+                val scanningResult = barcodeResultBoundaryAnalyzer.analyze(results, inputImage)
+                _scanningResult.value = scanningResult
+                if (scanningResult is ScanningResult.PerfectMatch) {
+                    loadProductDetailsWithBarcodeResult(scanningResult)
+                }
+            }
+        }
+
+        private fun notifyErrorResult(exception: Throwable) {
+            _resultBottomSheetState.value =
+                ProductScanBottomSheetState.Error.Generic
+        }
+
+        private fun loadProductDetailsWithBarcodeResult(
+            scanningResult: ScanningResult.PerfectMatch
+        ) {
+            val productCode = scanningResult.barCodeResult.barCode.displayValue
+            if (productCode != null) {
+                loadingProductCode = productCode
+                showBottomSheetLoading(scanningResult.barCodeResult)
+                freezeCameraPreview(true)
+                bindBottomSheetResult(
+                    barcodeResult = scanningResult.barCodeResult
+                )
+            } else {
+                // Show Error Information
+            }
+        }
+
+        private fun showBottomSheetLoading(barcodeResult: BarCodeResult) {
+            isResultBottomSheetShowing = true
+            _resultBottomSheetState.value = ProductScanBottomSheetState.Loading(barcodeResult)
+            this.barcodeResult = barcodeResult
+        }
+
+        private fun bindBottomSheetResult(barcodeResult: BarCodeResult) {
+            ProductScanBottomSheetState.ScanResult(
+                barcodeResult = barcodeResult
+            ).also { _resultBottomSheetState.value = it }
+            this.barcodeResult = barcodeResult
+        }
+
+        private fun freezeCameraPreview(freeze: Boolean) {
+            // true - freeze the camera preview,
+            // false - resume the camera preview
+            viewModelScope.launch {
+                _freezeCameraPreview.send(freeze)
+            }
         }
     }

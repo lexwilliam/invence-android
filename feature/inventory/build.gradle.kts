@@ -14,7 +14,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -64,5 +64,6 @@ dependencies {
     implementation(project(":libraries:core-ui"))
 
     implementation(libs.hilt.library)
+    implementation(project(":feature:barcode"))
     kapt(libs.hilt.kapt)
 }

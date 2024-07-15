@@ -1,7 +1,6 @@
 package com.lexwilliam.product.route.form
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -47,26 +46,23 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.product.category.CategoryUiEvent
 import com.lexwilliam.product.component.ProductItemCard
 import com.lexwilliam.product.navigation.ProductFormNavigationTarget
+import com.lexwilliam.product.route.form.scan.ProductScanDialog
 
-@RequiresApi(Build.VERSION_CODES.O)
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductFormRoute(
     viewModel: ProductFormViewModel = hiltViewModel(),
-    onBackStack: () -> Unit,
-    toBarcode: (String) -> Unit,
-    toInventory: () -> Unit
+    onBackStack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val productUUID by viewModel.productUUID.collectAsStateWithLifecycle()
+    val productUUID by viewModel.productUUID.collectAsStateWithLifecycle(initialValue = null)
     val product by viewModel.product.collectAsStateWithLifecycle()
     val categoryState by viewModel.categoryState.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.navigation) { target ->
         when (target) {
             is ProductFormNavigationTarget.BackStack -> onBackStack()
-            is ProductFormNavigationTarget.Barcode -> toBarcode(target.onlyID)
-            is ProductFormNavigationTarget.Inventory -> toInventory()
         }
     }
 
@@ -99,12 +95,17 @@ fun ProductFormRoute(
         )
     }
 
+    if (uiState.isScanBarcodeShowing) {
+        ProductScanDialog(viewModel = viewModel)
+    }
+
     if (uiState.takePhoto) {
         GetPhotoCameraPreview(
             onPhotoTaken = { viewModel.onEvent(ProductFormUiEvent.ProductPhotoTaken(it)) }
         )
     } else {
         Scaffold(
+            containerColor = InvenceTheme.colors.neutral10,
             topBar = {
                 InvenceCenterAlignedTopBar(
                     title = {
@@ -168,7 +169,7 @@ fun ProductFormRoute(
                     },
                     enableCamera = true
                 )
-                if (productUUID == null) {
+                if (uiState.uuid == null) {
                     InvencePrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { viewModel.onEvent(ProductFormUiEvent.ScanBarcodeClicked) }
@@ -195,7 +196,7 @@ fun ProductFormRoute(
                         )
                         Text(
                             modifier = Modifier.padding(start = 16.dp),
-                            text = "ID: $productUUID",
+                            text = "ID: ${uiState.uuid}",
                             style = InvenceTheme.typography.labelLarge
                         )
                     }

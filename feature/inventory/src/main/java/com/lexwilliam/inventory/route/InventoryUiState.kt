@@ -5,5 +5,6 @@ import com.lexwilliam.product.util.ProductQueryStrategy
 
 data class InventoryUiState(
     val query: ProductQueryStrategy = ProductQueryStrategy(),
-    val productCategories: List<ProductCategory> = emptyList()
+    val productCategories: List<ProductCategory> = emptyList(),
+    val isScanBarcodeShowing: Boolean = false
 )

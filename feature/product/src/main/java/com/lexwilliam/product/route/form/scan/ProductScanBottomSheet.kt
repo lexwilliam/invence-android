@@ -1,4 +1,4 @@
-package com.example.barcode.route
+package com.lexwilliam.product.route.form.scan
 
 import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
@@ -24,28 +24,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.barcode.model.BarCodeResult
-import com.example.barcode.model.BarcodeScannerBottomSheetState
-import com.example.barcode.model.InformationModel
 import com.lexwilliam.barcode.R
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.button.InvenceSecondaryButton
-import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.theme.InvenceTheme
+import com.lexwilliam.inventory.scan.ProductScanEvent
+import com.lexwilliam.product.route.form.ProductFormViewModel
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarcodeScannerBottomSheetLayout(
+fun ProductScanBottomSheet(
     resultBottomSheetState: SheetState,
-    resultBottomSheetStateModel: BarcodeScannerBottomSheetState,
-    viewModel: BarcodeViewModel
+    resultBottomSheetStateModel: ProductScanBottomSheetState,
+    viewModel: ProductFormViewModel
 ) {
-    Log.d("TAG", resultBottomSheetStateModel.toString())
     ModalBottomSheet(
         sheetState = resultBottomSheetState,
         content = {
             when (resultBottomSheetStateModel) {
-                is BarcodeScannerBottomSheetState.Loading -> {
+                is ProductScanBottomSheetState.Loading -> {
                     Log.d("TAG", "Loading")
                     Box(
                         modifier =
@@ -60,28 +58,22 @@ fun BarcodeScannerBottomSheetLayout(
 //                        )
                     }
                 }
-                is BarcodeScannerBottomSheetState.ProductFound -> {
-                    Log.d("TAG", "ProductFound")
-                    BarcodeScannerInformationLayout(
+                is ProductScanBottomSheetState.ScanResult -> {
+                    BarcodeScannerResultLayout(
                         barCodeResult = resultBottomSheetStateModel.barcodeResult,
-                        informationModel = resultBottomSheetStateModel.information,
-                        viewModel = viewModel
+                        onConfirmClicked = {
+                            viewModel.onScanEvent(
+                                ProductScanEvent.ConfirmClicked
+                            )
+                        },
+                        onCancelClicked = {
+                            viewModel.onScanEvent(
+                                ProductScanEvent.BottomSheetDismiss
+                            )
+                        }
                     )
                 }
-                is BarcodeScannerBottomSheetState.AddProduct -> {
-                    Log.d("TAG", "AddProduct")
-                    BarcodeScannerAddProductLayout(
-                        barCodeResult = resultBottomSheetStateModel.barcodeResult,
-                        viewModel = viewModel
-                    )
-                }
-                is BarcodeScannerBottomSheetState.OnlyID -> {
-                    BarcodeScannerOnlyIDLayout(
-                        barCodeResult = resultBottomSheetStateModel.barcodeResult,
-                        viewModel = viewModel
-                    )
-                }
-                is BarcodeScannerBottomSheetState.Error -> {
+                is ProductScanBottomSheetState.Error -> {
                     Log.d("TAG", "Error")
                     Column(
                         modifier =
@@ -104,7 +96,7 @@ fun BarcodeScannerBottomSheetLayout(
                         }
                     }
                 }
-                is BarcodeScannerBottomSheetState.Hidden -> {
+                is ProductScanBottomSheetState.Hidden -> {
                     Log.d("TAG", "Hidden")
                     // bottom sheet content should have real content at any case. otherwise it will throw exception
                     Text(text = "")
@@ -115,16 +107,16 @@ fun BarcodeScannerBottomSheetLayout(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-        onDismissRequest = {}
+        onDismissRequest = { viewModel.onScanEvent(ProductScanEvent.BottomSheetDismiss) }
     )
 }
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @Composable
-fun BarcodeScannerInformationLayout(
+fun BarcodeScannerResultLayout(
     barCodeResult: BarCodeResult,
-    informationModel: InformationModel,
-    viewModel: BarcodeViewModel
+    onCancelClicked: () -> Unit,
+    onConfirmClicked: () -> Unit
 ) {
     Column(
         modifier =
@@ -139,93 +131,21 @@ fun BarcodeScannerInformationLayout(
             text = "ID: ${barCodeResult.barCode.displayValue}",
             textAlign = TextAlign.Center,
             style = InvenceTheme.typography.bodyLarge
-        )
-        ColumnCardWithImage(
-            modifier = Modifier.fillMaxWidth(),
-            imagePath = informationModel.product?.imagePath
-        ) {
-            Text(
-                text = informationModel.product?.name.toString(),
-                style = InvenceTheme.typography.bodyMedium
-            )
-        }
-        InvencePrimaryButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { viewModel.handleToProductDetailClicked() }
-        ) {
-            Text(text = "Go to Product Detail", style = InvenceTheme.typography.labelLarge)
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-    }
-}
-
-@androidx.annotation.OptIn(ExperimentalGetImage::class)
-@Composable
-fun BarcodeScannerAddProductLayout(
-    barCodeResult: BarCodeResult,
-    viewModel: BarcodeViewModel
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            modifier = Modifier,
-            text = "ID: ${barCodeResult.barCode.displayValue}",
-            textAlign = TextAlign.Center,
-            style = InvenceTheme.typography.bodyLarge
-        )
-        Text(
-            text = "We have not found this product, do you want to add it?",
-            style = InvenceTheme.typography.bodyMedium
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             InvenceSecondaryButton(modifier = Modifier.weight(1f), onClick = {
-                viewModel.onBackButtonClicked()
+                onCancelClicked()
             }) {
                 Text(text = "No, cancel it", style = InvenceTheme.typography.labelLarge)
             }
             InvencePrimaryButton(modifier = Modifier.weight(1f), onClick = {
-                viewModel.handleAddProductClicked()
+                onConfirmClicked()
             }) {
                 Text(text = "Yes, add it", style = InvenceTheme.typography.labelLarge)
             }
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-    }
-}
-
-@androidx.annotation.OptIn(ExperimentalGetImage::class)
-@Composable
-fun BarcodeScannerOnlyIDLayout(
-    barCodeResult: BarCodeResult,
-    viewModel: BarcodeViewModel
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            modifier = Modifier,
-            text = "ID: ${barCodeResult.barCode.displayValue}",
-            textAlign = TextAlign.Center,
-            style = InvenceTheme.typography.bodyLarge
-        )
-        InvencePrimaryButton(modifier = Modifier.fillMaxWidth(), onClick = {
-            viewModel.handleOnlyIDConfirm()
-        }) {
-            Text(text = "Confirm", style = InvenceTheme.typography.labelLarge)
         }
         Spacer(modifier = Modifier.size(20.dp))
     }

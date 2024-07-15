@@ -22,7 +22,12 @@ object ProductModule {
         analytics: FirebaseCrashlytics,
         store: FirebaseFirestore,
         storage: FirebaseStorage
-    ): ProductRepository = firebaseProductRepository(analytics, store, storage)
+    ): ProductRepository =
+        firebaseProductRepository(
+            analytics,
+            store,
+            storage
+        )
 
     @Singleton
     @Provides

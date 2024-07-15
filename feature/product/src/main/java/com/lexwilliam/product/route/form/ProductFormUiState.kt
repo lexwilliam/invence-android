@@ -13,5 +13,6 @@ data class ProductFormUiState(
     val description: String = "",
     val image: UploadImageFormat? = null,
     val takePhoto: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isScanBarcodeShowing: Boolean = false
 )

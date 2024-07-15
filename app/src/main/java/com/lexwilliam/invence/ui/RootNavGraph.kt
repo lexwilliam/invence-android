@@ -8,8 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.barcode.navigation.barcodeNavigation
-import com.example.barcode.navigation.navigateToBarcode
 import com.lexwilliam.auth.navigation.loginNavigation
 import com.lexwilliam.auth.util.GoogleAuthUiClient
 import com.lexwilliam.company.navigation.companyFormNavigation
@@ -65,13 +63,10 @@ fun RootNavGraph(
             toProductForm = { productUUID ->
                 navController.navigateToProductForm(productUUID)
             },
-            toProductDetail = { productUUID -> navController.navigateToProductDetail(productUUID) },
-            toBarcode = { navController.navigateToBarcode() }
+            toProductDetail = { productUUID -> navController.navigateToProductDetail(productUUID) }
         )
         productFormNavigation(
-            onBackStack = navController::navigateUp,
-            toBarcode = { onlyID -> navController.navigateToBarcode(onlyID) },
-            toInventory = navController::navigateToInventory
+            onBackStack = navController::navigateUp
         )
         productDetailNavigation(
             onBackStack = navController::navigateUp,
@@ -85,26 +80,6 @@ fun RootNavGraph(
         )
         companyFormNavigation(
             toHome = navController::navigateToHome
-        )
-        barcodeNavigation(
-            onBackStack = navController::navigateUp,
-            toProductDetail = { productUUID ->
-                navController.navigateToProductDetail(
-                    productUUID,
-                    NavOptions.Builder()
-                        .setPopUpTo(Screen.BARCODE, true)
-                        .build()
-                )
-            },
-            toProductForm = { productUUID, onlyID ->
-                navController.navigateToProductForm(
-                    productUUID,
-                    onlyID,
-                    NavOptions.Builder()
-                        .setPopUpTo(Screen.BARCODE, true)
-                        .build()
-                )
-            }
         )
         cartNavigation(
             toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) }

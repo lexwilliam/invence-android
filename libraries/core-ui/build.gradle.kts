@@ -12,7 +12,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -58,6 +58,7 @@ ktlint {
 dependencies {
     implementation(project(":libraries:core"))
     api(libs.bundles.android.ui.dependencies)
+    api(platform(libs.compose.bom))
     api(libs.bundles.compose.dependencies)
 
     implementation(libs.kotlinx.datetime)

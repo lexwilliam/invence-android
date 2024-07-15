@@ -1,7 +1,5 @@
 package com.lexwilliam.log.model.dto
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.core.util.validateUUID
 import com.lexwilliam.firebase.toDate
@@ -10,7 +8,6 @@ import com.lexwilliam.log.model.DataLog
 import kotlinx.datetime.Instant
 import java.util.Date
 
-@RequiresApi(Build.VERSION_CODES.O)
 data class LogDto(
     val uuid: String? = null,
     @JvmField @PropertyName("branch_uuid")

@@ -44,6 +44,7 @@ fun CartRoute(
     }
 
     Scaffold(
+        containerColor = InvenceTheme.colors.neutral10,
         topBar = {
             InvenceTopBar(
                 title = {

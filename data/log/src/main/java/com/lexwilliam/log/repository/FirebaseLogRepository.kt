@@ -1,7 +1,5 @@
 package com.lexwilliam.log.repository
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import arrow.core.Either
 import arrow.core.raise.catch
 import arrow.core.raise.either
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.UUID
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun firebaseLogRepository(
     analytics: FirebaseCrashlytics,
     store: FirebaseFirestore

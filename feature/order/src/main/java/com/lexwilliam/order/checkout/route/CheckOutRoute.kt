@@ -79,6 +79,7 @@ fun CheckOutRoute(
     }
 
     Scaffold(
+        containerColor = InvenceTheme.colors.neutral10,
         topBar = {
             InvenceTopBar(
                 title = {

@@ -74,6 +74,7 @@ fun ProductDetailRoute(
     }
 
     Scaffold(
+        containerColor = InvenceTheme.colors.neutral10,
         topBar = {
             InvenceTopBar(
                 title = {

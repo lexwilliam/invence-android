@@ -12,6 +12,8 @@ sealed interface FetchUserFailure {
 
 sealed interface UpsertUserFailure
 
+sealed interface UpsertShiftFailure
+
 data class UnknownFailure(
     val message: String? = null
-) : LoginFailure, LogoutFailure, UpsertUserFailure, FetchUserFailure
+) : LoginFailure, LogoutFailure, UpsertUserFailure, FetchUserFailure, UpsertShiftFailure

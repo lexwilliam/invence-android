@@ -1,6 +1,5 @@
 package com.lexwilliam.home.route
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +37,7 @@ import com.lexwilliam.home.model.homeIcons
 import com.lexwilliam.home.navigation.HomeNavigationTarget
 import com.lexwilliam.transaction.component.LogCard
 import com.lexwilliam.transaction.component.TransactionCard
+import com.lexwilliam.user.model.EmployeeShift
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +50,8 @@ fun HomeRoute(
     toTransactionHistory: () -> Unit
 ) {
     val inbox by viewModel.inbox.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val shift by viewModel.shift.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
@@ -79,12 +81,19 @@ fun HomeRoute(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
                     .background(InvenceTheme.colors.neutral10),
-            columns = GridCells.Fixed(4),
+            columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 36.dp)
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                ShiftCalendar()
+                ShiftCalendar(
+                    state = uiState,
+                    onPrevious = { viewModel.previousDateClicked() },
+                    onNext = { viewModel.nextDateClicked() },
+                    shift = shift ?: EmployeeShift(),
+                    onCheckIn = { viewModel.checkInClicked() }
+                )
             }
             items(items = homeIcons) { model ->
                 HomeIconButton(
@@ -109,7 +118,6 @@ fun HomeRoute(
                     }
                 }
             }
-            Log.d("TAG", inbox.toString())
             inbox.forEach { entry ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(text = entry.key, style = InvenceTheme.typography.labelLarge)

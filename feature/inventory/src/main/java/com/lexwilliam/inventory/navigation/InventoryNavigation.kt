@@ -9,14 +9,12 @@ import com.lexwilliam.inventory.route.InventoryRoute
 
 fun NavGraphBuilder.inventoryNavigation(
     toProductForm: (String?) -> Unit,
-    toProductDetail: (String) -> Unit,
-    toBarcode: () -> Unit
+    toProductDetail: (String) -> Unit
 ) {
     composable(route = Screen.INVENTORY) {
         InventoryRoute(
             toProductForm = toProductForm,
-            toProductDetail = toProductDetail,
-            toBarcode = toBarcode
+            toProductDetail = toProductDetail
         )
     }
 }

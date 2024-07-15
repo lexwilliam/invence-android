@@ -14,7 +14,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -63,9 +63,9 @@ dependencies {
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
 
-    implementation(libs.bundles.camera.dependencies)
-    implementation(libs.mlkit.barcode.scanning)
-    implementation(libs.accompanist.permissions)
+    api(libs.bundles.camera.dependencies)
+    api(libs.mlkit.barcode.scanning)
+    api(libs.accompanist.permissions)
     implementation(libs.guava)
 
     implementation(libs.hilt.library)

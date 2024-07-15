@@ -14,7 +14,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -63,6 +63,8 @@ dependencies {
     implementation(project(":feature:transaction"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
+    implementation(libs.calendar)
+    implementation(libs.calendar.compose)
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)

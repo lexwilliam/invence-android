@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,11 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
-import com.lexwilliam.core_ui.component.dialog.SizeAwareDialog
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
+import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.product.model.ProductCategory
 
@@ -46,17 +48,30 @@ fun SelectCategoryDialog(
     formTitleChanged: (String) -> Unit,
     formOnConfirm: () -> Unit
 ) {
-    SizeAwareDialog(
-        onDismiss = onDismiss,
-        title = { Text(text = "Select Category", style = InvenceTheme.typography.titleMedium) },
-        titleLeading = {
-            IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.ArrowBackIos, contentDescription = "nav back")
-            }
-        },
-        isCompact = true
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = false
+            )
     ) {
         Scaffold(
+            containerColor = InvenceTheme.colors.neutral10,
+            topBar = {
+                InvenceTopBar(
+                    title = {
+                        Text(
+                            text = "Select Category",
+                            style = InvenceTheme.typography.titleMedium
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "dismiss dialog")
+                        }
+                    }
+                )
+            },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { showForm(true) },

@@ -6,10 +6,13 @@ import arrow.core.right
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lexwilliam.firebase.FirestoreConfig
+import com.lexwilliam.user.model.EmployeeShift
+import com.lexwilliam.user.model.EmployeeShiftDto
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.model.UserDto
 import com.lexwilliam.user.util.FetchUserFailure
 import com.lexwilliam.user.util.UnknownFailure
+import com.lexwilliam.user.util.UpsertShiftFailure
 import com.lexwilliam.user.util.UpsertUserFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +80,46 @@ fun firebaseUserRepository(
                 .document(user.uuid)
                 .set(UserDto.fromDomain(user))
             user
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            UnknownFailure(t.message)
+        }
+    }
+
+    override fun observeShift(uuid: String): Flow<EmployeeShift?> =
+        callbackFlow {
+            val reference =
+                store
+                    .collection(FirestoreConfig.COLLECTION_EMPLOYEE_SHIFT)
+                    .document(uuid)
+
+            val registration =
+                reference.addSnapshotListener { value, error ->
+                    error?.let { exception ->
+                        analytics.recordException(exception)
+                        trySend(null)
+                    }
+
+                    trySend(
+                        value
+                            ?.toObject(EmployeeShiftDto::class.java)
+                            ?.toDomain()
+                    )
+                }
+
+            awaitClose { registration.remove() }
+        }
+
+    override suspend fun upsertShift(
+        shift: EmployeeShift
+    ): Either<UpsertShiftFailure, EmployeeShift> {
+        return Either.catch {
+            store
+                .collection(FirestoreConfig.COLLECTION_EMPLOYEE_SHIFT)
+                .document(shift.userUUID.toString())
+                .set(EmployeeShiftDto.fromDomain(shift))
+            shift
         }.mapLeft { t ->
             t.printStackTrace()
             analytics.recordException(t)
