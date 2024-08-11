@@ -47,12 +47,18 @@ class HomeViewModel
         private val _navigation = Channel<HomeNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
 
-        private val user =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-            }
+        val user =
+            observeSession()
+                .map { session ->
+                    session.userUUID
+                        ?.let { fetchUser(it) }
+                        ?.getOrNull()
+                }
+                .stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5_000),
+                    null
+                )
 
         private val branchUUID = user.map { it?.branchUUID }
 
@@ -159,6 +165,12 @@ class HomeViewModel
                     is Either.Left -> Log.d("TAG", result.value.toString())
                     is Either.Right -> Log.d("TAG", "Upsert Shift Success")
                 }
+            }
+        }
+
+        fun onProfileClicked() {
+            viewModelScope.launch {
+                _navigation.send(HomeNavigationTarget.Profile)
             }
         }
     }

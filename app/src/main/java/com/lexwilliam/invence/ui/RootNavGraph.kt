@@ -1,15 +1,12 @@
 package com.lexwilliam.invence.ui
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lexwilliam.auth.navigation.loginNavigation
-import com.lexwilliam.auth.util.GoogleAuthUiClient
+import com.lexwilliam.auth.navigation.navigateToLogin
 import com.lexwilliam.company.navigation.companyFormNavigation
 import com.lexwilliam.company.navigation.companySearchNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
@@ -29,27 +26,25 @@ import com.lexwilliam.product.navigation.navigateToProductDetail
 import com.lexwilliam.product.navigation.navigateToProductForm
 import com.lexwilliam.product.navigation.productDetailNavigation
 import com.lexwilliam.product.navigation.productFormNavigation
+import com.lexwilliam.profile.navigation.navigateToProfile
+import com.lexwilliam.profile.navigation.profileNavigation
 import com.lexwilliam.transaction.detail.navigation.navigateToTransactionDetail
 import com.lexwilliam.transaction.detail.navigation.transactionDetailNavigation
 import com.lexwilliam.transaction.history.navigation.navigateToTransactionHistory
 import com.lexwilliam.transaction.history.navigation.transactionHistoryNavigation
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RootNavGraph(
     startDestination: String = Screen.LOGIN,
-    navController: NavHostController,
-    lifecycleScope: LifecycleCoroutineScope,
-    googleAuthUiClient: GoogleAuthUiClient
+    navController: NavHostController
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         loginNavigation(
-            lifecycleScope = lifecycleScope,
-            googleAuthUiClient = googleAuthUiClient,
-            toCompanySearch = navController::navigateToCompanySearch
+            toCompanySearch = navController::navigateToCompanySearch,
+            toHome = navController::navigateToHome
         )
         homeNavigation(
             toInventory = navController::navigateToInventory,
@@ -57,7 +52,8 @@ fun RootNavGraph(
             toTransactionHistory = navController::navigateToTransactionHistory,
             toTransactionDetail = { transactionUUID ->
                 navController.navigateToTransactionDetail(transactionUUID)
-            }
+            },
+            toProfile = navController::navigateToProfile
         )
         inventoryNavigation(
             toProductForm = { productUUID ->
@@ -105,6 +101,10 @@ fun RootNavGraph(
         )
         transactionHistoryNavigation(
             onBackStack = navController::navigateUp
+        )
+        profileNavigation(
+            onBackStack = navController::navigateUp,
+            toLogin = navController::navigateToLogin
         )
         composable(route = Screen.SPLASH) {}
     }

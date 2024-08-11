@@ -1,6 +1,5 @@
 package com.lexwilliam.user.model
 
-import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.firebase.toKtxInstant
@@ -23,7 +22,7 @@ data class UserDto(
             uuid = uuid ?: "",
             branchUUID = branchUUID?.let { UUID.fromString(it) },
             name = name ?: "",
-            imageUrl = imageUrl?.toUri(),
+            imageUrl = imageUrl,
             email = email ?: "",
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )

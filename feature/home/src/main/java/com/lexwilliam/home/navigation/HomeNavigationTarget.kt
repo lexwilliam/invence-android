@@ -10,4 +10,6 @@ sealed interface HomeNavigationTarget {
     data object TransactionHistory : HomeNavigationTarget
 
     data class TransactionDetail(val transactionUUID: UUID) : HomeNavigationTarget
+
+    data object Profile : HomeNavigationTarget
 }

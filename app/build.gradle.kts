@@ -89,6 +89,7 @@ dependencies {
     implementation(project(":feature:order"))
     implementation(project(":feature:product"))
     implementation(project(":feature:transaction"))
+    implementation(project(":feature:profile"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
     implementation(project(":libraries:firebase"))

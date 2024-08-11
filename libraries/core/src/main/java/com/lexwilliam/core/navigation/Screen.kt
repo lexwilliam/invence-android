@@ -18,4 +18,5 @@ object Screen {
     const val CHECK_OUT = "check_out"
     const val TRANSACTION_DETAIL = "transaction_detail"
     const val TRANSACTION_HISTORY = "transaction_history"
+    const val PROFILE = "profile"
 }

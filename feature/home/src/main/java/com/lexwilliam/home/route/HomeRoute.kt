@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,12 +23,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core.util.getGreetingString
 import com.lexwilliam.core_ui.component.ObserveAsEvents
+import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.home.component.HomeIconButton
@@ -47,8 +50,10 @@ fun HomeRoute(
     toInventory: () -> Unit,
     toCart: () -> Unit,
     toTransactionDetail: (UUID) -> Unit,
-    toTransactionHistory: () -> Unit
+    toTransactionHistory: () -> Unit,
+    toProfile: () -> Unit
 ) {
+    val user by viewModel.user.collectAsStateWithLifecycle()
     val inbox by viewModel.inbox.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val shift by viewModel.shift.collectAsStateWithLifecycle()
@@ -59,6 +64,7 @@ fun HomeRoute(
             HomeNavigationTarget.Cart -> toCart()
             is HomeNavigationTarget.TransactionDetail -> toTransactionDetail(target.transactionUUID)
             HomeNavigationTarget.TransactionHistory -> toTransactionHistory()
+            HomeNavigationTarget.Profile -> toProfile()
         }
     }
 
@@ -70,6 +76,16 @@ fun HomeRoute(
                     Text(
                         text = getGreetingString(),
                         style = InvenceTheme.typography.titleMedium
+                    )
+                },
+                actions = {
+                    NetworkImage(
+                        imagePath = user?.imageUrl,
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .clip(CircleShape)
+                                .clickable { viewModel.onProfileClicked() }
                     )
                 }
             )

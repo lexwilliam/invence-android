@@ -12,14 +12,16 @@ fun NavGraphBuilder.homeNavigation(
     toInventory: () -> Unit,
     toCart: () -> Unit,
     toTransactionDetail: (UUID) -> Unit,
-    toTransactionHistory: () -> Unit
+    toTransactionHistory: () -> Unit,
+    toProfile: () -> Unit
 ) {
     composable(route = Screen.HOME) {
         HomeRoute(
             toInventory = toInventory,
             toCart = toCart,
             toTransactionDetail = toTransactionDetail,
-            toTransactionHistory = toTransactionHistory
+            toTransactionHistory = toTransactionHistory,
+            toProfile = toProfile
         )
     }
 }

@@ -36,4 +36,13 @@ object InvenceButtonDefaults {
         containerColor = containerColor,
         contentColor = contentColor
     )
+
+    @Composable
+    fun textButtonColors(
+        containerColor: Color = Color.Transparent,
+        contentColor: Color = InvenceTheme.colors.primary
+    ) = baseButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor
+    )
 }

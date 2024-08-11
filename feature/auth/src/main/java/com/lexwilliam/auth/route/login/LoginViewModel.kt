@@ -1,9 +1,9 @@
 package com.lexwilliam.auth.route.login
 
-import android.util.Log
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either
+import arrow.optics.copy
 import com.lexwilliam.auth.navigation.LoginNavigationTarget
 import com.lexwilliam.auth.util.SignInResult
 import com.lexwilliam.user.model.User
@@ -34,52 +34,58 @@ class LoginViewModel
 
         fun onEvent(event: LoginUiEvent) {
             when (event) {
-                is LoginUiEvent.SignIn -> handleSignIn(event.result)
-                is LoginUiEvent.Success -> handleSuccess()
-                is LoginUiEvent.UserAlreadyAuthenticated -> handleUserAlreadyAuthenticated()
-            }
-        }
-
-        private fun handleUserAlreadyAuthenticated() {
-            viewModelScope.launch {
-                _navigation.send(LoginNavigationTarget.CompanySearch)
+                is LoginUiEvent.SignInWithGoogle -> handleSignIn(event.result)
+                is LoginUiEvent.EmailChanged -> TODO()
+                is LoginUiEvent.PasswordChanged -> TODO()
             }
         }
 
         private fun handleSignIn(result: SignInResult) {
-            _state.update { old ->
-                val userData = result.data
-                old.copy(
-                    user =
-                        User(
-                            uuid = userData?.userId ?: "",
-                            name = userData?.username ?: "",
-                            email = userData?.email ?: "",
-                            imageUrl = userData?.profilePictureUrl?.toUri(),
-                            createdAt = Clock.System.now()
-                        ),
-                    error = result.errorMessage
-                )
-            }
-        }
-
-        private fun handleSuccess() {
             viewModelScope.launch {
-                val user = _state.value.user ?: return@launch
-                val userDoc = fetchUser(user.uuid).getOrNull()
-                if (userDoc == null) {
-                    upsertUser(user).fold(
-                        ifLeft = { failure ->
-                            Log.d("TAG", failure.toString())
-                        },
-                        ifRight = {
-                            _navigation.send(LoginNavigationTarget.CompanySearch)
-                            _state.update { LoginUiState() }
+                val errorMessage = result.errorMessage
+                val userData = result.data
+                when {
+                    errorMessage != null -> _state.update { old -> old.copy(error = errorMessage) }
+                    userData == null ->
+                        _state.update {
+                                old ->
+                            old.copy(error = "Can't find user data")
                         }
-                    )
-                } else {
-                    _navigation.send(LoginNavigationTarget.CompanySearch)
-                    _state.update { LoginUiState() }
+                    else -> {
+                        val user =
+                            User(
+                                uuid = userData.userId,
+                                name = userData.username ?: "",
+                                email = userData.email ?: "",
+                                imageUrl = userData.profilePictureUrl,
+                                createdAt = Clock.System.now()
+                            )
+
+                        val userDoc = fetchUser(user.uuid).getOrNull()
+                        if (userDoc != null) {
+                            if (userDoc.branchUUID != null) {
+                                _navigation.send(LoginNavigationTarget.Home)
+                            } else {
+                                _navigation.send(LoginNavigationTarget.CompanySearch)
+                            }
+                            return@launch
+                        }
+
+                        when (val upsertResult = upsertUser(user)) {
+                            is Either.Left ->
+                                _state.update {
+                                        old ->
+                                    old.copy(error = "${upsertResult.value}: Insert User Failed")
+                                }
+                            is Either.Right -> {
+                                if (upsertResult.value.branchUUID != null) {
+                                    _navigation.send(LoginNavigationTarget.Home)
+                                } else {
+                                    _navigation.send(LoginNavigationTarget.CompanySearch)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
