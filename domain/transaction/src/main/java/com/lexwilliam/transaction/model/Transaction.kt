@@ -8,11 +8,8 @@ data class Transaction(
     val uuid: UUID,
     val branchUUID: UUID,
     val orderGroup: OrderGroup,
-    val payments: List<Payment>,
-    val refunds: List<Refund>,
+    val profit: Double,
     val customer: String,
-    val fee: TransactionFee?,
-    val tip: Double,
     val createdBy: String,
     val createdAt: Instant,
     val deletedAt: Instant? = null

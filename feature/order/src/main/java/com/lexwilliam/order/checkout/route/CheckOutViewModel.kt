@@ -8,9 +8,6 @@ import arrow.core.Either
 import arrow.core.right
 import com.lexwilliam.branch.model.BranchPaymentMethod
 import com.lexwilliam.branch.usecase.ObserveBranchUseCase
-import com.lexwilliam.log.model.DataLog
-import com.lexwilliam.log.model.LogSell
-import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
@@ -22,9 +19,6 @@ import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
-import com.lexwilliam.transaction.model.Payment
-import com.lexwilliam.transaction.model.PaymentMethod
-import com.lexwilliam.transaction.model.PaymentMethodFee
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.TransactionFee
 import com.lexwilliam.transaction.usecase.UpsertTransactionUseCase
@@ -60,7 +54,6 @@ class CheckOutViewModel
         private val observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val fetchUser: FetchUserUseCase,
-        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         observeBranch: ObserveBranchUseCase,
         savedStateHandle: SavedStateHandle
@@ -172,48 +165,24 @@ class CheckOutViewModel
             viewModelScope.launch {
                 val orderGroup = orderGroup.firstOrNull() ?: return@launch
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
-                val selectedPayMethod = _selectedPayMethod.value ?: return@launch
                 val user = user.firstOrNull() ?: return@launch
                 val categories = categories.firstOrNull() ?: return@launch
                 val orders = _orders.value
-                val paymentMethod =
-                    PaymentMethod(
-                        uuid = selectedPayMethod.uuid,
-                        group = selectedPayMethod.group,
-                        name = selectedPayMethod.name,
-                        fee =
-                            PaymentMethodFee(
-                                fixed = selectedPayMethod.fee?.fixed ?: 0.0,
-                                percent = selectedPayMethod.fee?.percent ?: 0.0f
-                            )
-                    )
-                val payment =
-                    Payment(
-                        uuid = UUID.randomUUID(),
-                        total = orderGroup.totalPrice,
-                        paymentMethod = paymentMethod,
-                        createdAt = Clock.System.now()
-                    )
                 val transactionUUID = UUID.randomUUID()
+                val soldItemsWithProfit =
+                    decreaseProductItemQuantity(
+                        orders = orders,
+                        categories = categories
+                    )
                 val transaction =
                     Transaction(
                         uuid = transactionUUID,
                         branchUUID = branchUUID,
                         orderGroup = orderGroup.copy(orders = orders),
-                        payments = listOf(payment),
-                        refunds = listOf(),
                         customer = "",
-                        fee = _transactionFee.value,
-                        // TODO: Implement Tip Later
-                        tip = 0.0,
+                        profit = soldItemsWithProfit.second,
                         createdBy = user.name,
                         createdAt = Clock.System.now()
-                    )
-
-                val soldItemsWithProfit =
-                    decreaseProductItemQuantity(
-                        orders = orders,
-                        categories = categories
                     )
 
                 when (val resultTransaction = upsertTransaction(transaction)) {
@@ -226,21 +195,6 @@ class CheckOutViewModel
                                 Log.d("TAG", result.value.toString())
                             }
                             is Either.Right -> {
-                                upsertLog(
-                                    log =
-                                        DataLog(
-                                            uuid = UUID.randomUUID(),
-                                            branchUUID = branchUUID,
-                                            sell =
-                                                LogSell(
-                                                    uuid = UUID.randomUUID(),
-                                                    orderGroup = orderGroup,
-                                                    soldProducts = soldItemsWithProfit.first,
-                                                    totalProfit = soldItemsWithProfit.second
-                                                ),
-                                            createdAt = Clock.System.now()
-                                        )
-                                )
                                 _navigation
                                     .send(
                                         CheckOutNavigationTarget.TransactionDetail(transactionUUID)

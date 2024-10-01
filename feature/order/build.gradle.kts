@@ -62,7 +62,6 @@ dependencies {
     implementation(project(":data:transaction"))
     implementation(project(":data:branch"))
     implementation(project(":data:user"))
-    implementation(project(":data:log"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
 

@@ -18,9 +18,6 @@ import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core.extensions.isFirebaseUri
 import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.inventory.scan.ProductScanEvent
-import com.lexwilliam.log.model.DataLog
-import com.lexwilliam.log.model.LogAdd
-import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.product.category.CategoryUiEvent
 import com.lexwilliam.product.category.CategoryUiState
 import com.lexwilliam.product.model.Product
@@ -68,7 +65,6 @@ class ProductFormViewModel
         private val uploadProductCategoryImage: UploadProductCategoryUseCase,
         private val barcodeImageAnalyzer: BarcodeImageAnalyzer,
         private val barcodeResultBoundaryAnalyzer: BarcodeResultBoundaryAnalyzer,
-        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
@@ -383,18 +379,6 @@ class ProductFormViewModel
                         _state.update { old -> old.copy(isLoading = false) }
                     },
                     ifRight = {
-                        upsertLog(
-                            DataLog(
-                                uuid = UUID.randomUUID(),
-                                branchUUID = branchUUID,
-                                add =
-                                    LogAdd(
-                                        uuid = UUID.randomUUID(),
-                                        product = product
-                                    ),
-                                createdAt = Clock.System.now()
-                            )
-                        )
                         _state.update { old -> old.copy(isLoading = false) }
                         _navigation.send(ProductFormNavigationTarget.BackStack)
                     }

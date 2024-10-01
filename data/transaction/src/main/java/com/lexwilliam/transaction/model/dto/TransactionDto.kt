@@ -15,11 +15,8 @@ data class TransactionDto(
     val branchUUID: String? = null,
     @JvmField @PropertyName("order_group")
     val orderGroup: OrderGroupDto? = null,
-    val payments: Map<String, PaymentDto>? = null,
-    val refunds: Map<String, RefundDto>? = null,
+    val profit: Double? = null,
     val customer: String? = null,
-    val fee: TransactionFeeDto? = null,
-    val tip: Double? = null,
     @JvmField @PropertyName("created_by")
     val createdBy: String? = null,
     @JvmField @PropertyName("created_at")
@@ -32,11 +29,8 @@ data class TransactionDto(
             uuid = uuid.validateUUID(),
             branchUUID = branchUUID.validateUUID(),
             orderGroup = orderGroup?.toDomain() ?: OrderGroupDto().toDomain(),
-            payments = payments?.map { it.value.toDomain() } ?: emptyList(),
-            refunds = refunds?.map { it.value.toDomain() } ?: emptyList(),
+            profit = profit ?: 0.0,
             customer = customer ?: "",
-            fee = fee?.toDomain(),
-            tip = tip ?: 0.0,
             createdBy = createdBy ?: "",
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
             deletedAt = deletedAt?.toKtxInstant()
@@ -48,15 +42,8 @@ data class TransactionDto(
                 uuid = domain.uuid.toString(),
                 branchUUID = domain.branchUUID.toString(),
                 orderGroup = OrderGroupDto.fromDomain(domain.orderGroup),
-                payments =
-                    domain.payments
-                        .associate { it.uuid.toString() to PaymentDto.fromDomain(it) },
-                refunds =
-                    domain.refunds
-                        .associate { it.uuid.toString() to RefundDto.fromDomain(it) },
+                profit = domain.profit,
                 customer = domain.customer,
-                fee = domain.fee?.let { TransactionFeeDto.fromDomain(it) },
-                tip = domain.tip,
                 createdBy = domain.createdBy,
                 createdAt = domain.createdAt.toTimestamp(),
                 deletedAt = domain.deletedAt?.toTimestamp()
