@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.barcode.model.BarCodeResult
 import com.lexwilliam.barcode.R
+import com.lexwilliam.core_ui.component.button.InvenceOutlineButton
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
-import com.lexwilliam.core_ui.component.button.InvenceSecondaryButton
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.inventory.scan.ProductScanEvent
 import com.lexwilliam.product.route.form.ProductFormViewModel
@@ -40,6 +40,7 @@ fun ProductScanBottomSheet(
     viewModel: ProductFormViewModel
 ) {
     ModalBottomSheet(
+        containerColor = InvenceTheme.colors.neutral10,
         sheetState = resultBottomSheetState,
         content = {
             when (resultBottomSheetStateModel) {
@@ -136,7 +137,7 @@ fun BarcodeScannerResultLayout(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            InvenceSecondaryButton(modifier = Modifier.weight(1f), onClick = {
+            InvenceOutlineButton(modifier = Modifier.weight(1f), onClick = {
                 onCancelClicked()
             }) {
                 Text(text = "No, cancel it", style = InvenceTheme.typography.labelLarge)

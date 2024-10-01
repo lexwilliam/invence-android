@@ -12,9 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import com.lexwilliam.core_ui.component.button.defaults.InvenceButtonDefaults
-import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
 fun InvenceSecondaryButton(
@@ -24,7 +22,7 @@ fun InvenceSecondaryButton(
     shape: Shape = ButtonDefaults.shape,
     colors: ButtonColors = InvenceButtonDefaults.secondaryButtonColors(),
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
-    border: BorderStroke? = BorderStroke(width = 1.dp, color = InvenceTheme.colors.primary),
+    border: BorderStroke? = null,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit

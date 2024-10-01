@@ -9,7 +9,8 @@ import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
 
 data class ProductDto(
-    val uuid: String? = null,
+    val sku: String? = null,
+    val upc: String? = null,
     val name: String? = null,
     val description: String? = null,
     @JvmField @PropertyName("category_name")
@@ -26,7 +27,8 @@ data class ProductDto(
 ) {
     fun toDomain() =
         Product(
-            uuid = uuid ?: "",
+            sku = sku ?: "",
+            upc = upc ?: "",
             name = name ?: "",
             description = description ?: "",
             categoryName = categoryName ?: "",
@@ -40,7 +42,8 @@ data class ProductDto(
     companion object {
         fun fromDomain(domain: Product) =
             ProductDto(
-                uuid = domain.uuid,
+                sku = domain.sku,
+                upc = domain.upc,
                 name = domain.name,
                 description = domain.description,
                 categoryName = domain.categoryName,

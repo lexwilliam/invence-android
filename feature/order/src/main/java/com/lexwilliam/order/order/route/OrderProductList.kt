@@ -23,7 +23,7 @@ fun LazyListScope.orderProductList(
             stock = product.product.quantity,
             quantity =
                 cart
-                    .firstOrNull { item -> item.product.uuid == product.product.uuid }
+                    .firstOrNull { item -> item.product.sku == product.product.sku }
                     ?.quantity ?: 0,
             onQuantityChanged = {
                 onEvent(OrderUiEvent.QuantityChanged(product.product, it))

@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.example.barcode.model.BarCodeResult
 import com.example.barcode.model.InformationModel
 import com.lexwilliam.barcode.R
+import com.lexwilliam.core_ui.component.button.InvenceOutlineButton
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
-import com.lexwilliam.core_ui.component.button.InvenceSecondaryButton
 import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.inventory.route.InventoryViewModel
@@ -41,6 +41,7 @@ fun InventoryScanBottomSheet(
     viewModel: InventoryViewModel
 ) {
     ModalBottomSheet(
+        containerColor = InvenceTheme.colors.neutral10,
         sheetState = resultBottomSheetState,
         content = {
             when (resultBottomSheetStateModel) {
@@ -63,9 +64,9 @@ fun InventoryScanBottomSheet(
                     BarcodeScannerInformationLayout(
                         barCodeResult = resultBottomSheetStateModel.barcodeResult,
                         informationModel = resultBottomSheetStateModel.information,
-                        onProductDetailClicked = {
+                        onProductDetailClicked = { productUUID ->
                             viewModel.onScanEvent(
-                                ScanEvent.ProductDetailClicked
+                                ScanEvent.ProductDetailClicked(productUUID)
                             )
                         }
                     )
@@ -120,7 +121,7 @@ fun InventoryScanBottomSheet(
 fun BarcodeScannerInformationLayout(
     barCodeResult: BarCodeResult,
     informationModel: InformationModel,
-    onProductDetailClicked: () -> Unit
+    onProductDetailClicked: (String) -> Unit
 ) {
     Column(
         modifier =
@@ -147,7 +148,7 @@ fun BarcodeScannerInformationLayout(
         }
         InvencePrimaryButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onProductDetailClicked
+            onClick = { informationModel.product?.sku?.let { onProductDetailClicked(it) } }
         ) {
             Text(text = "Go to Product Detail", style = InvenceTheme.typography.labelLarge)
         }
@@ -184,7 +185,7 @@ fun BarcodeScannerAddProductLayout(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            InvenceSecondaryButton(modifier = Modifier.weight(1f), onClick = {
+            InvenceOutlineButton(modifier = Modifier.weight(1f), onClick = {
                 onBackClicked()
             }) {
                 Text(text = "No, cancel it", style = InvenceTheme.typography.labelLarge)

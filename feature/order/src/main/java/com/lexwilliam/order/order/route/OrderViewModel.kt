@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.model.OrderItem
@@ -14,6 +15,7 @@ import com.lexwilliam.order.usecase.ObserveSingleOrderGroupUseCase
 import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
+import com.lexwilliam.product.util.queryProductCategory
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,7 +80,7 @@ class OrderViewModel
                                     UiCartItem(
                                         product =
                                             Product(
-                                                uuid = order.item.uuid,
+                                                sku = order.item.uuid,
                                                 name = order.item.name,
                                                 description = order.item.description,
                                                 categoryName = order.item.categoryName,
@@ -100,9 +102,12 @@ class OrderViewModel
                     when (it) {
                         null -> flowOf(emptyList())
                         else ->
-                            observeProductCategory(it, state.query)
+                            observeProductCategory(it)
                                 .map { categories ->
-                                    categories.flatMap { category ->
+                                    queryProductCategory(
+                                        categories,
+                                        state.query
+                                    ).flatMap { category ->
                                         category.products.map { product ->
                                             UiProduct(
                                                 category = category,
@@ -132,6 +137,14 @@ class OrderViewModel
                         event.product,
                         event.quantity
                     )
+
+                OrderUiEvent.BackStackClicked -> handleBackStackClicked()
+            }
+        }
+
+        private fun handleBackStackClicked() {
+            viewModelScope.launch {
+                _navigation.send(OrderNavigationTarget.BackStack)
             }
         }
 
@@ -147,7 +160,7 @@ class OrderViewModel
                             uuid = UUID.randomUUID(),
                             item =
                                 OrderItem(
-                                    uuid = item.product.uuid,
+                                    uuid = item.product.sku,
                                     name = item.product.name,
                                     categoryName = item.product.categoryName,
                                     label = "",
@@ -186,9 +199,9 @@ class OrderViewModel
                             product = product,
                             quantity = quantity
                         )
-                    ) { e, n -> e.product.uuid == n.product.uuid }
+                    ) { e, n -> e.product.sku == n.product.sku }
                 } else {
-                    old.filterNot { cart -> cart.product.uuid == product.uuid }
+                    old.filterNot { cart -> cart.product.sku == product.sku }
                 }
             }
             Log.d("TAG", _cart.value.toString())

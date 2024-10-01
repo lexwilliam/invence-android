@@ -59,7 +59,6 @@ ktlint {
 dependencies {
     implementation(project(":data:user"))
     implementation(project(":data:transaction"))
-    implementation(project(":data:log"))
     implementation(project(":feature:transaction"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))

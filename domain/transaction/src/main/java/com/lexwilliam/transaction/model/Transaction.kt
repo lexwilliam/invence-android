@@ -11,7 +11,6 @@ data class Transaction(
     val payments: List<Payment>,
     val refunds: List<Refund>,
     val customer: String,
-    val fee: TransactionFee?,
     val tip: Double,
     val createdBy: String,
     val createdAt: Instant,

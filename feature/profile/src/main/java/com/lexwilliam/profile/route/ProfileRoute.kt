@@ -49,7 +49,7 @@ fun ProfileRoute(
         topBar = {
             InvenceCenterAlignedTopBar(
                 title = {
-                    Text(text = "Profile")
+                    Text(text = "Profile", style = InvenceTheme.typography.titleMedium)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackStack) {

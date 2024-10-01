@@ -1,5 +1,6 @@
 package com.lexwilliam.company.route.form
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +13,6 @@ import com.lexwilliam.company.navigation.CompanyFormNavigationTarget
 import com.lexwilliam.company.route.form.dialog.CompanyFormDialogEvent
 import com.lexwilliam.company.route.form.dialog.CompanyFormDialogState
 import com.lexwilliam.company.usecase.UpsertCompanyUseCase
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import com.lexwilliam.user.usecase.UpsertUserUseCase
@@ -154,7 +154,7 @@ class CompanyFormViewModel
         fun onDialogEvent(event: CompanyFormDialogEvent) {
             when (event) {
                 is CompanyFormDialogEvent.NameChanged -> handleDialogNameChanged(event.value)
-                is CompanyFormDialogEvent.ImageChanged -> handleDialogImageChanged(event.format)
+                is CompanyFormDialogEvent.ImageChanged -> handleDialogImageChanged(event.bmp)
                 CompanyFormDialogEvent.Dismiss -> handleDialogDismiss()
                 CompanyFormDialogEvent.Confirm -> handleDialogConfirm()
             }
@@ -164,8 +164,8 @@ class CompanyFormViewModel
             _dialogState.update { old -> old?.copy(name = value) }
         }
 
-        private fun handleDialogImageChanged(format: UploadImageFormat?) {
-            _dialogState.update { old -> old?.copy(imageUrl = format) }
+        private fun handleDialogImageChanged(bmp: Bitmap?) {
+            _dialogState.update { old -> old?.copy(bitmap = bmp) }
         }
 
         private fun handleDialogDismiss() {

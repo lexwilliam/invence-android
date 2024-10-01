@@ -73,13 +73,13 @@ fun InvenceQuantityTextField(
                         containerColor = InvenceTheme.colors.primary,
                         contentColor = InvenceTheme.colors.neutral10,
                         title = "-5",
-                        onClick = { onValueChange((value.toInt() - 5).toString()) }
+                        onClick = { onValueChange(((value.toIntOrNull() ?: 0) - 5).toString()) }
                     )
                     InvenceTextFieldQuantityIndicator(
                         containerColor = InvenceTheme.colors.secondary,
                         contentColor = InvenceTheme.colors.primary,
                         title = "-1",
-                        onClick = { onValueChange((value.toInt() - 1).toString()) }
+                        onClick = { onValueChange(((value.toIntOrNull() ?: 0) - 1).toString()) }
                     )
                     Row(
                         modifier = Modifier.width(IntrinsicSize.Min)
@@ -90,13 +90,13 @@ fun InvenceQuantityTextField(
                         containerColor = InvenceTheme.colors.secondary,
                         contentColor = InvenceTheme.colors.primary,
                         title = "+1",
-                        onClick = { onValueChange((value.toInt() + 1).toString()) }
+                        onClick = { onValueChange(((value.toIntOrNull() ?: 0) + 1).toString()) }
                     )
                     InvenceTextFieldQuantityIndicator(
                         containerColor = InvenceTheme.colors.primary,
                         contentColor = InvenceTheme.colors.neutral10,
                         title = "+5",
-                        onClick = { onValueChange((value.toInt() + 5).toString()) }
+                        onClick = { onValueChange(((value.toIntOrNull() ?: 0) + 5).toString()) }
                     )
                 }
             },

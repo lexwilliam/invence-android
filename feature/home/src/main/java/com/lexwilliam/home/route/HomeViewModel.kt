@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.lexwilliam.core.extensions.toFormatString
-import com.lexwilliam.home.model.Inbox
 import com.lexwilliam.home.navigation.HomeNavigationTarget
-import com.lexwilliam.log.usecase.ObserveLogUseCase
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.usecase.ObserveTransactionUseCase
 import com.lexwilliam.user.model.EmployeeShift
@@ -21,7 +19,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -40,7 +37,6 @@ class HomeViewModel
         private val fetchUser: FetchUserUseCase,
         observeSession: ObserveSessionUseCase,
         observeTransaction: ObserveTransactionUseCase,
-        observeLog: ObserveLogUseCase,
         observeShift: ObserveShiftUseCase,
         private val upsertShift: UpsertShiftUseCase
     ) : ViewModel() {
@@ -74,7 +70,7 @@ class HomeViewModel
                 EmployeeShift()
             )
 
-        private val transactions =
+        private val _transactions =
             branchUUID.flatMapLatest { uuid ->
                 when (uuid) {
                     null -> flowOf(emptyList())
@@ -82,29 +78,18 @@ class HomeViewModel
                 }
             }
 
-        private val logs =
-            branchUUID.flatMapLatest { uuid ->
-                when (uuid) {
-                    null -> flowOf(emptyList())
-                    else -> observeLog(uuid, 10)
+        val transactions =
+            _transactions
+                .map { transactions ->
+                    transactions
+                        .sortedByDescending { it.createdAt.epochSeconds }
+                        .groupBy { it.createdAt.toFormatString("EEE, dd MMM yyyy") }
                 }
-            }
-
-        val inbox =
-            combine(
-                transactions,
-                logs
-            ) { transactions, logs ->
-                transactions
-                    .map { Inbox.InboxTransaction(transaction = it) }
-                    .plus(logs.map { Inbox.InboxLog(log = it) })
-                    .sortedByDescending { it.createdAt.epochSeconds }
-                    .groupBy { it.createdAt.toFormatString("EEE, dd MMM yyyy") }
-            }.stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                emptyMap()
-            )
+                .stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5_000),
+                    emptyMap()
+                )
 
         private val _state = MutableStateFlow(HomeUiState())
         val uiState = _state.asStateFlow()

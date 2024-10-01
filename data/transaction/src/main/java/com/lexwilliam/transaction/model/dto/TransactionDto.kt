@@ -35,7 +35,6 @@ data class TransactionDto(
             payments = payments?.map { it.value.toDomain() } ?: emptyList(),
             refunds = refunds?.map { it.value.toDomain() } ?: emptyList(),
             customer = customer ?: "",
-            fee = fee?.toDomain(),
             tip = tip ?: 0.0,
             createdBy = createdBy ?: "",
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST,
@@ -55,7 +54,6 @@ data class TransactionDto(
                     domain.refunds
                         .associate { it.uuid.toString() to RefundDto.fromDomain(it) },
                 customer = domain.customer,
-                fee = domain.fee?.let { TransactionFeeDto.fromDomain(it) },
                 tip = domain.tip,
                 createdBy = domain.createdBy,
                 createdAt = domain.createdAt.toTimestamp(),

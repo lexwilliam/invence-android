@@ -1,8 +1,8 @@
 package com.lexwilliam.product.usecase
 
+import android.graphics.Bitmap
 import android.net.Uri
 import arrow.core.Either
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.product.repository.ProductRepository
 import com.lexwilliam.product.util.UploadImageFailure
 import java.util.UUID
@@ -16,8 +16,8 @@ class UploadProductImageUseCase
         suspend operator fun invoke(
             branchUUID: UUID,
             productUUID: String,
-            format: UploadImageFormat
+            bmp: Bitmap
         ): Either<UploadImageFailure, Uri> {
-            return productRepository.uploadProductImage(branchUUID, productUUID, format)
+            return productRepository.uploadProductImage(branchUUID, productUUID, bmp)
         }
     }

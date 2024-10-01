@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,15 +32,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core.util.getGreetingString
 import com.lexwilliam.core_ui.component.ObserveAsEvents
+import com.lexwilliam.core_ui.component.chip.InvenceMenuChip
 import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.home.component.HomeIconButton
 import com.lexwilliam.home.component.ShiftCalendar
-import com.lexwilliam.home.model.Inbox
 import com.lexwilliam.home.model.homeIcons
 import com.lexwilliam.home.navigation.HomeNavigationTarget
-import com.lexwilliam.transaction.component.LogCard
 import com.lexwilliam.transaction.component.TransactionCard
 import com.lexwilliam.user.model.EmployeeShift
 import java.util.UUID
@@ -54,7 +54,7 @@ fun HomeRoute(
     toProfile: () -> Unit
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
-    val inbox by viewModel.inbox.collectAsStateWithLifecycle()
+    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val shift by viewModel.shift.collectAsStateWithLifecycle()
 
@@ -79,24 +79,29 @@ fun HomeRoute(
                     )
                 },
                 actions = {
-                    NetworkImage(
-                        imagePath = user?.imageUrl,
-                        modifier =
+                    if (user?.imageUrl != null) {
+                        NetworkImage(
+                            modifier =
                             Modifier
                                 .padding(end = 16.dp)
                                 .clip(CircleShape)
                                 .clickable { viewModel.onProfileClicked() }
-                    )
+                        )
+                    } else {
+                        IconButton(onClick = { viewModel.onProfileClicked() }) {
+                            Icon(Icons.Default.Person, contentDescription = "user icon")
+                        }
+                    }
                 }
             )
         }
     ) { innerPadding ->
         LazyVerticalGrid(
             modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
-                    .background(InvenceTheme.colors.neutral10),
+            Modifier
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .background(InvenceTheme.colors.neutral10),
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -112,7 +117,7 @@ fun HomeRoute(
                 )
             }
             items(items = homeIcons) { model ->
-                HomeIconButton(
+                InvenceMenuChip(
                     onClick = { viewModel.onHomeIconClicked(model.label) },
                     icon = model.icon,
                     iconColor = InvenceTheme.colors.primary,
@@ -134,42 +139,33 @@ fun HomeRoute(
                     }
                 }
             }
-            inbox.forEach { entry ->
+            transactions.forEach { entry ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(text = entry.key, style = InvenceTheme.typography.labelLarge)
                 }
                 items(
                     items = entry.value,
                     span = { GridItemSpan(maxLineSpan) }
-                ) { inbox ->
-                    when (inbox) {
-                        is Inbox.InboxTransaction -> {
-                            TransactionCard(
-                                modifier =
-                                    Modifier.clickable {
-                                        viewModel.transactionClicked(
-                                            inbox.transaction
-                                        )
-                                    },
-                                transaction = inbox.transaction
-                            )
-                        }
-                        is Inbox.InboxLog -> {
-                            LogCard(
-                                log = inbox.log
-                            )
-                        }
-                    }
+                ) { transaction ->
+                    TransactionCard(
+                        modifier =
+                            Modifier.clickable {
+                                viewModel.transactionClicked(
+                                    transaction
+                                )
+                            },
+                        transaction = transaction
+                    )
                 }
             }
-            if (inbox.values.isNotEmpty()) {
+            if (transactions.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     TextButton(onClick = { viewModel.seeAllClicked() }) {
                         Text(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                             text = "See All",
                             textAlign = TextAlign.Center,
                             style = InvenceTheme.typography.titleMedium,

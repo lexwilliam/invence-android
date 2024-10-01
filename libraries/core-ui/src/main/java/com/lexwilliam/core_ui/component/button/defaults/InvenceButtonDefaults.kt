@@ -30,6 +30,15 @@ object InvenceButtonDefaults {
 
     @Composable
     fun secondaryButtonColors(
+        containerColor: Color = InvenceTheme.colors.secondary,
+        contentColor: Color = InvenceTheme.colors.primary
+    ) = baseButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor
+    )
+
+    @Composable
+    fun outlineButtonColors(
         containerColor: Color = InvenceTheme.colors.neutral10,
         contentColor: Color = InvenceTheme.colors.primary
     ) = baseButtonColors(

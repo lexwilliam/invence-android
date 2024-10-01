@@ -12,4 +12,8 @@ sealed interface ProductDetailUiEvent {
     data object EditIconClicked : ProductDetailUiEvent
 
     data object DeleteIconClicked : ProductDetailUiEvent
+
+    data object DeleteConfirm : ProductDetailUiEvent
+
+    data object DeleteDismiss : ProductDetailUiEvent
 }

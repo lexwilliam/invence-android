@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -25,13 +28,16 @@ import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
+import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.order.order.navigation.OrderNavigationTarget
 import java.util.UUID
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderRoute(
     viewModel: OrderViewModel = hiltViewModel(),
+    onBackStack: () -> Unit,
     toCheckOut: (UUID) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -41,6 +47,7 @@ fun OrderRoute(
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
+            is OrderNavigationTarget.BackStack -> onBackStack()
             is OrderNavigationTarget.CheckOut -> toCheckOut(target.orderUUID)
         }
     }
@@ -48,47 +55,17 @@ fun OrderRoute(
     Scaffold(
         containerColor = InvenceTheme.colors.neutral10,
         topBar = {
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                InvenceSearchTextField(
-                    modifier =
-                        Modifier
-                            .weight(1f),
-                    value = uiState.query.query,
-                    onValueChange = { viewModel.onEvent(OrderUiEvent.QueryChanged(it)) },
-                    placeholder = {
-                        Text(
-                            text = "Search",
-                            style = InvenceTheme.typography.bodyLarge
-                        )
-                    },
-                    leadingIcon = {
+            InvenceTopBar(
+                title = { Text(text = "Order", style = InvenceTheme.typography.titleMedium) },
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.onEvent(OrderUiEvent.BackStackClicked) }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.search),
-                            contentDescription = "search icon",
-                            tint = InvenceTheme.colors.primary
+                            Icons.Default.ArrowBack,
+                            contentDescription = null
                         )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { viewModel.onEvent(OrderUiEvent.BarcodeScannerClicked) }
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.barcode_scanner),
-                                contentDescription = "barcode scan icon",
-                                tint = InvenceTheme.colors.primary
-                            )
-                        }
-                    },
-                    singleLine = true
-                )
-            }
+                    }
+                }
+            )
         },
         bottomBar = {
             Column(
@@ -126,18 +103,65 @@ fun OrderRoute(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier =
                 Modifier
                     .padding(innerPadding)
-                    .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            orderProductList(
-                uiProducts = uiProducts,
-                cart = cart,
-                onEvent = viewModel::onEvent
-            )
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                InvenceSearchTextField(
+                    modifier =
+                        Modifier
+                            .weight(1f),
+                    value = uiState.query.query,
+                    onValueChange = { viewModel.onEvent(OrderUiEvent.QueryChanged(it)) },
+                    placeholder = {
+                        Text(
+                            text = "Search",
+                            style = InvenceTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.search),
+                            contentDescription = "search icon",
+                            tint = InvenceTheme.colors.primary
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { viewModel.onEvent(OrderUiEvent.BarcodeScannerClicked) }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.barcode_scanner),
+                                contentDescription = "barcode scan icon",
+                                tint = InvenceTheme.colors.primary
+                            )
+                        }
+                    },
+                    singleLine = true
+                )
+            }
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                orderProductList(
+                    uiProducts = uiProducts,
+                    cart = cart,
+                    onEvent = viewModel::onEvent
+                )
+            }
         }
     }
 }

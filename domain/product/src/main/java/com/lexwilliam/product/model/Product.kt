@@ -6,7 +6,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 data class Product(
-    val uuid: String = "",
+    val sku: String = "",
+    val upc: String = "",
     val name: String = "",
     val description: String = "",
     val categoryName: String = "",

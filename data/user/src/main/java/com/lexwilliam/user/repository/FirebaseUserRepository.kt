@@ -3,6 +3,7 @@ package com.lexwilliam.user.repository
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lexwilliam.firebase.FirestoreConfig
@@ -11,6 +12,8 @@ import com.lexwilliam.user.model.EmployeeShiftDto
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.model.UserDto
 import com.lexwilliam.user.util.FetchUserFailure
+import com.lexwilliam.user.util.LoginFailure
+import com.lexwilliam.user.util.SignUpFailure
 import com.lexwilliam.user.util.UnknownFailure
 import com.lexwilliam.user.util.UpsertShiftFailure
 import com.lexwilliam.user.util.UpsertUserFailure
@@ -18,11 +21,70 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.datetime.Clock
 
 fun firebaseUserRepository(
     analytics: FirebaseCrashlytics,
-    store: FirebaseFirestore
+    store: FirebaseFirestore,
+    auth: FirebaseAuth
 ) = object : UserRepository {
+    override suspend fun login(
+        email: String,
+        password: String
+    ): Either<LoginFailure, User> {
+        return Either.catch {
+            val authResult =
+                auth
+                    .signInWithEmailAndPassword(email, password)
+                    .await()
+                    ?: return LoginFailure.TaskFailed.left()
+            val firebaseUser =
+                authResult.user
+                    ?: return LoginFailure.TaskFailed.left()
+            val user =
+                fetchUser(firebaseUser.uid).getOrNull()
+                    ?: return LoginFailure.UserNotFound.left()
+            user
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            UnknownFailure(t.message)
+        }
+    }
+
+    override suspend fun signUp(
+        email: String,
+        username: String,
+        password: String
+    ): Either<SignUpFailure, User> {
+        return Either.catch {
+            val authResult =
+                auth
+                    .createUserWithEmailAndPassword(email, password)
+                    .await()
+            val firebaseUser =
+                authResult?.user
+                    ?: return SignUpFailure.CreateUserTaskFail.left()
+            val user =
+                User(
+                    uuid = firebaseUser.uid,
+                    email = email,
+                    name = username,
+                    createdAt = Clock.System.now(),
+                    imageUrl = null,
+                    branchUUID = null
+                )
+            when (upsertUser(user)) {
+                is Either.Left -> return SignUpFailure.UpsertUserToFirestoreFail.left()
+                is Either.Right -> return user.right()
+            }
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            UnknownFailure(t.message)
+        }
+    }
+
     override fun observeUser(uuid: String): Flow<User?> =
         callbackFlow {
             val reference =

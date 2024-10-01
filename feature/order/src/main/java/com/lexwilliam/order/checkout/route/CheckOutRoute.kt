@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,17 +27,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core.extensions.toCurrency
 import com.lexwilliam.core_ui.component.ObserveAsEvents
+import com.lexwilliam.core_ui.component.button.InvenceOutlineButton
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
-import com.lexwilliam.core_ui.component.button.InvenceSecondaryButton
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.order.checkout.dialog.PaymentListDialog
+import com.lexwilliam.order.checkout.dialog.OrderAddOnDialog
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.order.component.SmallOrderProductCard
 import java.util.UUID
@@ -51,11 +50,10 @@ fun CheckOutRoute(
     toTransactionDetail: (UUID) -> Unit
 ) {
     val orders by viewModel.orders.collectAsStateWithLifecycle()
-    val paymentMethod by viewModel.paymentMethods.collectAsStateWithLifecycle()
-    val selectedPaymentMethod by viewModel.selectedPayMethod.collectAsStateWithLifecycle()
-    val isPaymentShown by viewModel.isPaymentShown.collectAsStateWithLifecycle()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
-    val total = orders.sumOf { order -> order.quantity * order.item.price }
+    val subtotal = orders.sumOf { order -> order.quantity * order.item.price }
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
@@ -69,12 +67,11 @@ fun CheckOutRoute(
         viewModel.onEvent(CheckOutUiEvent.BackStackClicked)
     }
 
-    if (isPaymentShown) {
-        PaymentListDialog(
-            paymentMethod = paymentMethod,
-            subtotal = total,
-            onMethodClicked = { viewModel.onEvent(CheckOutUiEvent.PaymentSelected(it)) },
-            onDismiss = { viewModel.onEvent(CheckOutUiEvent.Dismiss) }
+    dialogState?.let { state ->
+        OrderAddOnDialog(
+            state = state,
+            onEvent = viewModel::onDialogEvent,
+            subtotal = subtotal
         )
     }
 
@@ -101,52 +98,109 @@ fun CheckOutRoute(
                     Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(64.dp)
-                            .background(InvenceTheme.colors.neutral30)
-                            .padding(horizontal = 16.dp)
-                            .clickable { viewModel.onEvent(CheckOutUiEvent.PaymentMethodClicked) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (selectedPaymentMethod == null) {
+                if (uiState.discount != null || uiState.surcharge != null) {
+                    Column(
+                        modifier =
+                            Modifier
+                                .background(InvenceTheme.colors.neutral30)
+                                .clickable {
+                                    viewModel.onEvent(
+                                        CheckOutUiEvent.AddOnClicked(
+                                            uiState.discount,
+                                            uiState.surcharge
+                                        )
+                                    )
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier =
+                                Modifier
+                                    .background(InvenceTheme.colors.neutral30)
+                                    .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Subtotal", style = InvenceTheme.typography.titleSmall)
+                            Text(
+                                text = subtotal.toCurrency(),
+                                style = InvenceTheme.typography.titleSmall
+                            )
+                        }
+                        Row(
+                            modifier =
+                                Modifier
+                                    .background(InvenceTheme.colors.neutral30)
+                                    .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Discount", style = InvenceTheme.typography.titleSmall)
+                            Text(
+                                text = (uiState.discount?.calculate(subtotal) ?: 0.0).toCurrency(),
+                                style = InvenceTheme.typography.titleSmall
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Surcharge", style = InvenceTheme.typography.titleSmall)
+                            Text(
+                                text = (uiState.surcharge?.calculate(subtotal) ?: 0.0).toCurrency(),
+                                style = InvenceTheme.typography.titleSmall
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .background(InvenceTheme.colors.neutral30)
+                                .clickable { viewModel.onEvent(CheckOutUiEvent.AddOnClicked()) }
+                                .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         Icon(
-                            Icons.Default.Warning,
-                            contentDescription = "no payment method selected icon"
+                            Icons.Default.AddCircle,
+                            contentDescription = "add on icon"
                         )
                         Text(
-                            text = "Select payment method",
-                            style = InvenceTheme.typography.labelLarge
-                        )
-                    } else {
-                        Text(
-                            text = selectedPaymentMethod?.name.toString(),
+                            text = "Add discount or surcharge",
                             style = InvenceTheme.typography.labelLarge
                         )
                     }
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = "Total",
-                        style = InvenceTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        style = InvenceTheme.typography.titleMedium
                     )
-                    Text(text = total.toCurrency(), style = InvenceTheme.typography.titleLarge)
+                    Text(
+                        text = uiState.calculateTotal(subtotal).toCurrency(),
+                        style = InvenceTheme.typography.titleMedium
+                    )
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    InvenceSecondaryButton(
+                    InvenceOutlineButton(
                         modifier =
                             Modifier.wrapContentWidth(),
                         onClick = { viewModel.onEvent(CheckOutUiEvent.SaveForLaterClicked) }

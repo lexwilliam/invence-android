@@ -3,14 +3,15 @@ package com.lexwilliam.order.cart.route
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import java.util.UUID
 @Composable
 fun CartRoute(
     viewModel: CartViewModel = hiltViewModel(),
+    onBackStack: () -> Unit,
     toOrder: (UUID) -> Unit
 ) {
     val orderGroup by viewModel.orderGroup.collectAsStateWithLifecycle()
@@ -40,6 +42,7 @@ fun CartRoute(
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
             is CartNavigationTarget.Order -> toOrder(target.uuid)
+            CartNavigationTarget.BackStack -> onBackStack()
         }
     }
 
@@ -52,6 +55,14 @@ fun CartRoute(
                         text = "Cart",
                         style = InvenceTheme.typography.titleMedium
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.onEvent(CartUiEvent.BackStackClicked) }) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
                 }
             )
         },
@@ -63,38 +74,42 @@ fun CartRoute(
             }
         }
     ) { innerPadding ->
-        if (orderGroup.isNotEmpty()) {
-            LazyColumn(
-                modifier =
-                    Modifier
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
+        LazyColumn(
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 32.dp)
+        ) {
+            if (orderGroup.isEmpty()) {
+                item {
+                    Box(
+                        modifier =
+                            Modifier
+                                .padding(innerPadding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "You have no order, you can add it by clicking the + button",
+                            style = InvenceTheme.typography.bodyMedium,
+                            color = InvenceTheme.colors.neutral60,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
                 items(items = orderGroup) { group ->
                     CartCard(
                         orderGroup = group,
                         onClick = { viewModel.onEvent(CartUiEvent.CartClicked(group)) },
-                        onRemoveClick = { viewModel.onEvent(CartUiEvent.RemoveCartClicked(group)) }
+                        onRemoveClick = {
+                            viewModel.onEvent(
+                                CartUiEvent.RemoveCartClicked(group)
+                            )
+                        }
                     )
                 }
-            }
-        } else {
-            Box(
-                modifier =
-                    Modifier
-                        .padding(innerPadding)
-                        .padding(32.dp)
-                        .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "You have no order, you can add it by clicking the + button",
-                    style = InvenceTheme.typography.bodyMedium,
-                    color = InvenceTheme.colors.neutral60,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }

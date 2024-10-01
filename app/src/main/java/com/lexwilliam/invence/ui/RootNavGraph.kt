@@ -5,8 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.lexwilliam.auth.navigation.loginNavigation
-import com.lexwilliam.auth.navigation.navigateToLogin
+import com.lexwilliam.auth.route.forgot.navigation.forgotNavigation
+import com.lexwilliam.auth.route.forgot.navigation.navigateToForgotPassword
+import com.lexwilliam.auth.route.login.navigation.loginNavigation
+import com.lexwilliam.auth.route.login.navigation.navigateToLogin
+import com.lexwilliam.auth.route.signup.navigation.navigateToSignUp
+import com.lexwilliam.auth.route.signup.navigation.signUpNavigation
+import com.lexwilliam.category.navigation.categoryNavigation
+import com.lexwilliam.category.navigation.navigateToCategory
 import com.lexwilliam.company.navigation.companyFormNavigation
 import com.lexwilliam.company.navigation.companySearchNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
@@ -43,8 +49,31 @@ fun RootNavGraph(
         startDestination = startDestination
     ) {
         loginNavigation(
-            toCompanySearch = navController::navigateToCompanySearch,
-            toHome = navController::navigateToHome
+            toCompanySearch = {
+                navController.navigateToCompanySearch(
+                    options =
+                        NavOptions.Builder()
+                            .setPopUpTo(Screen.LOGIN, true)
+                            .build()
+                )
+            },
+            toHome = {
+                navController.navigateToHome(
+                    options =
+                        NavOptions.Builder()
+                            .setPopUpTo(Screen.LOGIN, true)
+                            .build()
+                )
+            },
+            toForgotPassword = navController::navigateToForgotPassword,
+            toSignUp = navController::navigateToSignUp
+        )
+        signUpNavigation(
+            onBackStack = navController::navigateUp,
+            toCompanySearch = navController::navigateToCompanySearch
+        )
+        forgotNavigation(
+            onBackStack = navController::navigateUp
         )
         homeNavigation(
             toInventory = navController::navigateToInventory,
@@ -56,10 +85,15 @@ fun RootNavGraph(
             toProfile = navController::navigateToProfile
         )
         inventoryNavigation(
+            onBackStack = navController::navigateUp,
             toProductForm = { productUUID ->
                 navController.navigateToProductForm(productUUID)
             },
-            toProductDetail = { productUUID -> navController.navigateToProductDetail(productUUID) }
+            toProductDetail = { productUUID -> navController.navigateToProductDetail(productUUID) },
+            toCategory = navController::navigateToCategory
+        )
+        categoryNavigation(
+            onBackStack = navController::navigateUp
         )
         productFormNavigation(
             onBackStack = navController::navigateUp
@@ -78,20 +112,29 @@ fun RootNavGraph(
             toHome = navController::navigateToHome
         )
         cartNavigation(
+            onBackStack = navController::navigateUp,
             toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) }
         )
         orderNavigation(
+            onBackStack = navController::navigateUp,
             toCheckOut = { orderUUID -> navController.navigateToCheckOut(orderUUID) }
         )
         checkOutNavigation(
             onBackStack = navController::navigateUp,
-            toCart = navController::navigateToCart,
+            toCart = {
+                navController.navigateToCart(
+                    options =
+                        NavOptions.Builder()
+                            .setPopUpTo(Screen.CART, true)
+                            .build()
+                )
+            },
             toTransactionDetail = { transactionUUID ->
                 navController.navigateToTransactionDetail(
                     transactionUUID = transactionUUID,
                     options =
                         NavOptions.Builder()
-                            .setPopUpTo(Screen.ORDER, true)
+                            .setPopUpTo(Screen.CART, true)
                             .build()
                 )
             }

@@ -6,25 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import arrow.core.right
-import com.lexwilliam.branch.model.BranchPaymentMethod
 import com.lexwilliam.branch.usecase.ObserveBranchUseCase
-import com.lexwilliam.log.model.DataLog
-import com.lexwilliam.log.model.LogSell
-import com.lexwilliam.log.usecase.UpsertLogUseCase
+import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
+import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogState
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.model.Order
+import com.lexwilliam.order.model.OrderDiscount
+import com.lexwilliam.order.model.OrderTax
 import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
 import com.lexwilliam.order.usecase.ObserveSingleOrderGroupUseCase
 import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.order.util.UpsertGroupFailure
-import com.lexwilliam.product.model.Product
-import com.lexwilliam.product.model.ProductCategory
-import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
-import com.lexwilliam.transaction.model.Payment
-import com.lexwilliam.transaction.model.PaymentMethod
-import com.lexwilliam.transaction.model.PaymentMethodFee
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.TransactionFee
 import com.lexwilliam.transaction.usecase.UpsertTransactionUseCase
@@ -34,14 +28,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -60,7 +52,6 @@ class CheckOutViewModel
         private val observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val fetchUser: FetchUserUseCase,
-        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         observeBranch: ObserveBranchUseCase,
         savedStateHandle: SavedStateHandle
@@ -98,20 +89,11 @@ class CheckOutViewModel
                 }
             }
 
-        private val _isPaymentShown = MutableStateFlow(false)
-        val isPaymentShown = _isPaymentShown.asStateFlow()
+        private val _state = MutableStateFlow(CheckOutUiState())
+        val state = _state.asStateFlow()
 
-        val paymentMethods =
-            branch
-                .map { it?.branchPaymentMethods ?: emptyList() }
-                .stateIn(
-                    viewModelScope,
-                    SharingStarted.WhileSubscribed(5_000),
-                    emptyList()
-                )
-
-        private val _selectedPayMethod = MutableStateFlow<BranchPaymentMethod?>(null)
-        val selectedPayMethod = _selectedPayMethod.asStateFlow()
+        private val _dialogState = MutableStateFlow<OrderAddOnDialogState?>(null)
+        val dialogState = _dialogState.asStateFlow()
 
         private val _transactionFee = MutableStateFlow<TransactionFee?>(null)
         val transactionFee = _transactionFee.asStateFlow()
@@ -149,71 +131,41 @@ class CheckOutViewModel
                     )
                 CheckOutUiEvent.SaveForLaterClicked -> handleSaveForLaterClicked()
                 CheckOutUiEvent.ConfirmClicked -> handleConfirmClicked()
-                CheckOutUiEvent.Dismiss -> handleDismiss()
-                is CheckOutUiEvent.PaymentSelected -> handlePaymentSelected(event.payment)
-                CheckOutUiEvent.PaymentMethodClicked -> handlePaymentMethodClicked()
+                is CheckOutUiEvent.AddOnClicked ->
+                    handleAddOnClicked(
+                        event.discount,
+                        event.surcharge
+                    )
             }
         }
 
-        private fun handlePaymentMethodClicked() {
-            _isPaymentShown.value = true
-        }
-
-        private fun handlePaymentSelected(payment: BranchPaymentMethod) {
-            _selectedPayMethod.update { payment }
-            _isPaymentShown.value = false
-        }
-
-        private fun handleDismiss() {
-            _isPaymentShown.value = false
+        private fun handleAddOnClicked(
+            discount: OrderDiscount?,
+            surcharge: OrderTax?
+        ) {
+            _dialogState.update { OrderAddOnDialogState.from(discount, surcharge) }
         }
 
         private fun handleConfirmClicked() {
             viewModelScope.launch {
                 val orderGroup = orderGroup.firstOrNull() ?: return@launch
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
-                val selectedPayMethod = _selectedPayMethod.value ?: return@launch
                 val user = user.firstOrNull() ?: return@launch
                 val categories = categories.firstOrNull() ?: return@launch
                 val orders = _orders.value
-                val paymentMethod =
-                    PaymentMethod(
-                        uuid = selectedPayMethod.uuid,
-                        group = selectedPayMethod.group,
-                        name = selectedPayMethod.name,
-                        fee =
-                            PaymentMethodFee(
-                                fixed = selectedPayMethod.fee?.fixed ?: 0.0,
-                                percent = selectedPayMethod.fee?.percent ?: 0.0f
-                            )
-                    )
-                val payment =
-                    Payment(
-                        uuid = UUID.randomUUID(),
-                        total = orderGroup.totalPrice,
-                        paymentMethod = paymentMethod,
-                        createdAt = Clock.System.now()
-                    )
                 val transactionUUID = UUID.randomUUID()
                 val transaction =
                     Transaction(
                         uuid = transactionUUID,
                         branchUUID = branchUUID,
                         orderGroup = orderGroup.copy(orders = orders),
-                        payments = listOf(payment),
+                        payments = listOf(),
                         refunds = listOf(),
                         customer = "",
-                        fee = _transactionFee.value,
                         // TODO: Implement Tip Later
                         tip = 0.0,
                         createdBy = user.name,
                         createdAt = Clock.System.now()
-                    )
-
-                val soldItemsWithProfit =
-                    decreaseProductItemQuantity(
-                        orders = orders,
-                        categories = categories
                     )
 
                 when (val resultTransaction = upsertTransaction(transaction)) {
@@ -226,21 +178,6 @@ class CheckOutViewModel
                                 Log.d("TAG", result.value.toString())
                             }
                             is Either.Right -> {
-                                upsertLog(
-                                    log =
-                                        DataLog(
-                                            uuid = UUID.randomUUID(),
-                                            branchUUID = branchUUID,
-                                            sell =
-                                                LogSell(
-                                                    uuid = UUID.randomUUID(),
-                                                    orderGroup = orderGroup,
-                                                    soldProducts = soldItemsWithProfit.first,
-                                                    totalProfit = soldItemsWithProfit.second
-                                                ),
-                                            createdAt = Clock.System.now()
-                                        )
-                                )
                                 _navigation
                                     .send(
                                         CheckOutNavigationTarget.TransactionDetail(transactionUUID)
@@ -250,57 +187,6 @@ class CheckOutViewModel
                     }
                 }
             }
-        }
-
-        private suspend fun decreaseProductItemQuantity(
-            orders: List<Order>,
-            categories: List<ProductCategory>
-        ): Pair<List<Product>, Double> {
-            val orderItemUUIDWithQuantityList = orders.associate { it.item.uuid to it.quantity }
-            val soldProduct = mutableListOf<Product>()
-            var totalProfit = 0.0
-
-            categories.forEach { category ->
-                val modifiedProducts =
-                    category.products.map { product ->
-                        if (orderItemUUIDWithQuantityList.contains(product.uuid)) {
-                            var count = orderItemUUIDWithQuantityList[product.uuid] ?: 0
-                            val soldItems = mutableListOf<ProductItem>()
-                            val modifiedItems =
-                                product.items.mapNotNull { item ->
-                                    if (count == 0) return@mapNotNull null
-                                    val quantity = item.quantity - count
-                                    when {
-                                        quantity > 0 -> {
-                                            totalProfit += product.getProfit(item, count)
-                                            soldItems.add(item.copy(quantity = count))
-                                            count = 0
-                                            item.copy(quantity = quantity)
-                                        }
-                                        else -> {
-                                            if (count > 0) {
-                                                totalProfit += product.getProfit(item, count)
-                                                soldItems.add(item)
-                                            }
-                                            count -= item.quantity
-                                            null
-                                        }
-                                    }
-                                }
-                            soldProduct.add(product.copy(items = soldItems))
-                            product.copy(items = modifiedItems)
-                        } else {
-                            product
-                        }
-                    }
-
-                val modifiedCategory = category.copy(products = modifiedProducts)
-                upsertProductCategory(modifiedCategory).isLeft { failure ->
-                    Log.d("TAG", failure.toString())
-                    true
-                }
-            }
-            return soldProduct to totalProfit
         }
 
         private fun handleSaveForLaterClicked() {
@@ -330,6 +216,60 @@ class CheckOutViewModel
                     }
                 }
             }
+        }
+
+        fun onDialogEvent(event: OrderAddOnDialogEvent) {
+            when (event) {
+                OrderAddOnDialogEvent.Dismiss -> handleDismiss()
+                OrderAddOnDialogEvent.Confirm -> handleConfirm()
+                is OrderAddOnDialogEvent.DiscountFixedChanged ->
+                    handleDiscountFixedChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.DiscountPercentChanged ->
+                    handleDiscountPercentChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.SurchargeFixedChanged ->
+                    handleSurchargeFixedChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.SurchargePercentChanged ->
+                    handleSurchargePercentChanged(
+                        event.value
+                    )
+            }
+        }
+
+        private fun handleSurchargePercentChanged(value: String) {
+            _dialogState.update { old -> old?.copy(surchargePercent = value) }
+        }
+
+        private fun handleSurchargeFixedChanged(value: String) {
+            _dialogState.update { old -> old?.copy(surchargeFixed = value) }
+        }
+
+        private fun handleDiscountPercentChanged(value: String) {
+            _dialogState.update { old -> old?.copy(discountPercent = value) }
+        }
+
+        private fun handleDiscountFixedChanged(value: String) {
+            _dialogState.update { old -> old?.copy(discountFixed = value) }
+        }
+
+        private fun handleDismiss() {
+            _dialogState.update { null }
+        }
+
+        private fun handleConfirm() {
+            val dialogState = _dialogState.value
+            _state.update { old ->
+                old.copy(
+                    discount = dialogState?.getDiscount(),
+                    surcharge = dialogState?.getSurcharge()
+                )
+            }
+            _dialogState.update { null }
         }
 
         private suspend fun upsertOrderGroup(): Either<UpsertGroupFailure, Boolean> {

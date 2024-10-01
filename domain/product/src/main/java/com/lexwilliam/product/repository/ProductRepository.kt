@@ -1,8 +1,8 @@
 package com.lexwilliam.product.repository
 
+import android.graphics.Bitmap
 import android.net.Uri
 import arrow.core.Either
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.util.DeleteProductFailure
 import com.lexwilliam.product.util.UploadImageFailure
@@ -24,12 +24,12 @@ interface ProductRepository {
     suspend fun uploadProductCategoryImage(
         branchUUID: UUID,
         categoryUUID: UUID,
-        format: UploadImageFormat
+        bmp: Bitmap
     ): Either<UploadImageFailure, Uri>
 
     suspend fun uploadProductImage(
         branchUUID: UUID,
         productUUID: String,
-        format: UploadImageFormat
+        bmp: Bitmap
     ): Either<UploadImageFailure, Uri>
 }

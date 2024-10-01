@@ -46,7 +46,7 @@ data class ProductCategoryDto(
                 products =
                     domain.products.associate {
                             product ->
-                        product.uuid.toString() to ProductDto.fromDomain(product)
+                        product.sku to ProductDto.fromDomain(product)
                     },
                 createdAt = domain.createdAt.toTimestamp(),
                 deletedAt = domain.deletedAt?.toTimestamp()

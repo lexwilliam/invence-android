@@ -1,6 +1,7 @@
 package com.lexwilliam.company.route.form
 
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -24,16 +25,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.company.navigation.CompanyFormNavigationTarget
 import com.lexwilliam.company.route.form.dialog.CompanyFormDialogEvent
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvenceFloatingActionButton
 import com.lexwilliam.core_ui.component.button.InvenceRadioButton
@@ -60,16 +60,14 @@ fun CompanyFormRoute(
     dialogState?.let { state ->
         FormDialogWithImage(
             onDismiss = { viewModel.onDialogEvent(CompanyFormDialogEvent.Dismiss) },
-            imagePath = state.imageUrl,
-            onImageChanged = { uri ->
+            image = state.bitmap,
+            onImageChanged = { bmp ->
                 viewModel.onDialogEvent(
-                    CompanyFormDialogEvent.ImageChanged(
-                        uri?.let { UploadImageFormat.WithUri(it) }
-                    )
+                    CompanyFormDialogEvent.ImageChanged(bmp)
                 )
             },
             title = "Add Branch",
-            label = "Upload Branch Logo",
+            label = "Name",
             placeHolder = "Input branch name",
             name = state.name,
             onNameChanged = { viewModel.onDialogEvent(CompanyFormDialogEvent.NameChanged(it)) },
@@ -122,16 +120,13 @@ fun CompanyFormNamePage(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Text(
-            text = "Welcome to the Warehouse!",
-            style = InvenceTheme.typography.displayMedium,
-            fontWeight = FontWeight.Bold
+            text = "Setup your company",
+            style = InvenceTheme.typography.brand,
+            color = InvenceTheme.colors.primary
         )
         Text(
-            text =
-                "Step into our digital warehouse! " +
-                    "We need a few details to set up your company's space." +
-                    " Think of it as your backstage pass to inventory greatness.",
-            style = InvenceTheme.typography.bodyLarge
+            text = "Step 1: Set up your company name",
+            style = InvenceTheme.typography.bodyMedium
         )
         InvenceOutlineTextField(
             value = uiState.companyName,
@@ -161,15 +156,15 @@ fun CompanyFormBranchPage(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Text(
-            text = "Branch Integration",
-            style = InvenceTheme.typography.displayMedium,
-            fontWeight = FontWeight.Bold
+            text = "Branches",
+            style = InvenceTheme.typography.brand,
+            color = InvenceTheme.colors.primary
         )
         Text(
             text =
-                "Let's weave the threads of your inventory network! " +
-                    "Does your company have branches?",
-            style = InvenceTheme.typography.bodyLarge
+                "Step 2: Does your company have branches? You can add them here or later. " +
+                    "\n\nBut make sure you have one branches at the start",
+            style = InvenceTheme.typography.bodyMedium
         )
         CompanyFormBranchList(
             uiState = uiState,
@@ -205,7 +200,7 @@ fun CompanyFormBranchList(
                 ) {
                     Text(
                         text = branch.name,
-                        style = InvenceTheme.typography.bodyLarge,
+                        style = InvenceTheme.typography.titleMedium,
                         color = InvenceTheme.colors.primary
                     )
                     InvenceRadioButton(
@@ -222,7 +217,7 @@ fun CompanyFormBranchList(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .clickable(
-                            interactionSource = MutableInteractionSource(),
+                            interactionSource = remember { MutableInteractionSource() },
                             indication = LocalIndication.current,
                             onClick = { onEvent(CompanyFormUiEvent.AddBranch) }
                         ),
@@ -236,6 +231,10 @@ fun CompanyFormBranchList(
                             .dashedBorder(
                                 color = InvenceTheme.colors.primary,
                                 shape = RoundedCornerShape(16.dp)
+                            )
+                            .background(
+                                InvenceTheme.colors.neutral10,
+                                shape = RoundedCornerShape(16.dp)
                             ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -248,15 +247,10 @@ fun CompanyFormBranchList(
                 }
                 Text(
                     text = "Add branch",
-                    style = InvenceTheme.typography.bodyLarge,
+                    style = InvenceTheme.typography.titleMedium,
                     color = InvenceTheme.colors.primary
                 )
             }
         }
     }
 }
-
-// @Composable
-// fun CompanyFormEmployee() {
-//
-// }

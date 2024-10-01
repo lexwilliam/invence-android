@@ -15,5 +15,5 @@ sealed interface ScanEvent {
 
     data object AddProductClicked : ScanEvent
 
-    data object ProductDetailClicked : ScanEvent
+    data class ProductDetailClicked(val productUUID: String) : ScanEvent
 }

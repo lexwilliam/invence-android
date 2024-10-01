@@ -27,6 +27,7 @@ object UserModule {
     @Provides
     fun providesUserRepository(
         analytics: FirebaseCrashlytics,
-        store: FirebaseFirestore
-    ): UserRepository = firebaseUserRepository(analytics = analytics, store = store)
+        store: FirebaseFirestore,
+        auth: FirebaseAuth
+    ): UserRepository = firebaseUserRepository(analytics = analytics, store = store, auth = auth)
 }

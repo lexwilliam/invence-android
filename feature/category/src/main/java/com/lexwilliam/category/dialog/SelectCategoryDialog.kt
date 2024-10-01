@@ -1,6 +1,6 @@
 package com.lexwilliam.category.dialog
 
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +19,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
@@ -37,17 +41,17 @@ import com.lexwilliam.product.model.ProductCategory
 fun SelectCategoryDialog(
     onDismiss: () -> Unit,
     categories: List<ProductCategory>,
-    query: String,
-    onQueryChanged: (String) -> Unit,
     onCategoryClicked: (ProductCategory) -> Unit,
-    isFormShown: Boolean,
-    showForm: (Boolean) -> Unit,
-    formImagePath: UploadImageFormat? = null,
-    formInputImageChanged: (Uri?) -> Unit,
-    formTitle: String,
-    formTitleChanged: (String) -> Unit,
-    formOnConfirm: () -> Unit
+    onFormConfirm: (String, Bitmap?) -> Unit
 ) {
+    var query by remember { mutableStateOf("") }
+    var isFormShowing by remember { mutableStateOf(false) }
+
+    val filteredCategories =
+        categories.filter {
+            it.name.contains(query, ignoreCase = true)
+        }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties =
@@ -74,7 +78,7 @@ fun SelectCategoryDialog(
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { showForm(true) },
+                    onClick = { isFormShowing = true },
                     containerColor = InvenceTheme.colors.primary,
                     contentColor = InvenceTheme.colors.neutral10
                 ) {
@@ -96,7 +100,7 @@ fun SelectCategoryDialog(
                             Modifier
                                 .fillMaxWidth(),
                         value = query,
-                        onValueChange = onQueryChanged,
+                        onValueChange = { query = it },
                         placeholder = {
                             Text(
                                 text = "Search",
@@ -113,34 +117,50 @@ fun SelectCategoryDialog(
                         singleLine = true
                     )
                 }
-                items(items = categories) { category ->
-                    ColumnCardWithImage(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable { onCategoryClicked(category) },
-                        imageModifier = Modifier.size(64.dp),
-                        imagePath = null
-                    ) {
-                        Text(
-                            text = category.name,
-                            style = InvenceTheme.typography.bodyLarge
-                        )
+                when (filteredCategories.isNotEmpty()) {
+                    true -> {
+                        items(items = filteredCategories) { category ->
+                            ColumnCardWithImage(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onCategoryClicked(category) },
+                                imageModifier = Modifier.size(64.dp),
+                                imagePath = category.imageUrl
+                            ) {
+                                Text(
+                                    text = category.name,
+                                    style = InvenceTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+                    }
+                    false -> {
+                        item {
+                            Text(
+                                modifier =
+                                    Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                text = "No categories found",
+                                style = InvenceTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    if (isFormShown) {
+    if (isFormShowing) {
         CategoryFormDialog(
-            onDismiss = { showForm(false) },
-            isEditing = false,
-            imagePath = formImagePath,
-            onImageChanged = formInputImageChanged,
-            title = formTitle,
-            onTitleChanged = formTitleChanged,
-            onConfirm = formOnConfirm
+            onDismiss = { isFormShowing = false },
+            category = null,
+            onConfirm = { title, bitmap ->
+                onFormConfirm(title, bitmap)
+                isFormShowing = false
+            }
         )
     }
 }

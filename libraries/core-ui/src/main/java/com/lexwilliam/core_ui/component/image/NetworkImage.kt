@@ -1,5 +1,6 @@
 package com.lexwilliam.core_ui.component.image
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable

@@ -17,7 +17,9 @@ import com.lexwilliam.inventory.navigation.InventoryNavigationTarget
 import com.lexwilliam.inventory.scan.InventoryScanBottomSheetState
 import com.lexwilliam.inventory.scan.ScanEvent
 import com.lexwilliam.product.model.Product
+import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
+import com.lexwilliam.product.util.queryProductCategory
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,15 +73,26 @@ class InventoryViewModel
                 }
             }
 
+        val categories =
+            _categories
+                .stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5_000),
+                    emptyList()
+                )
+
         val uiProducts =
             _state.flatMapLatest { state ->
                 branchUUID.flatMapLatest {
                     when (it) {
                         null -> flowOf(emptyList())
                         else ->
-                            observeProductCategory(it, state.query)
+                            observeProductCategory(it)
                                 .map { categories ->
-                                    categories.flatMap { category ->
+                                    queryProductCategory(
+                                        categories,
+                                        state.query
+                                    ).flatMap { category ->
                                         category.products.map { product ->
                                             UiProduct(
                                                 category = category,
@@ -120,6 +133,31 @@ class InventoryViewModel
                 is InventoryUiEvent.FabClicked -> handleFabClicked()
                 is InventoryUiEvent.ProductClicked -> handleProductClicked(event.product)
                 InventoryUiEvent.BarcodeScannerClicked -> handleBarcodeScannerClicked()
+                is InventoryUiEvent.CategoryClicked -> handleCategoryClicked(event.category)
+                InventoryUiEvent.CategorySettingClicked -> handleCategorySettingClicked()
+                InventoryUiEvent.BackStackClicked -> handleBackStackClicked()
+            }
+        }
+
+        private fun handleBackStackClicked() {
+            viewModelScope.launch {
+                _navigation.send(InventoryNavigationTarget.BackStack)
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
+            }
+        }
+
+        private fun handleCategorySettingClicked() {
+            viewModelScope.launch {
+                _navigation.send(InventoryNavigationTarget.Category)
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
+            }
+        }
+
+        private fun handleCategoryClicked(category: ProductCategory?) {
+            _state.update { old ->
+                old.copy(
+                    query = old.query.copy(categoryUUID = category?.uuid)
+                )
             }
         }
 
@@ -130,7 +168,8 @@ class InventoryViewModel
 
         private fun handleProductClicked(product: Product) {
             viewModelScope.launch {
-                _navigation.send(InventoryNavigationTarget.ProductDetail(product.uuid))
+                _navigation.send(InventoryNavigationTarget.ProductDetail(product.sku))
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
             }
         }
 
@@ -145,6 +184,7 @@ class InventoryViewModel
         private fun handleFabClicked() {
             viewModelScope.launch {
                 _navigation.send(InventoryNavigationTarget.ProductForm(null))
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
             }
         }
 
@@ -157,7 +197,7 @@ class InventoryViewModel
                     )
                 is ScanEvent.CameraBoundaryReady -> handleCameraBoundaryReady(event.cameraBoundary)
                 ScanEvent.Dismiss -> handleDismiss()
-                ScanEvent.ProductDetailClicked -> handleProductDetailClicked()
+                is ScanEvent.ProductDetailClicked -> handleProductDetailClicked(event.productUUID)
                 is ScanEvent.ScanningAreaReady -> handleScanningAreaReady(event.scanningArea)
                 ScanEvent.BottomSheetDismiss -> handleBottomSheetDismiss()
             }
@@ -171,6 +211,7 @@ class InventoryViewModel
             viewModelScope.launch {
                 val productCode = barcodeResult.barCode.displayValue ?: return@launch
                 _navigation.send(InventoryNavigationTarget.ProductForm(productCode))
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
             }
         }
 
@@ -195,10 +236,10 @@ class InventoryViewModel
             _state.update { old -> old.copy(isScanBarcodeShowing = false) }
         }
 
-        private fun handleProductDetailClicked() {
+        private fun handleProductDetailClicked(productUUID: String) {
             viewModelScope.launch {
-                val productCode = barcodeResult.barCode.displayValue ?: return@launch
-                _navigation.send(InventoryNavigationTarget.ProductDetail(productCode))
+                _navigation.send(InventoryNavigationTarget.ProductDetail(productUUID))
+                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
             }
         }
 
@@ -283,7 +324,7 @@ class InventoryViewModel
                 selectedProduct =
                     category.products.firstOrNull {
                             product ->
-                        product.uuid == productCode
+                        product.upc == productCode
                     }
                 if (selectedProduct != null) {
                     break

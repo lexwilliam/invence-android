@@ -3,7 +3,8 @@ package com.lexwilliam.core.navigation
 object Screen {
     const val SPLASH = "splash"
     const val LOGIN = "login"
-    const val SIGNUP = "signup"
+    const val SIGN_UP = "sign_up"
+    const val FORGOT_PASSWORD = "forgot_password"
     const val INVENTORY = "inventory"
     const val SUPPLIER = "supplier"
     const val PRODUCT_FORM = "product_form"
@@ -19,4 +20,8 @@ object Screen {
     const val TRANSACTION_DETAIL = "transaction_detail"
     const val TRANSACTION_HISTORY = "transaction_history"
     const val PROFILE = "profile"
+    const val PAYMENT = "payment"
+    const val DISCOUNT = "discount"
+    const val TAX = "tax"
+    const val FEE = "fee"
 }

@@ -1,6 +1,7 @@
 package com.lexwilliam.order.checkout.route
 
-import com.lexwilliam.branch.model.BranchPaymentMethod
+import com.lexwilliam.order.model.OrderDiscount
+import com.lexwilliam.order.model.OrderTax
 
 sealed interface CheckOutUiEvent {
     data object BackStackClicked : CheckOutUiEvent
@@ -11,9 +12,8 @@ sealed interface CheckOutUiEvent {
 
     data object SaveForLaterClicked : CheckOutUiEvent
 
-    data object PaymentMethodClicked : CheckOutUiEvent
-
-    data object Dismiss : CheckOutUiEvent
-
-    data class PaymentSelected(val payment: BranchPaymentMethod) : CheckOutUiEvent
+    data class AddOnClicked(
+        val discount: OrderDiscount? = null,
+        val surcharge: OrderTax? = null
+    ) : CheckOutUiEvent
 }

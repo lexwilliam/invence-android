@@ -1,16 +1,11 @@
 package com.lexwilliam.product.route.detail
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
-import com.lexwilliam.log.model.DataLog
-import com.lexwilliam.log.model.LogDelete
-import com.lexwilliam.log.model.LogRestock
-import com.lexwilliam.log.usecase.UpsertLogUseCase
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.navigation.ProductDetailNavigationTarget
@@ -36,18 +31,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import java.util.UUID
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class ProductDetailViewModel
     @Inject
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
-        private val upsertLog: UpsertLogUseCase,
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
@@ -79,7 +71,7 @@ class ProductDetailViewModel
             categories.map { categories ->
                 categories.firstOrNull { category ->
                     category.products.any { product ->
-                        product.uuid == productUUID.firstOrNull()
+                        product.sku == productUUID.firstOrNull()
                     }
                 }
             }
@@ -92,7 +84,7 @@ class ProductDetailViewModel
                 productUUID?.let {
                     val product =
                         category?.products?.firstOrNull { product ->
-                            product.uuid == productUUID
+                            product.sku == productUUID
                         }
                     product ?: Product()
                 } ?: Product()
@@ -113,10 +105,16 @@ class ProductDetailViewModel
                 ProductDetailUiEvent.CopyDescription -> handleCopyDescription()
                 ProductDetailUiEvent.EditIconClicked -> handleEditIconClicked()
                 ProductDetailUiEvent.DeleteIconClicked -> handleDeleteIconClicked()
+                ProductDetailUiEvent.DeleteConfirm -> handleDeleteConfirm()
+                ProductDetailUiEvent.DeleteDismiss -> handleDeleteDismiss()
             }
         }
 
-        private fun handleDeleteIconClicked() {
+        private fun handleDeleteDismiss() {
+            _state.update { old -> old.copy(isDeleteShowing = false) }
+        }
+
+        private fun handleDeleteConfirm() {
             viewModelScope.launch {
                 val category = category.firstOrNull() ?: return@launch
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
@@ -125,34 +123,26 @@ class ProductDetailViewModel
                         category.copy(
                             products =
                                 category.products
-                                    .filterNot { product.value.uuid == it.uuid }
+                                    .filterNot { product.value.sku == it.sku }
                         )
                 ).fold(
                     ifLeft = { failure ->
                         Log.d("TAG", failure.toString())
                     },
                     ifRight = {
-                        upsertLog(
-                            DataLog(
-                                uuid = UUID.randomUUID(),
-                                branchUUID = branchUUID,
-                                delete =
-                                    LogDelete(
-                                        uuid = UUID.randomUUID(),
-                                        product = product.value
-                                    ),
-                                createdAt = Clock.System.now()
-                            )
-                        )
                         _navigation.send(ProductDetailNavigationTarget.BackStack)
                     }
                 )
             }
         }
 
+        private fun handleDeleteIconClicked() {
+            _state.update { old -> old.copy(isDeleteShowing = true) }
+        }
+
         private fun handleEditIconClicked() {
             viewModelScope.launch {
-                _navigation.send(ProductDetailNavigationTarget.ProductForm(product.value.uuid))
+                _navigation.send(ProductDetailNavigationTarget.ProductForm(product.value.sku))
             }
         }
 
@@ -205,7 +195,7 @@ class ProductDetailViewModel
                         products =
                             category.products
                                 .addOrUpdateDuplicate(modifiedProduct) { existingItem, newValue ->
-                                    existingItem.uuid == newValue.uuid
+                                    existingItem.sku == newValue.sku
                                 }
                     )
                 upsertProductCategory(modifiedCategory).fold(
@@ -213,23 +203,6 @@ class ProductDetailViewModel
                         Log.d("TAG", failure.toString())
                     },
                     ifRight = {
-                        upsertLog(
-                            log =
-                                DataLog(
-                                    uuid = UUID.randomUUID(),
-                                    branchUUID = branchUUID,
-                                    restock =
-                                        LogRestock(
-                                            uuid = UUID.randomUUID(),
-                                            productUUID = product.uuid,
-                                            name = product.name,
-                                            originalStock = product.quantity,
-                                            addedStock = productItem.quantity,
-                                            price = productItem.buyPrice
-                                        ),
-                                    createdAt = Clock.System.now()
-                                )
-                        )
                         _dialogState.update { null }
                     }
                 )

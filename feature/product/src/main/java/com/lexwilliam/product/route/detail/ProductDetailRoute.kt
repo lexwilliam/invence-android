@@ -1,15 +1,15 @@
 package com.lexwilliam.product.route.detail
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,15 +28,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core.extensions.toCurrency
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
+import com.lexwilliam.core_ui.component.button.InvenceTextButton
 import com.lexwilliam.core_ui.component.chip.InvenceChip
 import com.lexwilliam.core_ui.component.image.NetworkImage
-import com.lexwilliam.core_ui.component.textfield.InvenceOutlineTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.product.component.ProductItemCard
@@ -43,7 +46,6 @@ import com.lexwilliam.product.navigation.ProductDetailNavigationTarget
 import com.lexwilliam.product.route.detail.dialog.RestockDialogEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductDetailRoute(
     viewModel: ProductDetailViewModel = hiltViewModel(),
@@ -60,6 +62,36 @@ fun ProductDetailRoute(
             is ProductDetailNavigationTarget.ProductForm ->
                 toProductForm(target.productUUID)
         }
+    }
+
+    if (uiState.isDeleteShowing) {
+        AlertDialog(
+            containerColor = InvenceTheme.colors.neutral10,
+            onDismissRequest = { viewModel.onEvent(ProductDetailUiEvent.DeleteDismiss) },
+            title = {
+                Text(text = "Delete Product", style = InvenceTheme.typography.titleLarge)
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete this product?",
+                    style = InvenceTheme.typography.bodyMedium
+                )
+            },
+            dismissButton = {
+                InvenceTextButton(
+                    onClick = { viewModel.onEvent(ProductDetailUiEvent.DeleteDismiss) }
+                ) {
+                    Text(text = "Cancel", style = InvenceTheme.typography.labelLarge)
+                }
+            },
+            confirmButton = {
+                InvencePrimaryButton(
+                    onClick = { viewModel.onEvent(ProductDetailUiEvent.DeleteConfirm) }
+                ) {
+                    Text(text = "Delete", style = InvenceTheme.typography.labelLarge)
+                }
+            }
+        )
     }
 
     dialogState?.let { state ->
@@ -135,94 +167,159 @@ fun ProductDetailRoute(
             modifier =
                 Modifier
                     .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            NetworkImage(
+            Row(
                 modifier =
                     Modifier
+                        .padding(vertical = 8.dp, horizontal = 16.dp)
                         .fillMaxWidth()
-                        .height(300.dp),
-                imagePath = product.imagePath
-            )
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(end = 16.dp)
+                ) {
+                    InvenceChip(
+                        onClick = { },
+                        label = {
+                            Text(
+                                text = product.categoryName,
+                                style = InvenceTheme.typography.labelMedium,
+                                color = InvenceTheme.colors.primary
+                            )
+                        }
+                    )
+                    Text(
+                        text = product.name,
+                        style = InvenceTheme.typography.titleLarge
+                    )
+                }
+                NetworkImage(
+                    modifier =
+                        Modifier
+                            .size(150.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                    imagePath = product.imagePath
+                )
+            }
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InvenceChip(
-                    onClick = { },
-                    label = {
-                        Text(
-                            text = product.categoryName,
-                            style = InvenceTheme.typography.labelMedium,
-                            color = InvenceTheme.colors.primary
-                        )
-                    }
-                )
-                Text(text = product.name, style = InvenceTheme.typography.titleLarge)
-                Column {
-                    Text(
-                        text = "Sell Price",
-                        style = InvenceTheme.typography.titleSmall
-                    )
-                    InvenceOutlineTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = product.sellPrice.toCurrency(),
-                        onValueChange = {},
-                        placeholder = {
-                            Text(
-                                text = "0.0",
-                                style = InvenceTheme.typography.bodyLarge
-                            )
-                        },
-                        readOnly = true
-                    )
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Items", style = InvenceTheme.typography.titleMedium)
-                        IconButton(
-                            onClick = { viewModel.onEvent(ProductDetailUiEvent.ItemExpanded) }
-                        ) {
-                            Icon(
-                                Icons.Default.KeyboardArrowDown,
-                                contentDescription = "expand items content icon"
-                            )
-                        }
-                    }
-                    AnimatedVisibility(visible = uiState.itemExpanded) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            product.items.forEach { item ->
-                                ProductItemCard(
-                                    itemId = item.itemId,
-                                    buyPrice = item.buyPrice.toString(),
-                                    quantity = item.quantity.toString()
-                                )
-                            }
-                        }
-                    }
-                }
-                Text(text = "Description", style = InvenceTheme.typography.titleMedium)
-                Text(text = product.description, style = InvenceTheme.typography.bodyMedium)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Absolute.Right
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { viewModel.onEvent(ProductDetailUiEvent.CopyDescription) }
+                    Text(
+                        modifier = Modifier.fillMaxWidth(0.2f),
+                        text = "SKU",
+                        style = InvenceTheme.typography.titleMedium
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = product.sku,
+                        style = InvenceTheme.typography.bodyMedium
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(0.2f),
+                        text = "UPC",
+                        style = InvenceTheme.typography.titleMedium
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = product.upc,
+                        style = InvenceTheme.typography.bodyMedium
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(0.2f),
+                        text = "Price",
+                        style = InvenceTheme.typography.titleMedium
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = product.sellPrice.toCurrency(),
+                        style = InvenceTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Column {
+                Divider(Modifier.padding(vertical = 8.dp))
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        text = "Stock",
+                        style = InvenceTheme.typography.titleMedium
+                    )
+                    Icon(
+                        modifier =
+                            Modifier
+                                .clickable { viewModel.onEvent(ProductDetailUiEvent.ItemExpanded) },
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "expand items content icon"
+                    )
+                }
+                Divider(
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                AnimatedVisibility(visible = uiState.itemExpanded) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Icon(
-                            Icons.Default.CopyAll,
-                            contentDescription = "copy description icon"
-                        )
+                        product.items.forEach { item ->
+                            ProductItemCard(
+                                itemId = item.itemId,
+                                buyPrice = item.buyPrice.toString(),
+                                quantity = item.quantity.toString(),
+                                readOnly = true
+                            )
+                        }
                     }
+                }
+            }
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                text = "Description",
+                style = InvenceTheme.typography.titleMedium
+            )
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = product.description,
+                style = InvenceTheme.typography.bodyMedium
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Absolute.Right
+            ) {
+                IconButton(
+                    onClick = { viewModel.onEvent(ProductDetailUiEvent.CopyDescription) }
+                ) {
+                    Icon(
+                        Icons.Default.CopyAll,
+                        contentDescription = "copy description icon"
+                    )
                 }
             }
         }

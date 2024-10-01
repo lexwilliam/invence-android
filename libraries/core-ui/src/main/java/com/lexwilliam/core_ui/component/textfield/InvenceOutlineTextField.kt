@@ -21,7 +21,7 @@ fun InvenceOutlineTextField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    textStyle: TextStyle = InvenceTheme.typography.bodyLarge,
+    textStyle: TextStyle = InvenceTheme.typography.bodyMedium,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,

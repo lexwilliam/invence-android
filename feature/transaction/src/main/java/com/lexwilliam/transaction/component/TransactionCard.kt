@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lexwilliam.core.extensions.toCurrency
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -57,12 +58,19 @@ fun TransactionCard(
             )
             transaction.orderGroup.orders.forEach { order ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = order.item.name, style = InvenceTheme.typography.bodySmall)
                     Text(
+                        modifier = Modifier.weight(3f),
+                        text = order.item.name,
+                        style = InvenceTheme.typography.bodySmall
+                    )
+                    Text(
+                        modifier =
+                            Modifier
+                                .weight(1f),
                         text = "${order.quantity} pcs",
+                        textAlign = TextAlign.End,
                         style = InvenceTheme.typography.bodySmall
                     )
                 }

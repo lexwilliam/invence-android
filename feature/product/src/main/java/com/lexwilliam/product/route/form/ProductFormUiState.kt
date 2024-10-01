@@ -1,18 +1,29 @@
 package com.lexwilliam.product.route.form
 
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.model.UiPriceAndQuantity
 
 data class ProductFormUiState(
-    val uuid: String? = null,
+    val sku: String = "",
+    val upc: String? = null,
     val title: String = "",
     val sellPrice: String = "",
     val buyPriceList: Map<Int, UiPriceAndQuantity> = mapOf(),
     val selectedCategory: ProductCategory? = null,
     val description: String = "",
-    val image: UploadImageFormat? = null,
+    val image: Any? = null,
     val takePhoto: Boolean = false,
     val isLoading: Boolean = false,
-    val isScanBarcodeShowing: Boolean = false
-)
+    val isScanBarcodeShowing: Boolean = false,
+    val isSelectCategoryShowing: Boolean = false
+) {
+    val isValid =
+        sku.isNotBlank() &&
+            upc?.isNotBlank() == true &&
+            title.isNotBlank() &&
+            sellPrice.isNotBlank() &&
+            selectedCategory != null &&
+            buyPriceList.isNotEmpty() &&
+            image != null &&
+            !isLoading
+}

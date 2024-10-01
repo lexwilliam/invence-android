@@ -1,8 +1,18 @@
 package com.lexwilliam.user.util
 
-sealed interface LoginFailure
+sealed interface LoginFailure {
+    data object TaskFailed : LoginFailure
+
+    data object UserNotFound : LoginFailure
+}
 
 sealed interface LogoutFailure
+
+sealed interface SignUpFailure {
+    data object CreateUserTaskFail : SignUpFailure
+
+    data object UpsertUserToFirestoreFail : SignUpFailure
+}
 
 sealed interface FetchUserFailure {
     data object UserIsNull : FetchUserFailure
@@ -16,4 +26,9 @@ sealed interface UpsertShiftFailure
 
 data class UnknownFailure(
     val message: String? = null
-) : LoginFailure, LogoutFailure, UpsertUserFailure, FetchUserFailure, UpsertShiftFailure
+) : LoginFailure,
+    LogoutFailure,
+    UpsertUserFailure,
+    FetchUserFailure,
+    UpsertShiftFailure,
+    SignUpFailure

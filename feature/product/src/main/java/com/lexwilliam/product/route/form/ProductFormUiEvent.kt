@@ -1,22 +1,24 @@
 package com.lexwilliam.product.route.form
 
 import android.graphics.Bitmap
-import android.net.Uri
+import com.lexwilliam.product.model.ProductCategory
 
 sealed interface ProductFormUiEvent {
     data object BackStackClicked : ProductFormUiEvent
 
-    data class InputImageChanged(val uri: Uri?) : ProductFormUiEvent
+    data class InputImageChanged(val bmp: Bitmap?) : ProductFormUiEvent
 
     data object CameraClicked : ProductFormUiEvent
-
-    data class ProductPhotoTaken(val bitmap: Bitmap) : ProductFormUiEvent
 
     data object AddProductItem : ProductFormUiEvent
 
     data class RemoveProductItem(val itemId: Int) : ProductFormUiEvent
 
     data object ScanBarcodeClicked : ProductFormUiEvent
+
+    data class SkuChanged(val value: String) : ProductFormUiEvent
+
+    data class UpcChanged(val value: String) : ProductFormUiEvent
 
     data class TitleValueChanged(val value: String) : ProductFormUiEvent
 
@@ -28,7 +30,15 @@ sealed interface ProductFormUiEvent {
 
     data object SelectCategoryClicked : ProductFormUiEvent
 
+    data class AddCategory(val name: String, val bitmap: Bitmap?) : ProductFormUiEvent
+
+    data class CategorySelected(val category: ProductCategory) : ProductFormUiEvent
+
+    data object CategoryDismiss : ProductFormUiEvent
+
     data class DescriptionValueChanged(val value: String) : ProductFormUiEvent
 
     data object SaveClicked : ProductFormUiEvent
+
+    data object GenerateSkuClicked : ProductFormUiEvent
 }

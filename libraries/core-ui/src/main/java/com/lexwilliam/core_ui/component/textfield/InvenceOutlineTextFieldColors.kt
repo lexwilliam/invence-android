@@ -10,7 +10,7 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 @Composable
 fun OutlinedTextFieldDefaults.invenceTextFieldColors(
     textColor: Color = InvenceTheme.colors.neutral100,
-    unfocusedTextColor: Color = InvenceTheme.colors.neutral80,
+    unfocusedTextColor: Color = InvenceTheme.colors.neutral70,
     disabledTextColor: Color = InvenceTheme.colors.neutral60,
     cursorColor: Color = InvenceTheme.colors.primary,
     errorCursorColor: Color = InvenceTheme.colors.error,
@@ -27,14 +27,14 @@ fun OutlinedTextFieldDefaults.invenceTextFieldColors(
     unfocusedLabelColor: Color = InvenceTheme.colors.neutral60,
     disabledLabelColor: Color = InvenceTheme.colors.neutral60,
     errorLabelColor: Color = InvenceTheme.colors.neutral100,
-    placeholderColor: Color = InvenceTheme.colors.primary,
+    placeholderColor: Color = InvenceTheme.colors.neutral70,
     disabledPlaceholderColor: Color = InvenceTheme.colors.neutral60,
     focusedSupportingTextColor: Color = InvenceTheme.colors.neutral60,
     unfocusedSupportingTextColor: Color = InvenceTheme.colors.neutral60,
     disabledSupportingTextColor: Color = InvenceTheme.colors.neutral60,
     errorSupportingTextColor: Color = InvenceTheme.colors.neutral60,
     focusedBorderColor: Color = InvenceTheme.colors.primary,
-    unfocusedBorderColor: Color = InvenceTheme.colors.primary,
+    unfocusedBorderColor: Color = InvenceTheme.colors.neutral70,
     disabledBorderColor: Color = InvenceTheme.colors.neutral30,
     errorBorderColor: Color = InvenceTheme.colors.error,
     selectionColors: TextSelectionColors =
@@ -74,6 +74,8 @@ fun OutlinedTextFieldDefaults.invenceTextFieldColors(
         unfocusedPlaceholderColor = placeholderColor,
         errorPlaceholderColor = placeholderColor,
         focusedPlaceholderColor = placeholderColor,
-        focusedContainerColor = containerColor
+        focusedContainerColor = containerColor,
+        unfocusedContainerColor = containerColor,
+        errorContainerColor = containerColor
     )
 }

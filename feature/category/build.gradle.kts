@@ -58,6 +58,8 @@ ktlint {
 
 dependencies {
     implementation(project(":data:product"))
+    implementation(project(":data:user"))
+    implementation(project(":data:branch"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
 

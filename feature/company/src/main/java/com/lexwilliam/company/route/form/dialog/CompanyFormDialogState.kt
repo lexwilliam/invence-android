@@ -1,8 +1,8 @@
 package com.lexwilliam.company.route.form.dialog
 
-import com.lexwilliam.core.model.UploadImageFormat
+import android.graphics.Bitmap
 
 data class CompanyFormDialogState(
-    val imageUrl: UploadImageFormat? = null,
+    val bitmap: Bitmap? = null,
     val name: String = ""
 )

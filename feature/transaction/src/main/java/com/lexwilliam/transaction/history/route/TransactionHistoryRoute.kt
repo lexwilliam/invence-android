@@ -20,10 +20,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.transaction.component.LogCard
 import com.lexwilliam.transaction.component.TransactionCard
 import com.lexwilliam.transaction.history.navigation.TransactionHistoryNavigationTarget
-import com.lexwilliam.transaction.model.Inbox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +29,7 @@ fun TransactionHistoryRoute(
     viewModel: TransactionHistoryViewModel = hiltViewModel(),
     onBackStack: () -> Unit
 ) {
-    val inbox by viewModel.inbox.collectAsStateWithLifecycle()
+    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.navigation) { target ->
         when (target) {
@@ -61,26 +59,17 @@ fun TransactionHistoryRoute(
                     .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            inbox.forEach { entry ->
+            transactions.forEach { entry ->
                 item {
                     Text(text = entry.key, style = InvenceTheme.typography.labelLarge)
                 }
                 items(
                     items = entry.value,
                     key = { it.uuid }
-                ) { inbox ->
-                    when (inbox) {
-                        is Inbox.InboxTransaction -> {
-                            TransactionCard(
-                                transaction = inbox.transaction
-                            )
-                        }
-                        is Inbox.InboxLog -> {
-                            LogCard(
-                                log = inbox.log
-                            )
-                        }
-                    }
+                ) { transaction ->
+                    TransactionCard(
+                        transaction = transaction
+                    )
                 }
             }
         }

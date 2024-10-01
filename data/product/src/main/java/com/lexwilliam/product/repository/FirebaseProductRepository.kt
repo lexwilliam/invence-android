@@ -9,7 +9,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.lexwilliam.core.model.UploadImageFormat
 import com.lexwilliam.firebase.FirestoreConfig
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.model.dto.ProductCategoryDto
@@ -88,52 +87,33 @@ internal fun firebaseProductRepository(
     override suspend fun uploadProductCategoryImage(
         branchUUID: UUID,
         categoryUUID: UUID,
-        format: UploadImageFormat
+        bmp: Bitmap
     ): Either<UploadImageFailure, Uri> {
         return Either.catch {
             val imageRef =
                 storage
                     .reference
                     .child("category/$branchUUID/$categoryUUID")
-            when (format) {
-                is UploadImageFormat.WithUri -> {
-                    imageRef.putFile(format.uri)
-                        .addOnSuccessListener {
+            val baos = ByteArrayOutputStream()
+            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+            val fileInBytes = baos.toByteArray()
+            val uploadTask =
+                imageRef.putBytes(fileInBytes)
+                    .addOnSuccessListener {}
+                    .addOnFailureListener {
+                        it.printStackTrace()
+                    }
+            val urlTask =
+                uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
                         }
-                        .addOnFailureListener {
-                            it.printStackTrace()
-                        }
-                    val uploadTask = imageRef.putFile(format.uri)
-                    val urlTask =
-                        uploadTask.continueWithTask { task ->
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
-                            }
-                            imageRef.downloadUrl
-                        }.await()
-                    return urlTask?.right()
-                        ?: UploadImageFailure.UploadFailure("Task Failed").left()
-                }
-                is UploadImageFormat.WithBitmap -> {
-                    val baos = ByteArrayOutputStream()
-                    format.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-                    val data = baos.toByteArray()
-                    val uploadTask = imageRef.putBytes(data)
-                    val urlTask =
-                        uploadTask.continueWithTask { task ->
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
-                            }
-                            imageRef.downloadUrl
-                        }.await()
-                    return urlTask?.right()
-                        ?: UploadImageFailure.UploadFailure("Task Failed").left()
-                }
-            }
+                    }
+                    imageRef.downloadUrl
+                }.await()
+            return urlTask?.right()
+                ?: UploadImageFailure.UploadFailure("Task Failed").left()
         }.mapLeft { t ->
             t.printStackTrace()
             analytics.recordException(t)
@@ -144,52 +124,34 @@ internal fun firebaseProductRepository(
     override suspend fun uploadProductImage(
         branchUUID: UUID,
         productUUID: String,
-        format: UploadImageFormat
+        bmp: Bitmap
     ): Either<UploadImageFailure, Uri> {
         return Either.catch {
             val imageRef =
                 storage
                     .reference
-                    .child("product/$branchUUID/$productUUID.jpg}")
-            when (format) {
-                is UploadImageFormat.WithUri -> {
-                    imageRef.putFile(format.uri)
-                        .addOnSuccessListener {
+                    .child("product/$branchUUID/$productUUID")
+            val baos = ByteArrayOutputStream()
+            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+            val fileInBytes = baos.toByteArray()
+            val uploadTask =
+                imageRef.putBytes(fileInBytes)
+                    .addOnSuccessListener {
+                    }
+                    .addOnFailureListener {
+                        it.printStackTrace()
+                    }
+            val urlTask =
+                uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
                         }
-                        .addOnFailureListener {
-                            it.printStackTrace()
-                        }
-                    val uploadTask = imageRef.putFile(format.uri)
-                    val urlTask =
-                        uploadTask.continueWithTask { task ->
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
-                            }
-                            imageRef.downloadUrl
-                        }.await()
-                    return urlTask?.right()
-                        ?: UploadImageFailure.UploadFailure("Task Failed").left()
-                }
-                is UploadImageFormat.WithBitmap -> {
-                    val baos = ByteArrayOutputStream()
-                    format.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-                    val data = baos.toByteArray()
-                    val uploadTask = imageRef.putBytes(data)
-                    val urlTask =
-                        uploadTask.continueWithTask { task ->
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
-                            }
-                            imageRef.downloadUrl
-                        }.await()
-                    return urlTask?.right()
-                        ?: UploadImageFailure.UploadFailure("Task Failed").left()
-                }
-            }
+                    }
+                    imageRef.downloadUrl
+                }.await()
+            return urlTask?.right()
+                ?: UploadImageFailure.UploadFailure("Task Failed").left()
         }.mapLeft { t ->
             t.printStackTrace()
             analytics.recordException(t)

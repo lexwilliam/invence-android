@@ -1,15 +1,23 @@
 package com.lexwilliam.inventory.route
 
 import androidx.camera.core.ExperimentalGetImage
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,12 +28,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvenceFloatingActionButton
+import com.lexwilliam.core_ui.component.chip.InvenceFilterChip
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -40,18 +50,23 @@ import com.lexwilliam.inventory.scan.InventoryScanDialog
 @Composable
 fun InventoryRoute(
     viewModel: InventoryViewModel = hiltViewModel(),
+    onBackStack: () -> Unit,
     toProductForm: (String?) -> Unit,
-    toProductDetail: (String) -> Unit
+    toProductDetail: (String) -> Unit,
+    toCategory: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     val uiProducts by viewModel.uiProducts.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
 
     ObserveAsEvents(viewModel.navigation) { target ->
         when (target) {
+            InventoryNavigationTarget.BackStack -> onBackStack()
             is InventoryNavigationTarget.ProductForm -> toProductForm(target.productUUID)
             is InventoryNavigationTarget.ProductDetail -> toProductDetail(target.productUUID)
+            InventoryNavigationTarget.Category -> toCategory()
         }
     }
 
@@ -62,7 +77,15 @@ fun InventoryRoute(
     Scaffold(
         topBar = {
             InvenceTopBar(
-                title = { Text("Inventory", style = InvenceTheme.typography.titleMedium) }
+                title = { Text("Inventory", style = InvenceTheme.typography.titleMedium) },
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.onEvent(InventoryUiEvent.BackStackClicked) }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "back button"
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -89,7 +112,7 @@ fun InventoryRoute(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -131,14 +154,80 @@ fun InventoryRoute(
                     )
                 }
             }
-            items(items = uiProducts) { product ->
-                InventoryColumnCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    product = product.product,
-                    onClick = {
-                        viewModel.onEvent(InventoryUiEvent.ProductClicked(product.product))
+            item {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.width(0.dp))
+                        InvenceFilterChip(
+                            selected = uiState.query.categoryUUID == null,
+                            onClick = { viewModel.onEvent(InventoryUiEvent.CategoryClicked(null)) },
+                            label = { Text("All", style = InvenceTheme.typography.labelLarge) }
+                        )
+                        categories.forEach { category ->
+                            InvenceFilterChip(
+                                selected = uiState.query.categoryUUID == category.uuid,
+                                onClick = {
+                                    viewModel.onEvent(
+                                        InventoryUiEvent.CategoryClicked(category)
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        category.name,
+                                        style = InvenceTheme.typography.labelLarge
+                                    )
+                                }
+                            )
+                        }
                     }
-                )
+                    Icon(
+                        modifier =
+                            Modifier
+                                .padding(horizontal = 16.dp)
+                                .clickable {
+                                    viewModel.onEvent(
+                                        InventoryUiEvent.CategorySettingClicked
+                                    )
+                                },
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "category settings icon"
+                    )
+                }
+            }
+            if (uiProducts.isNotEmpty()) {
+                items(items = uiProducts) { product ->
+                    InventoryColumnCard(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        product = product.product,
+                        onClick = {
+                            viewModel.onEvent(InventoryUiEvent.ProductClicked(product.product))
+                        }
+                    )
+                }
+            } else {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No product found",
+                            style = InvenceTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
             item {
                 Spacer(modifier = Modifier.size(24.dp))
