@@ -16,9 +16,7 @@ gms-version = "4.4.0"
 
 # Compose versions
 compose-bom = "2023.05.01"
-compose-material3-version = "1.1.2"
-compose-constraint-version = "1.0.1"
-compose-lifecycle-version = "2.7.0"
+
 
 # Realm
 realm-gradle-plugin = "10.15.1"
@@ -86,6 +84,9 @@ ui-tooling = "1.5.4"
 guava-version = "27.0.1-android"
 
 calendar-version = "2.5.0"
+
+# Chart
+y-chart-version = "2.1.0"
 
 [libraries]
 # Android
@@ -184,6 +185,9 @@ mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version
 
 # Accompanist
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-version"}
+
+# Y-Chart
+y-chart = { module = "co.yml:ycharts", version.ref = "y-chart-version"}
 
 # Tests
 test-core = { module = "androidx.test:core", version.ref = "test-core-version"}

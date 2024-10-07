@@ -35,11 +35,10 @@ import com.lexwilliam.core_ui.component.chip.InvenceMenuChip
 import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.home.component.ShiftCalendar
+import com.lexwilliam.home.component.ProfitGraphCard
 import com.lexwilliam.home.model.homeIcons
 import com.lexwilliam.home.navigation.HomeNavigationTarget
 import com.lexwilliam.transaction.component.TransactionCard
-import com.lexwilliam.user.model.EmployeeShift
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,12 +106,11 @@ fun HomeRoute(
             contentPadding = PaddingValues(bottom = 36.dp)
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                ShiftCalendar(
+                ProfitGraphCard(
                     state = uiState,
                     onPrevious = { viewModel.previousDateClicked() },
                     onNext = { viewModel.nextDateClicked() },
-                    shift = shift ?: EmployeeShift(),
-                    onCheckIn = { viewModel.checkInClicked() }
+                    onClick = { viewModel.checkInClicked() }
                 )
             }
             items(items = homeIcons) { model ->

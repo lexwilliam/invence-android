@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":libraries:core-ui"))
     implementation(libs.calendar)
     implementation(libs.calendar.compose)
+    implementation(libs.y.chart)
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)

@@ -19,7 +19,6 @@ data class ProductItemDto(
     @JvmField @PropertyName("deleted_at")
     val deletedAt: Timestamp? = null
 ) {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toDomain() =
         ProductItem(
             itemId = itemId ?: 0,
