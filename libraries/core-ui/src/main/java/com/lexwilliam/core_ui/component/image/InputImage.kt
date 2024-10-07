@@ -56,7 +56,10 @@ fun InputImage(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
             onResult = { uri ->
-                uri?.let { ImageManager(context).uriToBitmap(it) }
+                val bmp = uri?.let { ImageManager(context).uriToBitmap(it) }
+                onImageChanged(bmp)
+                cameraOpen = false
+                isDialogShowing = false
             }
         )
 

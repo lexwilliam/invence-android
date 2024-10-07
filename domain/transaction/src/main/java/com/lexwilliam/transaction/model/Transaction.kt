@@ -8,13 +8,10 @@ data class Transaction(
     val uuid: UUID,
     val branchUUID: UUID,
     val orderGroup: OrderGroup,
-    val payments: List<Payment>,
-    val refunds: List<Refund>,
     val customer: String,
-    val tip: Double,
+    val total: Double,
+    val profit: Double,
     val createdBy: String,
     val createdAt: Instant,
     val deletedAt: Instant? = null
-) {
-    val total = orderGroup.totalPrice
-}
+)

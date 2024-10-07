@@ -17,10 +17,12 @@ import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
 import com.lexwilliam.order.usecase.ObserveSingleOrderGroupUseCase
 import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.order.util.UpsertGroupFailure
+import com.lexwilliam.product.model.Product
+import com.lexwilliam.product.model.ProductCategory
+import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
 import com.lexwilliam.transaction.model.Transaction
-import com.lexwilliam.transaction.model.TransactionFee
 import com.lexwilliam.transaction.usecase.UpsertTransactionUseCase
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
@@ -95,9 +97,6 @@ class CheckOutViewModel
         private val _dialogState = MutableStateFlow<OrderAddOnDialogState?>(null)
         val dialogState = _dialogState.asStateFlow()
 
-        private val _transactionFee = MutableStateFlow<TransactionFee?>(null)
-        val transactionFee = _transactionFee.asStateFlow()
-
         private val orderGroup =
             orderUUID.flatMapLatest { uuid ->
                 when (uuid) {
@@ -154,16 +153,19 @@ class CheckOutViewModel
                 val categories = categories.firstOrNull() ?: return@launch
                 val orders = _orders.value
                 val transactionUUID = UUID.randomUUID()
+                val soldItemsWithProfit =
+                    decreaseProductItemQuantity(
+                        orders = orders,
+                        categories = categories
+                    )
                 val transaction =
                     Transaction(
                         uuid = transactionUUID,
                         branchUUID = branchUUID,
                         orderGroup = orderGroup.copy(orders = orders),
-                        payments = listOf(),
-                        refunds = listOf(),
                         customer = "",
-                        // TODO: Implement Tip Later
-                        tip = 0.0,
+                        total = orderGroup.totalPrice,
+                        profit = soldItemsWithProfit.second,
                         createdBy = user.name,
                         createdAt = Clock.System.now()
                     )
@@ -187,6 +189,55 @@ class CheckOutViewModel
                     }
                 }
             }
+        }
+
+        private suspend fun decreaseProductItemQuantity(
+            orders: List<Order>,
+            categories: List<ProductCategory>
+        ): Pair<List<Product>, Double> {
+            val orderItemUUIDWithQuantityList = orders.associate { it.item.uuid to it.quantity }
+            val soldProduct = mutableListOf<Product>()
+            var totalProfit = 0.0
+            categories.forEach { category ->
+                val modifiedProducts =
+                    category.products.map { product ->
+                        if (orderItemUUIDWithQuantityList.contains(product.sku)) {
+                            var count = orderItemUUIDWithQuantityList[product.sku] ?: 0
+                            val soldItems = mutableListOf<ProductItem>()
+                            val modifiedItems =
+                                product.items.mapNotNull { item ->
+                                    if (count == 0) return@mapNotNull null
+                                    val quantity = item.quantity - count
+                                    when {
+                                        quantity > 0 -> {
+                                            totalProfit += product.getProfit(item, count)
+                                            soldItems.add(item.copy(quantity = count))
+                                            count = 0
+                                            item.copy(quantity = quantity)
+                                        }
+                                        else -> {
+                                            if (count > 0) {
+                                                totalProfit += product.getProfit(item, count)
+                                                soldItems.add(item)
+                                            }
+                                            count -= item.quantity
+                                            null
+                                        }
+                                    }
+                                }
+                            soldProduct.add(product.copy(items = soldItems))
+                            product.copy(items = modifiedItems)
+                        } else {
+                            product
+                        }
+                    }
+                val modifiedCategory = category.copy(products = modifiedProducts)
+                upsertProductCategory(modifiedCategory).isLeft { failure ->
+                    Log.d("TAG", failure.toString())
+                    true
+                }
+            }
+            return soldProduct to totalProfit
         }
 
         private fun handleSaveForLaterClicked() {

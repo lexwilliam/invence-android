@@ -32,7 +32,6 @@ import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.transaction.detail.navigation.TransactionDetailNavigationTarget
-import com.lexwilliam.transaction.model.Payment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,10 +78,6 @@ fun TransactionDetailRoute(
                         price = order.item.price,
                         quantity = order.quantity
                     )
-                }
-                Text(text = "Payment", style = InvenceTheme.typography.titleMedium)
-                transaction?.payments?.forEach { payment ->
-                    TransactionPaymentCard(payment = payment)
                 }
                 transaction?.createdBy?.let {
                     Text(text = "Created By: $it", style = InvenceTheme.typography.bodyMedium)
@@ -148,22 +143,5 @@ fun TransactionOrderCard(
         ) {
             Text(text = "$quantity pcs", style = InvenceTheme.typography.bodyMedium)
         }
-    }
-}
-
-@Composable
-fun TransactionPaymentCard(
-    modifier: Modifier = Modifier,
-    payment: Payment
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = payment.paymentMethod.group, style = InvenceTheme.typography.bodyLarge)
-        Text(
-            text = payment.total.toCurrency(),
-            style = InvenceTheme.typography.bodyLarge
-        )
     }
 }

@@ -4,6 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
+    kotlin("plugin.serialization")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
@@ -57,6 +58,11 @@ dependencies {
 
     implementation(libs.hilt.library)
     kapt(libs.hilt.kapt)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)

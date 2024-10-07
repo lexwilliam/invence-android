@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -82,10 +81,10 @@ fun HomeRoute(
                     if (user?.imageUrl != null) {
                         NetworkImage(
                             modifier =
-                            Modifier
-                                .padding(end = 16.dp)
-                                .clip(CircleShape)
-                                .clickable { viewModel.onProfileClicked() }
+                                Modifier
+                                    .padding(end = 16.dp)
+                                    .clip(CircleShape)
+                                    .clickable { viewModel.onProfileClicked() }
                         )
                     } else {
                         IconButton(onClick = { viewModel.onProfileClicked() }) {
@@ -98,10 +97,10 @@ fun HomeRoute(
     ) { innerPadding ->
         LazyVerticalGrid(
             modifier =
-            Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-                .background(InvenceTheme.colors.neutral10),
+                Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+                    .background(InvenceTheme.colors.neutral10),
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -163,9 +162,9 @@ fun HomeRoute(
                     TextButton(onClick = { viewModel.seeAllClicked() }) {
                         Text(
                             modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
                             text = "See All",
                             textAlign = TextAlign.Center,
                             style = InvenceTheme.typography.titleMedium,
