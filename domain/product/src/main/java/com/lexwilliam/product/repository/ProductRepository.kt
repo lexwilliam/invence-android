@@ -3,6 +3,7 @@ package com.lexwilliam.product.repository
 import android.graphics.Bitmap
 import android.net.Uri
 import arrow.core.Either
+import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.util.DeleteProductFailure
 import com.lexwilliam.product.util.UploadImageFailure
@@ -17,9 +18,19 @@ interface ProductRepository {
         category: ProductCategory
     ): Either<UpsertProductFailure, ProductCategory>
 
+    suspend fun upsertProduct(
+        category: ProductCategory,
+        product: Product
+    ): Either<UpsertProductFailure, Product>
+
     suspend fun deleteProductCategory(
         category: ProductCategory
     ): Either<DeleteProductFailure, ProductCategory>
+
+    suspend fun deleteProduct(
+        category: ProductCategory,
+        product: Product
+    ): Either<DeleteProductFailure, Product>
 
     suspend fun uploadProductCategoryImage(
         branchUUID: UUID,

@@ -2,6 +2,7 @@ package com.lexwilliam.product.di
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import com.lexwilliam.product.repository.ProductRepository
 import com.lexwilliam.product.repository.TempProductRepository
@@ -11,6 +12,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -21,12 +23,16 @@ object ProductModule {
     fun providesProductRepository(
         analytics: FirebaseCrashlytics,
         store: FirebaseFirestore,
-        storage: FirebaseStorage
+        storage: FirebaseStorage,
+        functions: FirebaseFunctions,
+        json: Json
     ): ProductRepository =
         firebaseProductRepository(
             analytics,
             store,
-            storage
+            storage,
+            functions,
+            json
         )
 
     @Singleton

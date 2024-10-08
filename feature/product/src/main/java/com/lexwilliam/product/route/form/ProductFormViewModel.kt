@@ -15,7 +15,6 @@ import com.example.barcode.model.BarCodeResult
 import com.example.barcode.model.ScanningResult
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.inventory.scan.ProductScanEvent
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
@@ -27,6 +26,7 @@ import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UploadCategoryImageUseCase
 import com.lexwilliam.product.usecase.UploadProductImageUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
+import com.lexwilliam.product.usecase.UpsertProductUseCase
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,6 +58,7 @@ class ProductFormViewModel
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
+        private val upsertProduct: UpsertProductUseCase,
         private val uploadProductImage: UploadProductImageUseCase,
         private val uploadProductCategoryImage: UploadCategoryImageUseCase,
         private val barcodeImageAnalyzer: BarcodeImageAnalyzer,
@@ -413,16 +414,11 @@ class ProductFormViewModel
                 if (image is Uri) {
                     product = product.copy(imagePath = image)
                 }
-                val modifiedCategory =
-                    category
-                        .copy(
-                            products =
-                                category.products
-                                    .addOrUpdateDuplicate(product) { e, n ->
-                                        e.sku == n.sku
-                                    }
-                        )
-                upsertProductCategory(modifiedCategory).fold(
+
+                upsertProduct(
+                    category,
+                    product
+                ).fold(
                     ifLeft = { failure ->
                         Log.d("TAG", failure.toString())
                         _state.update { old -> old.copy(isLoading = false) }

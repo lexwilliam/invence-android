@@ -3,26 +3,33 @@ package com.lexwilliam.product.model.dto
 import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.google.firebase.firestore.ServerTimestamp
 import com.lexwilliam.firebase.toKtxInstant
 import com.lexwilliam.firebase.toTimestamp
 import com.lexwilliam.product.model.ProductCategory
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
+@Serializable
 data class ProductCategoryDto(
     val uuid: String? = null,
-    @JvmField @PropertyName("branch_uuid")
+    @JvmField @PropertyName("branch_uuid") @SerialName("branch_uuid")
     val branchUUID: String? = null,
     val name: String? = null,
-    @JvmField @PropertyName("image_url")
+    @JvmField @PropertyName("image_url") @SerialName("image_url")
     val imageUrl: String? = null,
     val products: Map<String, ProductDto>? = null,
-    @ServerTimestamp
     @JvmField
     @PropertyName("created_at")
+    @SerialName("created_at")
+    @Contextual
     val createdAt: Timestamp? = null,
-    @JvmField @PropertyName("deleted_at")
+    @JvmField
+    @PropertyName("deleted_at")
+    @SerialName("deleted_at")
+    @Contextual
     val deletedAt: Timestamp? = null
 ) {
     fun toDomain() =

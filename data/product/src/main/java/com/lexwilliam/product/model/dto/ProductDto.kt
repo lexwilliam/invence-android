@@ -7,22 +7,32 @@ import com.lexwilliam.firebase.toKtxInstant
 import com.lexwilliam.firebase.toTimestamp
 import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ProductDto(
     val sku: String? = null,
     val upc: String? = null,
     val name: String? = null,
     val description: String? = null,
-    @JvmField @PropertyName("category_name")
+    @JvmField @PropertyName("category_name") @SerialName("category_name")
     val categoryName: String? = null,
-    @JvmField @PropertyName("sell_price")
+    @JvmField @PropertyName("sell_price") @SerialName("sell_price")
     val sellPrice: Double? = null,
     val items: List<ProductItemDto>? = null,
-    @JvmField @PropertyName("image_path")
+    @JvmField @PropertyName("image_path") @SerialName("image_path")
     val imagePath: String? = null,
-    @JvmField @PropertyName("created_at")
+    @JvmField
+    @PropertyName("created_at")
+    @SerialName("created_at")
+    @Contextual
     val createdAt: Timestamp? = null,
-    @JvmField @PropertyName("updated_at")
+    @JvmField
+    @PropertyName("updated_at")
+    @SerialName("updated_at")
+    @Contextual
     val updatedAt: Timestamp? = null
 ) {
     fun toDomain() =

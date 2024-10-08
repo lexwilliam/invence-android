@@ -57,6 +57,7 @@ dependencies {
     kapt(libs.hilt.kapt)
 
     api(libs.kotlinx.datetime)
+    api(libs.kotlinx.serialization.json)
 
     api(platform(libs.arrow.bom))
     api(libs.bundles.arrow.dependencies)

@@ -87,6 +87,7 @@ calendar-version = "2.5.0"
 
 # Chart
 y-chart-version = "2.1.0"
+firebase-dataconnect-version = "16.0.0-beta01"
 
 [libraries]
 # Android
@@ -137,6 +138,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 firebase-storage = { module = "com.google.firebase:firebase-storage-ktx"}
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle-version"}
+firebase-functions = { module = "com.google.firebase:firebase-functions-ktx" }
 
 # Calendar
 calendar = { module = "com.kizitonwose.calendar:view", version.ref = "calendar-version" }
@@ -200,6 +202,7 @@ test-junit-compose = { module = "androidx.compose.ui:ui-test-junit4", version.re
 test-manifest-compose = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "test-compose-version"}
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+firebase-dataconnect = { group = "com.google.firebase", name = "firebase-dataconnect", version.ref = "firebase-dataconnect-version" }
 
 [bundles]
 android-ui-dependencies = ["android-core", "android-core-splashscreen", "android-activity-compose", "android-appcompat"]
@@ -222,6 +225,7 @@ firebase-dependencies = [
     "firebase-crashlytics",
     "firebase-firestore",
     "firebase-storage",
+    "firebase-functions"
 ]
 compose-test-dependencies = ["test-manifest-compose", "compose-tooling"]
 navigation-dependencies = ["hilt-nav", "android-navigation-ui", "android-navigation-fragment"]

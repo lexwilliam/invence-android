@@ -7,12 +7,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
 import javax.inject.Singleton
 
 @Module
@@ -45,5 +50,22 @@ object FirebaseModule {
     @Provides
     fun provideFirebaseStorage(): FirebaseStorage {
         return FirebaseStorage.getInstance()
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseFunction(): FirebaseFunctions {
+        return Firebase.functions("asia-southeast2")
+    }
+
+    @Singleton
+    @Provides
+    fun provideJson(): Json {
+        return Json {
+            serializersModule =
+                SerializersModule {
+                    contextual(TimestampSerializer)
+                }
+        }
     }
 }
