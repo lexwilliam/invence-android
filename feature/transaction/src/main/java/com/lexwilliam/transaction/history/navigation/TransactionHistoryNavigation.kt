@@ -7,12 +7,12 @@ import androidx.navigation.compose.composable
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.transaction.history.route.TransactionHistoryRoute
 
-fun NavGraphBuilder.transactionHistoryNavigation(onBackStack: () -> Unit) {
+fun NavGraphBuilder.transactionHistoryNavigation(onDrawerNavigation: (String) -> Unit) {
     composable(
         route = Screen.TRANSACTION_HISTORY
     ) {
         TransactionHistoryRoute(
-            onBackStack = onBackStack
+            onDrawerNavigation = onDrawerNavigation
         )
     }
 }

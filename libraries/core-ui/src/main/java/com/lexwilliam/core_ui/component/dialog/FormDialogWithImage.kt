@@ -1,6 +1,5 @@
 package com.lexwilliam.core_ui.component.dialog
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +19,7 @@ fun FormDialogWithImage(
     onDismiss: () -> Unit,
     image: Any?,
     inputImageLabel: String = "Upload Image",
-    onImageChanged: (Bitmap?) -> Unit,
+    onImageChanged: (Any?) -> Unit,
     title: String,
     label: String,
     placeHolder: String,

@@ -13,7 +13,6 @@ object Screen {
     const val COMPANY_SEARCH = "company_search"
     const val COMPANY_FORM = "company_form"
     const val BARCODE = "barcode"
-    const val HOME = "home"
     const val ORDER = "order"
     const val CART = "cart"
     const val CHECK_OUT = "check_out"
@@ -24,4 +23,5 @@ object Screen {
     const val DISCOUNT = "discount"
     const val TAX = "tax"
     const val FEE = "fee"
+    const val ANALYTICS = "analytics"
 }

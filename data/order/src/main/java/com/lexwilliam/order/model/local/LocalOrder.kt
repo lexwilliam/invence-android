@@ -3,7 +3,6 @@ package com.lexwilliam.order.model.local
 import com.lexwilliam.db.toInstant
 import com.lexwilliam.db.toRealmInstant
 import com.lexwilliam.order.model.Order
-import com.lexwilliam.order.model.OrderItem
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmInstant
@@ -27,7 +26,7 @@ internal open class LocalOrder : RealmObject {
     fun toDomain(): Order =
         Order(
             uuid = UUID.fromString(uuid.toString()),
-            item = item?.toDomain() ?: OrderItem(),
+            item = item?.toDomain(),
             discounts = discounts.map { it.toDomain() },
             quantity = quantity ?: 0,
             refundedQuantity = refundedQuantity ?: 0,
@@ -41,7 +40,7 @@ internal open class LocalOrder : RealmObject {
         fun fromDomain(domain: Order): LocalOrder =
             LocalOrder().apply {
                 uuid = RealmUUID.from(domain.uuid.toString())
-                item = LocalOrderItem.fromDomain(domain.item)
+                item = domain.item?.let { LocalOrderItem.fromDomain(it) }
                 discounts = domain.discounts.map { LocalOrderDiscount.fromDomain(it) }.toRealmList()
                 quantity = domain.quantity
                 refundedQuantity = domain.refundedQuantity

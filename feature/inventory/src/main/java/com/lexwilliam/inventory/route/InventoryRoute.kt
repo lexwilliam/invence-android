@@ -16,15 +16,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,16 +36,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvenceFloatingActionButton
 import com.lexwilliam.core_ui.component.chip.InvenceFilterChip
+import com.lexwilliam.core_ui.component.drawer.InvenceNavigationDrawer
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.inventory.component.InventoryColumnCard
 import com.lexwilliam.inventory.navigation.InventoryNavigationTarget
 import com.lexwilliam.inventory.scan.InventoryScanDialog
+import kotlinx.coroutines.launch
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
 @OptIn(
@@ -50,20 +57,20 @@ import com.lexwilliam.inventory.scan.InventoryScanDialog
 @Composable
 fun InventoryRoute(
     viewModel: InventoryViewModel = hiltViewModel(),
-    onBackStack: () -> Unit,
     toProductForm: (String?) -> Unit,
     toProductDetail: (String) -> Unit,
-    toCategory: () -> Unit
+    toCategory: () -> Unit,
+    onDrawerNavigation: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val uiProducts by viewModel.uiProducts.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
+    val scope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.navigation) { target ->
         when (target) {
-            InventoryNavigationTarget.BackStack -> onBackStack()
             is InventoryNavigationTarget.ProductForm -> toProductForm(target.productUUID)
             is InventoryNavigationTarget.ProductDetail -> toProductDetail(target.productUUID)
             InventoryNavigationTarget.Category -> toCategory()
@@ -73,164 +80,182 @@ fun InventoryRoute(
     if (uiState.isScanBarcodeShowing) {
         InventoryScanDialog(viewModel = viewModel)
     }
-
-    Scaffold(
-        topBar = {
-            InvenceTopBar(
-                title = { Text("Inventory", style = InvenceTheme.typography.titleMedium) },
-                navigationIcon = {
-                    IconButton(onClick = { viewModel.onEvent(InventoryUiEvent.BackStackClicked) }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "back button"
-                        )
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            InvenceFloatingActionButton(
-                onClick = { viewModel.onEvent(InventoryUiEvent.FabClicked) }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.add),
-                    contentDescription = "plus fab icon"
-                )
-            }
-        },
-        containerColor = InvenceTheme.colors.neutral10
-    ) { innerPadding ->
-        LazyColumn(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    InvenceSearchTextField(
-                        modifier =
-                            Modifier
-                                .weight(1f),
-                        value = uiState.query.query,
-                        onValueChange = { viewModel.onEvent(InventoryUiEvent.QueryChanged(it)) },
-                        placeholder = {
-                            Text(
-                                text = "Search",
-                                style = InvenceTheme.typography.bodyLarge
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.search),
-                                contentDescription = "search icon",
-                                tint = InvenceTheme.colors.primary
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    viewModel.onEvent(
-                                        InventoryUiEvent.BarcodeScannerClicked
-                                    )
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.barcode_scanner),
-                                    contentDescription = "barcode scan icon",
-                                    tint = InvenceTheme.colors.primary
-                                )
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    InvenceNavigationDrawer(
+        currentScreen = Screen.INVENTORY,
+        drawerState = drawerState,
+        onNavigationItemClick = onDrawerNavigation
+    ) {
+        Scaffold(
+            topBar = {
+                InvenceTopBar(
+                    title = { Text("Inventory", style = InvenceTheme.typography.titleMedium) },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                drawerState.open()
                             }
-                        },
-                        singleLine = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "back button"
+                            )
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                InvenceFloatingActionButton(
+                    onClick = { viewModel.onEvent(InventoryUiEvent.FabClicked) }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.add),
+                        contentDescription = "plus fab icon"
                     )
                 }
-            }
-            item {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            },
+            containerColor = InvenceTheme.colors.neutral10
+        ) { innerPadding ->
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
                     Row(
                         modifier =
                             Modifier
-                                .weight(1f)
-                                .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Spacer(modifier = Modifier.width(0.dp))
-                        InvenceFilterChip(
-                            selected = uiState.query.categoryUUID == null,
-                            onClick = { viewModel.onEvent(InventoryUiEvent.CategoryClicked(null)) },
-                            label = { Text("All", style = InvenceTheme.typography.labelLarge) }
-                        )
-                        categories.forEach { category ->
-                            InvenceFilterChip(
-                                selected = uiState.query.categoryUUID == category.uuid,
-                                onClick = {
-                                    viewModel.onEvent(
-                                        InventoryUiEvent.CategoryClicked(category)
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        category.name,
-                                        style = InvenceTheme.typography.labelLarge
+                        InvenceSearchTextField(
+                            modifier =
+                                Modifier
+                                    .weight(1f),
+                            value = uiState.query.query,
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    InventoryUiEvent.QueryChanged(it)
+                                )
+                            },
+                            placeholder = {
+                                Text(
+                                    text = "Search",
+                                    style = InvenceTheme.typography.bodyLarge
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.search),
+                                    contentDescription = "search icon",
+                                    tint = InvenceTheme.colors.primary
+                                )
+                            },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        viewModel.onEvent(
+                                            InventoryUiEvent.BarcodeScannerClicked
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.barcode_scanner),
+                                        contentDescription = "barcode scan icon",
+                                        tint = InvenceTheme.colors.primary
                                     )
                                 }
+                            },
+                            singleLine = true
+                        )
+                    }
+                }
+                item {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Spacer(modifier = Modifier.width(0.dp))
+                            InvenceFilterChip(
+                                selected = uiState.query.categoryUUID == null,
+                                onClick = {
+                                    viewModel.onEvent(
+                                        InventoryUiEvent.CategoryClicked(null)
+                                    )
+                                },
+                                label = { Text("All", style = InvenceTheme.typography.labelLarge) }
+                            )
+                            categories.forEach { category ->
+                                InvenceFilterChip(
+                                    selected = uiState.query.categoryUUID == category.uuid,
+                                    onClick = {
+                                        viewModel.onEvent(
+                                            InventoryUiEvent.CategoryClicked(category)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            category.name,
+                                            style = InvenceTheme.typography.labelLarge
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                        Icon(
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .clickable {
+                                        viewModel.onEvent(
+                                            InventoryUiEvent.CategorySettingClicked
+                                        )
+                                    },
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "category settings icon"
+                        )
+                    }
+                }
+                if (uiProducts.isNotEmpty()) {
+                    items(items = uiProducts) { product ->
+                        InventoryColumnCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            product = product.product,
+                            onClick = {
+                                viewModel.onEvent(InventoryUiEvent.ProductClicked(product.product))
+                            }
+                        )
+                    }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No product found",
+                                style = InvenceTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
-                    Icon(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = 16.dp)
-                                .clickable {
-                                    viewModel.onEvent(
-                                        InventoryUiEvent.CategorySettingClicked
-                                    )
-                                },
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "category settings icon"
-                    )
                 }
-            }
-            if (uiProducts.isNotEmpty()) {
-                items(items = uiProducts) { product ->
-                    InventoryColumnCard(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        product = product.product,
-                        onClick = {
-                            viewModel.onEvent(InventoryUiEvent.ProductClicked(product.product))
-                        }
-                    )
-                }
-            } else {
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No product found",
-                            style = InvenceTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Spacer(modifier = Modifier.size(24.dp))
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.size(24.dp))
             }
         }
     }

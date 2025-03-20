@@ -3,11 +3,9 @@ package com.lexwilliam.product.di
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.storage.FirebaseStorage
+import com.lexwilliam.firebase.utils.StorageUploader
 import com.lexwilliam.product.repository.ProductRepository
-import com.lexwilliam.product.repository.TempProductRepository
 import com.lexwilliam.product.repository.firebaseProductRepository
-import com.lexwilliam.product.repository.inMemoryTempProductRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,19 +21,15 @@ object ProductModule {
     fun providesProductRepository(
         analytics: FirebaseCrashlytics,
         store: FirebaseFirestore,
-        storage: FirebaseStorage,
+        storageUploader: StorageUploader,
         functions: FirebaseFunctions,
         json: Json
     ): ProductRepository =
         firebaseProductRepository(
             analytics,
             store,
-            storage,
+            storageUploader,
             functions,
             json
         )
-
-    @Singleton
-    @Provides
-    fun providesTempProductRepository(): TempProductRepository = inMemoryTempProductRepository()
 }

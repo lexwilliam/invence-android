@@ -14,5 +14,5 @@ data class OrderGroup(
     val deletedAt: Instant? = null,
     val completedAt: Instant? = null
 ) {
-    val totalPrice = orders.sumOf { order -> order.quantity * order.item.price }
+    val totalPrice = orders.sumOf { order -> order.quantity * ((order.item?.price) ?: 0.0) }
 }

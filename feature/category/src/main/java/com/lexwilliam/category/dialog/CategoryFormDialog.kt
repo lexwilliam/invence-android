@@ -1,6 +1,5 @@
 package com.lexwilliam.category.dialog
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,10 +24,10 @@ import com.lexwilliam.product.model.ProductCategory
 fun CategoryFormDialog(
     onDismiss: () -> Unit,
     category: ProductCategory?,
-    onConfirm: (String, Bitmap?) -> Unit
+    onConfirm: (String, Any?) -> Unit
 ) {
     var title by remember { mutableStateOf(category?.name ?: "") }
-    var bitmap by remember { mutableStateOf<Any?>(category?.imageUrl) }
+    var image by remember { mutableStateOf<Any?>(category?.imageUrl) }
     AlertDialog(
         containerColor = InvenceTheme.colors.neutral10,
         onDismissRequest = onDismiss,
@@ -47,8 +46,8 @@ fun CategoryFormDialog(
                     imageModifier =
                         Modifier
                             .size(128.dp),
-                    image = bitmap,
-                    onImageChanged = { bitmap = it }
+                    image = image,
+                    onImageChanged = { image = it }
                 )
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -72,7 +71,7 @@ fun CategoryFormDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(title, bitmap as? Bitmap) }) {
+            TextButton(onClick = { onConfirm(title, image) }) {
                 Text(
                     text = "Confirm",
                     style = InvenceTheme.typography.labelLarge,

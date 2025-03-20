@@ -1,5 +1,6 @@
-package com.lexwilliam.firebase
+package com.lexwilliam.firebase.di
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -11,9 +12,12 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.lexwilliam.firebase.utils.StorageUploader
+import com.lexwilliam.firebase.utils.TimestampSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -68,4 +72,12 @@ object FirebaseModule {
                 }
         }
     }
+
+    @Singleton
+    @Provides
+    fun provideStorageUploader(
+        analytics: FirebaseCrashlytics,
+        storage: FirebaseStorage,
+        @ApplicationContext context: Context
+    ) = StorageUploader(analytics, storage, context)
 }

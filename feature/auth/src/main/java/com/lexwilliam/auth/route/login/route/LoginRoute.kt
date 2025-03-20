@@ -8,9 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,10 +20,12 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -41,7 +44,6 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.lexwilliam.auth.route.login.navigation.LoginNavigationTarget
 import com.lexwilliam.auth.util.GoogleAuthUiClient
 import com.lexwilliam.core_ui.component.ObserveAsEvents
-import com.lexwilliam.core_ui.component.button.AppleSignInButton
 import com.lexwilliam.core_ui.component.button.GoogleSignInButton
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.textfield.InvenceOutlineTextField
@@ -197,7 +199,7 @@ fun LoginRoute(
                     style = InvenceTheme.typography.bodyMedium
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column {
                 InvencePrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { viewModel.onEvent(LoginUiEvent.SignInClicked) },
@@ -205,6 +207,7 @@ fun LoginRoute(
                 ) {
                     Text("Sign in", style = InvenceTheme.typography.bodyMedium)
                 }
+                Spacer(Modifier.height(8.dp))
                 GoogleSignInButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -218,34 +221,24 @@ fun LoginRoute(
                         }
                     }
                 )
-                AppleSignInButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { }
-                )
-                Row(
+//                AppleSignInButton(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    onClick = { }
+//                )
+                TextButton(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(
-                            2.dp,
-                            Alignment.CenterHorizontally
+                            .fillMaxWidth(),
+                    onClick = {
+                        viewModel.onEvent(LoginUiEvent.SignUpClicked)
+                    },
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            contentColor = InvenceTheme.colors.primary
                         )
                 ) {
                     Text(
-                        text = "Don't have an account? ",
-                        style = InvenceTheme.typography.bodyMedium
-                    )
-                    Text(
-                        modifier =
-                            Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = { viewModel.onEvent(LoginUiEvent.SignUpClicked) }
-                                ),
-                        text = "Sign up",
+                        text = "Don't have an account? Sign up",
                         style = InvenceTheme.typography.bodyMedium
                     )
                 }

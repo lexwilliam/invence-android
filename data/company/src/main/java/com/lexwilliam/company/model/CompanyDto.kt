@@ -2,8 +2,8 @@ package com.lexwilliam.company.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import kotlinx.datetime.Instant
 
 data class CompanyDto(

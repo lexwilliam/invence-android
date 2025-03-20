@@ -70,8 +70,8 @@ fun ProductFormRoute(
             onCategoryClicked = {
                 viewModel.onEvent(ProductFormUiEvent.CategorySelected(it))
             },
-            onFormConfirm = { name, bitmap ->
-                viewModel.onEvent(ProductFormUiEvent.AddCategory(name, bitmap))
+            onFormConfirm = { name, image ->
+                viewModel.onEvent(ProductFormUiEvent.AddCategory(name, image))
             }
         )
     }
@@ -133,8 +133,8 @@ fun ProductFormRoute(
                         .padding(horizontal = 16.dp)
                         .size(128.dp),
                 image = uiState.image,
-                onImageChanged = { bmp ->
-                    viewModel.onEvent(ProductFormUiEvent.InputImageChanged(bmp))
+                onImageChanged = { image ->
+                    viewModel.onEvent(ProductFormUiEvent.InputImageChanged(image))
                 }
             )
             Row(

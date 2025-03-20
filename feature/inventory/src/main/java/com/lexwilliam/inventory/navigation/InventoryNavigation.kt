@@ -8,17 +8,17 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.inventory.route.InventoryRoute
 
 fun NavGraphBuilder.inventoryNavigation(
-    onBackStack: () -> Unit,
     toProductForm: (String?) -> Unit,
     toProductDetail: (String) -> Unit,
-    toCategory: () -> Unit
+    toCategory: () -> Unit,
+    onDrawerNavigation: (String) -> Unit
 ) {
     composable(route = Screen.INVENTORY) {
         InventoryRoute(
-            onBackStack = onBackStack,
             toProductForm = toProductForm,
             toProductDetail = toProductDetail,
-            toCategory = toCategory
+            toCategory = toCategory,
+            onDrawerNavigation = onDrawerNavigation
         )
     }
 }

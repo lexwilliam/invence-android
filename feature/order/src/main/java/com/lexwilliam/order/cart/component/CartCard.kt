@@ -78,31 +78,33 @@ fun CartCard(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                NetworkImage(
-                                    modifier =
-                                        Modifier
-                                            .size(64.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
-                                    imagePath = order.item.imagePath
-                                )
-                                Column {
-                                    Text(
-                                        text = order.item.name,
-                                        style = InvenceTheme.typography.bodyMedium
+                            if (order.item != null) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    NetworkImage(
+                                        modifier =
+                                            Modifier
+                                                .size(64.dp)
+                                                .clip(RoundedCornerShape(8.dp)),
+                                        imagePath = order.item!!.imagePath
                                     )
-                                    Text(
-                                        text = order.item.price.toCurrency(),
-                                        style = InvenceTheme.typography.labelMedium
-                                    )
+                                    Column {
+                                        Text(
+                                            text = order.item!!.name,
+                                            style = InvenceTheme.typography.bodyMedium
+                                        )
+                                        Text(
+                                            text = order.item!!.price.toCurrency(),
+                                            style = InvenceTheme.typography.labelMedium
+                                        )
+                                    }
                                 }
+                                Text(
+                                    text = "x${order.quantity}",
+                                    style = InvenceTheme.typography.labelLarge
+                                )
                             }
-                            Text(
-                                text = "x${order.quantity}",
-                                style = InvenceTheme.typography.labelLarge
-                            )
                         }
                     }
                     Divider(modifier = Modifier.fillMaxWidth())

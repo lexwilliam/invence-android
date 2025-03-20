@@ -19,11 +19,8 @@ data class ProductFormUiState(
 ) {
     val isValid =
         sku.isNotBlank() &&
-            upc?.isNotBlank() == true &&
             title.isNotBlank() &&
             sellPrice.isNotBlank() &&
             selectedCategory != null &&
-            buyPriceList.isNotEmpty() &&
-            image != null &&
             !isLoading
 }

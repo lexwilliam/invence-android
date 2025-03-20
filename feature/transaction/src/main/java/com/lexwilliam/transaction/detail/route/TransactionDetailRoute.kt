@@ -72,12 +72,14 @@ fun TransactionDetailRoute(
             ) {
                 Text(text = "Order", style = InvenceTheme.typography.titleMedium)
                 transaction?.orderGroup?.orders?.forEach { order ->
-                    TransactionOrderCard(
-                        imagePath = order.item.imagePath,
-                        name = order.item.name,
-                        price = order.item.price,
-                        quantity = order.quantity
-                    )
+                    if (order.item != null) {
+                        TransactionOrderCard(
+                            imagePath = order.item!!.imagePath,
+                            name = order.item!!.name,
+                            price = order.item!!.price,
+                            quantity = order.quantity
+                        )
+                    }
                 }
                 transaction?.createdBy?.let {
                     Text(text = "Created By: $it", style = InvenceTheme.typography.bodyMedium)

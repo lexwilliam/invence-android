@@ -1,6 +1,5 @@
 package com.lexwilliam.category.route
 
-import android.graphics.Bitmap
 import com.lexwilliam.product.model.ProductCategory
 
 sealed interface CategoryUiEvent {
@@ -15,6 +14,6 @@ sealed interface CategoryUiEvent {
     data class ConfirmForm(
         val category: ProductCategory?,
         val name: String,
-        val image: Bitmap?
+        val image: Any?
     ) : CategoryUiEvent
 }

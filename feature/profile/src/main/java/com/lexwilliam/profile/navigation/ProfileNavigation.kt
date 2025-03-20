@@ -8,15 +8,15 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.profile.route.ProfileRoute
 
 fun NavGraphBuilder.profileNavigation(
-    onBackStack: () -> Unit,
-    toLogin: () -> Unit
+    toLogin: () -> Unit,
+    onDrawerNavigation: (String) -> Unit
 ) {
     composable(
         route = Screen.PROFILE
     ) {
         ProfileRoute(
-            onBackStack = onBackStack,
-            toLogin = toLogin
+            toLogin = toLogin,
+            onDrawerNavigation = onDrawerNavigation
         )
     }
 }

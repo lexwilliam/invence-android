@@ -6,6 +6,8 @@ import arrow.core.Either
 import arrow.optics.copy
 import com.lexwilliam.auth.route.signup.navigation.SignUpNavigationTarget
 import com.lexwilliam.user.usecase.SignUpUseCase
+import com.lexwilliam.user.util.SignUpFailure
+import com.lexwilliam.user.util.UnknownFailure
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,12 +90,18 @@ class SignUpViewModel
                         )
                 ) {
                     is Either.Left ->
-                        _state.update {
-                                old ->
-                            old.copy(error = result.value.toString())
+                        _state.update { old ->
+                            old.copy(error = localizeSignUpFailure(result.value))
                         }
                     is Either.Right -> _navigation.send(SignUpNavigationTarget.CompanySearch)
                 }
             }
         }
+
+        private fun localizeSignUpFailure(failure: SignUpFailure): String =
+            when (failure) {
+                SignUpFailure.CreateUserTaskFail -> "Create user task fail"
+                is UnknownFailure -> failure.message ?: "Unknown Failure"
+                SignUpFailure.UpsertUserToFirestoreFail -> "Insert user to database fail"
+            }
     }

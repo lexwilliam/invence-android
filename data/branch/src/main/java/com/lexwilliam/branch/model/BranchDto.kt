@@ -1,10 +1,9 @@
 package com.lexwilliam.branch.model
 
-import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import kotlinx.datetime.Instant
 import java.util.UUID
 
@@ -15,8 +14,6 @@ data class BranchDto(
     val logoUrl: String? = null,
     val address: String? = null,
     val phone: String? = null,
-    @JvmField @PropertyName("payment_methods")
-    val paymentMethods: Map<String, PaymentMethodDto>? = null,
     @JvmField @PropertyName("created_at")
     val createdAt: Timestamp? = null
 ) {
@@ -24,8 +21,7 @@ data class BranchDto(
         Branch(
             uuid = uuid?.let { UUID.fromString(uuid) } ?: UUID.randomUUID(),
             name = name ?: "",
-            logoUrl = logoUrl?.toUri(),
-            branchPaymentMethods = paymentMethods?.values?.map { it.toDomain() } ?: emptyList(),
+            logoUrl = logoUrl ?: "",
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )
 
@@ -35,9 +31,6 @@ data class BranchDto(
                 uuid = domain.uuid.toString(),
                 name = domain.name,
                 logoUrl = domain.logoUrl.toString(),
-                paymentMethods =
-                    domain.branchPaymentMethods
-                        .associate { it.uuid.toString() to PaymentMethodDto.fromDomain(it) },
                 createdAt = domain.createdAt.toTimestamp()
             )
     }

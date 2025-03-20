@@ -6,7 +6,7 @@ import arrow.core.raise.either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
-import com.lexwilliam.firebase.FirestoreConfig
+import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.dto.TransactionDto
 import com.lexwilliam.transaction.util.DeleteTransactionFailure

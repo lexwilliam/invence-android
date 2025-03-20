@@ -4,8 +4,6 @@ import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
 
 sealed interface InventoryUiEvent {
-    data object BackStackClicked : InventoryUiEvent
-
     data class QueryChanged(val value: String) : InventoryUiEvent
 
     data object FabClicked : InventoryUiEvent

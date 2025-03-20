@@ -70,13 +70,6 @@ class CartViewModel
                 CartUiEvent.AddCartClicked -> handleAddCartClicked()
                 is CartUiEvent.RemoveCartClicked -> handleRemoveCartClicked(event.orderGroup)
                 is CartUiEvent.CartClicked -> handleCartClicked(event.orderGroup)
-                CartUiEvent.BackStackClicked -> handleBackStackClicked()
-            }
-        }
-
-        private fun handleBackStackClicked() {
-            viewModelScope.launch {
-                _navigation.send(CartNavigationTarget.BackStack)
             }
         }
 

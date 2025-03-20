@@ -1,9 +1,11 @@
 package com.lexwilliam.user.session
 
+import android.util.Log
 import arrow.core.Either
 import arrow.core.right
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.lexwilliam.firebase.model.AuthClaims
 import com.lexwilliam.user.source.SessionManager
 import com.lexwilliam.user.util.LoginFailure
 import com.lexwilliam.user.util.LogoutFailure
@@ -22,22 +24,23 @@ fun firebaseSessionManager(
                     firebaseAuth
                         .currentUser
                         ?.getIdToken(false)
-                        ?.addOnSuccessListener {
+                        ?.addOnSuccessListener { result ->
+                            val branchUUID = result.claims[AuthClaims.BRANCH_UUID.path]?.toString()
+                            val role = result.claims[AuthClaims.ROLE.path]?.toString()
                             val userUUID = firebaseAuth.currentUser?.uid
+                            Log.d("SESSION", "$userUUID")
+                            Log.d("SESSION", branchUUID.toString())
+                            Log.d("SESSION", role.toString())
                             val session =
-                                Session(
-                                    userUUID = userUUID
-                                )
+                                Session(userUUID = userUUID, branchUUID = branchUUID, role = role)
                             trySend(session)
                         }
-                        ?.addOnFailureListener { exception ->
+                        ?.addOnFailureListener {
+                                exception ->
                             crashlytics.recordException(exception)
                         }
-                    if (firebaseAuth.currentUser?.getIdToken(false) == null) {
-                        trySend(Session())
-                    }
+                        ?: trySend(Session())
                 }
-
             auth.addIdTokenListener(listener)
 
             awaitClose { auth.removeIdTokenListener(listener) }

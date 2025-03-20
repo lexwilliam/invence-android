@@ -191,11 +191,12 @@ class CheckOutViewModel
             }
         }
 
+        // TODO: Need cloud function later
         private suspend fun decreaseProductItemQuantity(
             orders: List<Order>,
             categories: List<ProductCategory>
         ): Pair<List<Product>, Double> {
-            val orderItemUUIDWithQuantityList = orders.associate { it.item.uuid to it.quantity }
+            val orderItemUUIDWithQuantityList = orders.associate { it.item?.uuid to it.quantity }
             val soldProduct = mutableListOf<Product>()
             var totalProfit = 0.0
             categories.forEach { category ->
@@ -260,7 +261,7 @@ class CheckOutViewModel
         ) {
             _orders.update { old ->
                 old.map { order ->
-                    if (productUUID == order.item.uuid) {
+                    if (productUUID == order.item?.uuid) {
                         order.copy(quantity = quantity)
                     } else {
                         order

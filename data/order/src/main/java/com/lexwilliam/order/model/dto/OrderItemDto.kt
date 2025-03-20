@@ -6,6 +6,7 @@ import com.lexwilliam.order.model.OrderItem
 
 data class OrderItemDto(
     val uuid: String? = null,
+    val upc: String? = null,
     val name: String? = null,
     @JvmField @PropertyName("category_name")
     val categoryName: String? = null,
@@ -18,6 +19,7 @@ data class OrderItemDto(
     fun toDomain() =
         OrderItem(
             uuid = uuid ?: "",
+            upc = upc,
             name = name ?: "",
             categoryName = categoryName ?: "",
             label = label ?: "",

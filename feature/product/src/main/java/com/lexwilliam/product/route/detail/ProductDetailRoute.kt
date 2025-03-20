@@ -144,7 +144,7 @@ fun ProductDetailRoute(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Quantity: ${product.items.sumOf { it.quantity }}",
+                    text = "Quantity: ${product?.items?.sumOf { it.quantity } ?: 0}",
                     style = InvenceTheme.typography.bodyMedium
                 )
                 InvencePrimaryButton(
@@ -163,163 +163,169 @@ fun ProductDetailRoute(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier =
-                    Modifier
-                        .padding(vertical = 8.dp, horizontal = 16.dp)
-                        .fillMaxWidth()
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(end = 16.dp)
-                ) {
-                    InvenceChip(
-                        onClick = { },
-                        label = {
-                            Text(
-                                text = product.categoryName,
-                                style = InvenceTheme.typography.labelMedium,
-                                color = InvenceTheme.colors.primary
-                            )
-                        }
-                    )
-                    Text(
-                        text = product.name,
-                        style = InvenceTheme.typography.titleLarge
-                    )
-                }
-                NetworkImage(
-                    modifier =
-                        Modifier
-                            .size(150.dp)
-                            .clip(RoundedCornerShape(16.dp)),
-                    imagePath = product.imagePath
-                )
-            }
+        if (product != null) {
             Column(
                 modifier =
                     Modifier
-                        .padding(horizontal = 16.dp),
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(0.2f),
-                        text = "SKU",
-                        style = InvenceTheme.typography.titleMedium
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = product.sku,
-                        style = InvenceTheme.typography.bodyMedium
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(0.2f),
-                        text = "UPC",
-                        style = InvenceTheme.typography.titleMedium
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = product.upc,
-                        style = InvenceTheme.typography.bodyMedium
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(0.2f),
-                        text = "Price",
-                        style = InvenceTheme.typography.titleMedium
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = product.sellPrice.toCurrency(),
-                        style = InvenceTheme.typography.bodyMedium
-                    )
-                }
-            }
-            Column {
-                Divider(Modifier.padding(vertical = 8.dp))
-                Row(
                     modifier =
                         Modifier
+                            .padding(vertical = 8.dp, horizontal = 16.dp)
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        modifier = Modifier,
-                        text = "Stock",
-                        style = InvenceTheme.typography.titleMedium
-                    )
-                    Icon(
+                    Column(
                         modifier =
                             Modifier
-                                .clickable { viewModel.onEvent(ProductDetailUiEvent.ItemExpanded) },
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "expand items content icon"
+                                .weight(1f)
+                                .padding(end = 16.dp)
+                    ) {
+                        InvenceChip(
+                            onClick = { },
+                            label = {
+                                Text(
+                                    text = product!!.categoryName,
+                                    style = InvenceTheme.typography.labelMedium,
+                                    color = InvenceTheme.colors.primary
+                                )
+                            }
+                        )
+                        Text(
+                            text = product!!.name,
+                            style = InvenceTheme.typography.titleLarge
+                        )
+                    }
+                    NetworkImage(
+                        modifier =
+                            Modifier
+                                .size(150.dp)
+                                .clip(RoundedCornerShape(16.dp)),
+                        imagePath = product!!.imagePath
                     )
                 }
-                Divider(
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                AnimatedVisibility(visible = uiState.itemExpanded) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        product.items.forEach { item ->
-                            ProductItemCard(
-                                itemId = item.itemId,
-                                buyPrice = item.buyPrice.toString(),
-                                quantity = item.quantity.toString(),
-                                readOnly = true
-                            )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(0.2f),
+                            text = "SKU",
+                            style = InvenceTheme.typography.titleMedium
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = product!!.sku,
+                            style = InvenceTheme.typography.bodyMedium
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(0.2f),
+                            text = "UPC",
+                            style = InvenceTheme.typography.titleMedium
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = product!!.upc ?: "-",
+                            style = InvenceTheme.typography.bodyMedium
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(0.2f),
+                            text = "Price",
+                            style = InvenceTheme.typography.titleMedium
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = product!!.sellPrice.toCurrency(),
+                            style = InvenceTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                Column {
+                    Divider(Modifier.padding(vertical = 8.dp))
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            text = "Stock",
+                            style = InvenceTheme.typography.titleMedium
+                        )
+                        Icon(
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        viewModel.onEvent(
+                                            ProductDetailUiEvent.ItemExpanded
+                                        )
+                                    },
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "expand items content icon"
+                        )
+                    }
+                    Divider(
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    AnimatedVisibility(visible = uiState.itemExpanded) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            product!!.items.forEach { item ->
+                                ProductItemCard(
+                                    itemId = item.itemId,
+                                    buyPrice = item.buyPrice.toString(),
+                                    quantity = item.quantity.toString(),
+                                    readOnly = true
+                                )
+                            }
                         }
                     }
                 }
-            }
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                text = "Description",
-                style = InvenceTheme.typography.titleMedium
-            )
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = product.description,
-                style = InvenceTheme.typography.bodyMedium
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.Right
-            ) {
-                IconButton(
-                    onClick = { viewModel.onEvent(ProductDetailUiEvent.CopyDescription) }
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    text = "Description",
+                    style = InvenceTheme.typography.titleMedium
+                )
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = product!!.description,
+                    style = InvenceTheme.typography.bodyMedium
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Absolute.Right
                 ) {
-                    Icon(
-                        Icons.Default.CopyAll,
-                        contentDescription = "copy description icon"
-                    )
+                    IconButton(
+                        onClick = { viewModel.onEvent(ProductDetailUiEvent.CopyDescription) }
+                    ) {
+                        Icon(
+                            Icons.Default.CopyAll,
+                            contentDescription = "copy description icon"
+                        )
+                    }
                 }
             }
         }

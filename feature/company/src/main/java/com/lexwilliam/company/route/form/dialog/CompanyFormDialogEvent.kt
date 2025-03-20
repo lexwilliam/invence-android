@@ -1,9 +1,7 @@
 package com.lexwilliam.company.route.form.dialog
 
-import android.graphics.Bitmap
-
 sealed interface CompanyFormDialogEvent {
-    data class ImageChanged(val bmp: Bitmap?) : CompanyFormDialogEvent
+    data class ImageChanged(val bmp: Any?) : CompanyFormDialogEvent
 
     data class NameChanged(val value: String) : CompanyFormDialogEvent
 

@@ -6,6 +6,7 @@ import io.realm.kotlin.types.RealmObject
 
 internal open class LocalOrderItem : RealmObject {
     var uuid: String? = null
+    var upc: String? = null
     var name: String? = null
     var categoryName: String? = null
     var label: String? = null
@@ -16,6 +17,7 @@ internal open class LocalOrderItem : RealmObject {
     fun toDomain(): OrderItem =
         OrderItem(
             uuid = uuid ?: "",
+            upc = upc,
             name = name ?: "",
             categoryName = categoryName ?: "",
             label = label ?: "",
@@ -28,6 +30,7 @@ internal open class LocalOrderItem : RealmObject {
         fun fromDomain(domain: OrderItem): LocalOrderItem =
             LocalOrderItem().apply {
                 uuid = domain.uuid
+                upc = domain.upc
                 name = domain.name
                 categoryName = domain.categoryName
                 label = domain.label

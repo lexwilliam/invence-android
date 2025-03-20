@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.lexwilliam.analytics.navigation.analyticsNavigation
+import com.lexwilliam.analytics.navigation.navigateToAnalytics
 import com.lexwilliam.auth.route.forgot.navigation.forgotNavigation
 import com.lexwilliam.auth.route.forgot.navigation.navigateToForgotPassword
 import com.lexwilliam.auth.route.login.navigation.loginNavigation
@@ -18,8 +20,6 @@ import com.lexwilliam.company.navigation.companySearchNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
 import com.lexwilliam.company.navigation.navigateToCompanySearch
 import com.lexwilliam.core.navigation.Screen
-import com.lexwilliam.home.navigation.homeNavigation
-import com.lexwilliam.home.navigation.navigateToHome
 import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
 import com.lexwilliam.order.cart.navigation.cartNavigation
@@ -58,7 +58,7 @@ fun RootNavGraph(
                 )
             },
             toHome = {
-                navController.navigateToHome(
+                navController.navigateToInventory(
                     options =
                         NavOptions.Builder()
                             .setPopUpTo(Screen.LOGIN, true)
@@ -75,22 +75,13 @@ fun RootNavGraph(
         forgotNavigation(
             onBackStack = navController::navigateUp
         )
-        homeNavigation(
-            toInventory = navController::navigateToInventory,
-            toCart = navController::navigateToCart,
-            toTransactionHistory = navController::navigateToTransactionHistory,
-            toTransactionDetail = { transactionUUID ->
-                navController.navigateToTransactionDetail(transactionUUID)
-            },
-            toProfile = navController::navigateToProfile
-        )
         inventoryNavigation(
-            onBackStack = navController::navigateUp,
             toProductForm = { productUUID ->
                 navController.navigateToProductForm(productUUID)
             },
             toProductDetail = { productUUID -> navController.navigateToProductDetail(productUUID) },
-            toCategory = navController::navigateToCategory
+            toCategory = navController::navigateToCategory,
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         categoryNavigation(
             onBackStack = navController::navigateUp
@@ -106,14 +97,14 @@ fun RootNavGraph(
         )
         companySearchNavigation(
             toCompanyForm = navController::navigateToCompanyForm,
-            toHome = navController::navigateToHome
+            toHome = navController::navigateToInventory
         )
         companyFormNavigation(
-            toHome = navController::navigateToHome
+            toHome = navController::navigateToInventory
         )
         cartNavigation(
-            onBackStack = navController::navigateUp,
-            toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) }
+            toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) },
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         orderNavigation(
             onBackStack = navController::navigateUp,
@@ -143,12 +134,28 @@ fun RootNavGraph(
             onBackStack = navController::navigateUp
         )
         transactionHistoryNavigation(
-            onBackStack = navController::navigateUp
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         profileNavigation(
-            onBackStack = navController::navigateUp,
-            toLogin = navController::navigateToLogin
+            toLogin = navController::navigateToLogin,
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
+        )
+        analyticsNavigation(
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         composable(route = Screen.SPLASH) {}
+    }
+}
+
+fun onDrawerNavigation(
+    navController: NavHostController,
+    screen: String
+) {
+    when (screen) {
+        Screen.INVENTORY -> navController.navigateToInventory()
+        Screen.CART -> navController.navigateToCart()
+        Screen.ANALYTICS -> navController.navigateToAnalytics()
+        Screen.TRANSACTION_HISTORY -> navController.navigateToTransactionHistory()
+        Screen.PROFILE -> navController.navigateToProfile()
     }
 }

@@ -113,12 +113,12 @@ class ProductFormViewModel
                         category?.products?.firstOrNull { product ->
                             product.sku == productUUID
                         }
-                    product?.let { updateProductState(it) } ?: Product()
-                } ?: Product()
+                    product?.let { updateProductState(it) }
+                }
             }.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5_000),
-                Product()
+                null
             )
 
         private fun updateProductState(product: Product) {
@@ -177,7 +177,7 @@ class ProductFormViewModel
         fun onEvent(event: ProductFormUiEvent) {
             when (event) {
                 is ProductFormUiEvent.BackStackClicked -> handleBackStackClicked()
-                is ProductFormUiEvent.InputImageChanged -> handleInputImageChanged(event.bmp)
+                is ProductFormUiEvent.InputImageChanged -> handleInputImageChanged(event.image)
                 is ProductFormUiEvent.CameraClicked -> handleCameraClicked()
                 is ProductFormUiEvent.ScanBarcodeClicked -> handleScanBarcodeClicked()
                 is ProductFormUiEvent.TitleValueChanged -> handleTitleValueChanged(event.value)
@@ -202,7 +202,7 @@ class ProductFormViewModel
                     )
                 is ProductFormUiEvent.SaveClicked -> handleSaveClicked()
                 is ProductFormUiEvent.CategorySelected -> handleCategorySelected(event.category)
-                is ProductFormUiEvent.AddCategory -> handleAddCategory(event.name, event.bitmap)
+                is ProductFormUiEvent.AddCategory -> handleAddCategory(event.name, event.image)
                 ProductFormUiEvent.CategoryDismiss -> handleCategoryDismiss()
                 is ProductFormUiEvent.SkuChanged -> handleSkuChanged(event.value)
                 is ProductFormUiEvent.UpcChanged -> handleUpcChanged(event.value)
@@ -229,37 +229,54 @@ class ProductFormViewModel
 
         private fun handleAddCategory(
             name: String,
-            imagePath: Bitmap?
+            imagePath: Any?
         ) {
             viewModelScope.launch {
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 val categoryUUID = UUID.randomUUID()
-                val image = imagePath ?: return@launch
-                uploadProductCategoryImage(
-                    branchUUID = branchUUID,
-                    categoryUUID = categoryUUID,
-                    bmp = image
-                ).fold(
-                    ifLeft = {
-                        Log.d("TAG", it.toString())
-                    },
-                    ifRight = {
-                        val category =
-                            ProductCategory(
-                                uuid = categoryUUID,
-                                branchUUID = branchUUID,
-                                imageUrl = it,
-                                name = name,
-                                products = emptyList(),
-                                createdAt = Clock.System.now(),
-                                deletedAt = null
-                            )
-                        when (val result = upsertProductCategory(category = category)) {
-                            is Either.Left -> Log.d("TAG", result.value.toString())
-                            is Either.Right -> Log.d("TAG", "Success")
+                val image = imagePath
+                if (image != null) {
+                    uploadProductCategoryImage(
+                        branchUUID = branchUUID,
+                        categoryUUID = categoryUUID,
+                        image = image
+                    ).fold(
+                        ifLeft = {
+                            Log.d("TAG", it.toString())
+                        },
+                        ifRight = {
+                            val category =
+                                ProductCategory(
+                                    uuid = categoryUUID,
+                                    branchUUID = branchUUID,
+                                    imageUrl = it,
+                                    name = name,
+                                    products = emptyList(),
+                                    createdAt = Clock.System.now(),
+                                    deletedAt = null
+                                )
+                            when (val result = upsertProductCategory(category = category)) {
+                                is Either.Left -> Log.d("TAG", result.value.toString())
+                                is Either.Right -> Log.d("TAG", "Success")
+                            }
                         }
+                    )
+                } else {
+                    val category =
+                        ProductCategory(
+                            uuid = categoryUUID,
+                            branchUUID = branchUUID,
+                            imageUrl = null,
+                            name = name,
+                            products = emptyList(),
+                            createdAt = Clock.System.now(),
+                            deletedAt = null
+                        )
+                    when (val result = upsertProductCategory(category = category)) {
+                        is Either.Left -> Log.d("TAG", result.value.toString())
+                        is Either.Right -> Log.d("TAG", "Success")
                     }
-                )
+                }
             }
         }
 
@@ -295,9 +312,9 @@ class ProductFormViewModel
             }
         }
 
-        private fun handleInputImageChanged(bmp: Bitmap?) {
+        private fun handleInputImageChanged(image: Any?) {
             _state.update { old ->
-                old.copy(image = bmp)
+                old.copy(image = image)
             }
         }
 
@@ -374,12 +391,11 @@ class ProductFormViewModel
             _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 val category = _state.value.selectedCategory ?: return@launch
-                val upc = _state.value.upc ?: return@launch
                 val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 var product =
                     Product(
                         sku = _state.value.sku,
-                        upc = upc,
+                        upc = _state.value.upc,
                         name = _state.value.title,
                         description = _state.value.description,
                         categoryName = category.name,
@@ -393,6 +409,7 @@ class ProductFormViewModel
                                     createdAt = Clock.System.now()
                                 )
                             },
+                        imagePath = null,
                         createdAt = Clock.System.now()
                     )
                 val image = _state.value.image

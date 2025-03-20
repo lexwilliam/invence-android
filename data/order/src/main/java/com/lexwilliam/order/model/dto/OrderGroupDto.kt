@@ -3,8 +3,8 @@ package com.lexwilliam.order.model.dto
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.core.util.validateUUID
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.order.model.OrderGroup
 import kotlinx.datetime.Instant
 

@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class Order(
     val uuid: UUID,
-    val item: OrderItem,
+    val item: OrderItem?,
     val discounts: List<OrderDiscount>,
     val quantity: Int,
     val refundedQuantity: Int,

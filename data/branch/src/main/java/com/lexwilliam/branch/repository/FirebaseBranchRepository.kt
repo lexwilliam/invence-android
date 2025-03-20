@@ -1,14 +1,16 @@
 package com.lexwilliam.branch.repository
 
+import android.net.Uri
 import arrow.core.Either
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lexwilliam.branch.model.Branch
 import com.lexwilliam.branch.model.BranchDto
 import com.lexwilliam.branch.util.DeleteBranchFailure
-import com.lexwilliam.branch.util.UnknownFailure
 import com.lexwilliam.branch.util.UpsertBranchFailure
-import com.lexwilliam.firebase.FirestoreConfig
+import com.lexwilliam.core.util.UploadImageFailure
+import com.lexwilliam.firebase.utils.FirestoreConfig
+import com.lexwilliam.firebase.utils.StorageUploader
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,7 +18,8 @@ import java.util.UUID
 
 fun firebaseBranchRepository(
     analytics: FirebaseCrashlytics,
-    store: FirebaseFirestore
+    store: FirebaseFirestore,
+    storageUploader: StorageUploader
 ) = object : BranchRepository {
     override fun observeBranch(branchUUID: UUID): Flow<Branch?> =
         callbackFlow {
@@ -51,11 +54,19 @@ fun firebaseBranchRepository(
         }.mapLeft { t ->
             t.printStackTrace()
             analytics.recordException(t)
-            UnknownFailure(t.message)
+            UpsertBranchFailure.UnknownFailure(t.message)
         }
     }
 
     override suspend fun deleteBranch(branch: Branch): Either<DeleteBranchFailure, Branch> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun uploadBranchImage(
+        branchUUID: UUID,
+        image: Any
+    ): Either<UploadImageFailure, Uri> {
+        val path = "$branchUUID/branch"
+        return storageUploader.imageUploader(path, image)
     }
 }

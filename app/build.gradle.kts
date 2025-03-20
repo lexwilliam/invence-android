@@ -13,12 +13,12 @@ plugins {
 
 android {
     namespace = "com.lexwilliam.invence"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.lexwilliam.invence"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -83,13 +83,13 @@ dependencies {
     implementation(project(":feature:barcode"))
     implementation(project(":feature:category"))
     implementation(project(":feature:company"))
-    implementation(project(":feature:home"))
     implementation(project(":feature:inventory"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:order"))
     implementation(project(":feature:product"))
     implementation(project(":feature:transaction"))
     implementation(project(":feature:profile"))
+    implementation(project(":feature:analytics"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))
     implementation(project(":libraries:firebase"))

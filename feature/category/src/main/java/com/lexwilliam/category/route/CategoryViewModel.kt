@@ -1,6 +1,5 @@
 package com.lexwilliam.category.route
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -109,7 +108,7 @@ class CategoryViewModel
         private fun handleConfirmForm(
             category: ProductCategory?,
             name: String,
-            image: Bitmap?
+            image: Any?
         ) {
             viewModelScope.launch {
                 val isEditing = _state.value.isEditing
@@ -130,7 +129,7 @@ class CategoryViewModel
                     uploadCategoryImageUseCase(
                         branchUUID = branchUUID,
                         categoryUUID = modifiedCategory.uuid,
-                        bmp = image ?: return@launch
+                        image = image ?: return@launch
                     ).fold(
                         ifLeft = {
                             Log.d("TAG", it.toString())
@@ -148,35 +147,61 @@ class CategoryViewModel
                     )
                 } else {
                     val categoryUUID = UUID.randomUUID()
-                    uploadCategoryImageUseCase(
-                        branchUUID = branchUUID,
-                        categoryUUID = categoryUUID,
-                        bmp = image ?: return@launch
-                    ).fold(
-                        ifLeft = {
-                            Log.d("TAG", it.toString())
-                        },
-                        ifRight = {
-                            val modifiedCategory =
-                                ProductCategory(
-                                    uuid = categoryUUID,
-                                    branchUUID = branchUUID,
-                                    imageUrl = it,
-                                    name = name,
-                                    products = emptyList(),
-                                    createdAt = Clock.System.now(),
-                                    deletedAt = null
-                                )
-                            when (val result = upsertProductCategory(category = modifiedCategory)) {
-                                is Either.Left -> Log.d("TAG", result.value.toString())
-                                is Either.Right ->
-                                    _state.update {
-                                            old ->
-                                        old.copy(shouldNavigateBack = true)
-                                    }
+                    if (image != null) {
+                        uploadCategoryImageUseCase(
+                            branchUUID = branchUUID,
+                            categoryUUID = categoryUUID,
+                            image = image
+                        ).fold(
+                            ifLeft = {
+                                Log.d("TAG", it.toString())
+                            },
+                            ifRight = {
+                                val modifiedCategory =
+                                    ProductCategory(
+                                        uuid = categoryUUID,
+                                        branchUUID = branchUUID,
+                                        imageUrl = it,
+                                        name = name,
+                                        products = emptyList(),
+                                        createdAt = Clock.System.now(),
+                                        deletedAt = null
+                                    )
+                                when (
+                                    val result =
+                                        upsertProductCategory(
+                                            category = modifiedCategory
+                                        )
+                                ) {
+                                    is Either.Left -> Log.d("TAG", result.value.toString())
+                                    is Either.Right ->
+                                        _state.update {
+                                                old ->
+                                            old.copy(shouldNavigateBack = true)
+                                        }
+                                }
                             }
+                        )
+                    } else {
+                        val modifiedCategory =
+                            ProductCategory(
+                                uuid = categoryUUID,
+                                branchUUID = branchUUID,
+                                imageUrl = null,
+                                name = name,
+                                products = emptyList(),
+                                createdAt = Clock.System.now(),
+                                deletedAt = null
+                            )
+                        when (val result = upsertProductCategory(category = modifiedCategory)) {
+                            is Either.Left -> Log.d("TAG", result.value.toString())
+                            is Either.Right ->
+                                _state.update {
+                                        old ->
+                                    old.copy(shouldNavigateBack = true)
+                                }
                         }
-                    )
+                    }
                 }
             }
         }

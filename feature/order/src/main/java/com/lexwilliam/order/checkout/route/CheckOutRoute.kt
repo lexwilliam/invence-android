@@ -53,7 +53,7 @@ fun CheckOutRoute(
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
-    val subtotal = orders.sumOf { order -> order.quantity * order.item.price }
+    val subtotal = orders.sumOf { order -> order.quantity * (order.item?.price ?: 0.0) }
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
@@ -234,17 +234,21 @@ fun CheckOutRoute(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items = orders) { order ->
-                SmallOrderProductCard(
-                    modifier = Modifier,
-                    imagePath = order.item.imagePath,
-                    imageModifier = Modifier.size(50.dp),
-                    name = order.item.name,
-                    price = order.item.price,
-                    quantity = order.quantity,
-                    onQuantityChanged = {
-                        viewModel.onEvent(CheckOutUiEvent.QuantityChanged(order.item.uuid, it))
-                    }
-                )
+                if (order.item != null) {
+                    SmallOrderProductCard(
+                        modifier = Modifier,
+                        imagePath = order.item!!.imagePath,
+                        imageModifier = Modifier.size(50.dp),
+                        name = order.item!!.name,
+                        price = order.item!!.price,
+                        quantity = order.quantity,
+                        onQuantityChanged = {
+                            viewModel.onEvent(
+                                CheckOutUiEvent.QuantityChanged(order.item!!.uuid, it)
+                            )
+                        }
+                    )
+                }
             }
             item {
                 Column {

@@ -3,10 +3,9 @@ package com.lexwilliam.order.model.dto
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.core.util.validateUUID
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.order.model.Order
-import com.lexwilliam.order.model.OrderItem
 import kotlinx.datetime.Instant
 
 data class OrderDto(
@@ -27,7 +26,7 @@ data class OrderDto(
     fun toDomain() =
         Order(
             uuid = uuid.validateUUID(),
-            item = item?.toDomain() ?: OrderItem(),
+            item = item?.toDomain(),
             discounts = discounts?.map { it.value.toDomain() } ?: emptyList(),
             quantity = quantity ?: 0,
             refundedQuantity = refundedQuantity ?: 0,
@@ -41,7 +40,7 @@ data class OrderDto(
         fun fromDomain(domain: Order) =
             OrderDto(
                 uuid = domain.uuid.toString(),
-                item = OrderItemDto.fromDomain(domain.item),
+                item = domain.item?.let { OrderItemDto.fromDomain(it) },
                 discounts =
                     domain.discounts
                         .associate { it.uuid.toString() to OrderDiscountDto.fromDomain(it) },

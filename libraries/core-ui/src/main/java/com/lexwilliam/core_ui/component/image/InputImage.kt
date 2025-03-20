@@ -1,7 +1,6 @@
 package com.lexwilliam.core_ui.component.image
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,7 +31,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.lexwilliam.core.manager.ImageManager
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.button.InvenceTextButton
 import com.lexwilliam.core_ui.component.camera.GetPhotoCameraPreview
@@ -46,7 +44,7 @@ fun InputImage(
     imageModifier: Modifier = Modifier,
     image: Any? = null,
     label: String? = null,
-    onImageChanged: (Bitmap?) -> Unit
+    onImageChanged: (Any?) -> Unit
 ) {
     val context = LocalContext.current
     var isDialogShowing by remember { mutableStateOf(false) }
@@ -56,8 +54,7 @@ fun InputImage(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
             onResult = { uri ->
-                val bmp = uri?.let { ImageManager(context).uriToBitmap(it) }
-                onImageChanged(bmp)
+                onImageChanged(uri)
                 cameraOpen = false
                 isDialogShowing = false
             }

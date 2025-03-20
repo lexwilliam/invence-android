@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
-import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.navigation.ProductDetailNavigationTarget
 import com.lexwilliam.product.route.detail.dialog.RestockDialogEvent
@@ -86,12 +85,12 @@ class ProductDetailViewModel
                         category?.products?.firstOrNull { product ->
                             product.sku == productUUID
                         }
-                    product ?: Product()
-                } ?: Product()
+                    product
+                }
             }.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5_000),
-                Product()
+                null
             )
 
         private val _state = MutableStateFlow(ProductDetailUiState())
@@ -123,7 +122,7 @@ class ProductDetailViewModel
                         category.copy(
                             products =
                                 category.products
-                                    .filterNot { product.value.sku == it.sku }
+                                    .filterNot { product.value?.sku == it.sku }
                         )
                 ).fold(
                     ifLeft = { failure ->
@@ -142,7 +141,8 @@ class ProductDetailViewModel
 
         private fun handleEditIconClicked() {
             viewModelScope.launch {
-                _navigation.send(ProductDetailNavigationTarget.ProductForm(product.value.sku))
+                val product = product.value ?: return@launch
+                _navigation.send(ProductDetailNavigationTarget.ProductForm(product.sku))
             }
         }
 
@@ -178,7 +178,6 @@ class ProductDetailViewModel
 
         private fun handleDialogConfirm() {
             viewModelScope.launch {
-                val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 val dialogState = _dialogState.value ?: return@launch
                 val category = category.firstOrNull() ?: return@launch
                 val product = product.firstOrNull() ?: return@launch

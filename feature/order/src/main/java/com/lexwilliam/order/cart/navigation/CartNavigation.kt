@@ -9,13 +9,13 @@ import com.lexwilliam.order.cart.route.CartRoute
 import java.util.UUID
 
 fun NavGraphBuilder.cartNavigation(
-    onBackStack: () -> Unit,
-    toOrder: (UUID) -> Unit
+    toOrder: (UUID) -> Unit,
+    onDrawerNavigation: (String) -> Unit
 ) {
     composable(route = Screen.CART) {
         CartRoute(
-            onBackStack = onBackStack,
-            toOrder = toOrder
+            toOrder = toOrder,
+            onDrawerNavigation = onDrawerNavigation
         )
     }
 }

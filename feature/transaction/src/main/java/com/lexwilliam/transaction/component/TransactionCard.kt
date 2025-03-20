@@ -62,7 +62,7 @@ fun TransactionCard(
                 ) {
                     Text(
                         modifier = Modifier.weight(3f),
-                        text = order.item.name,
+                        text = order.item?.name ?: "",
                         style = InvenceTheme.typography.bodySmall
                     )
                     Text(

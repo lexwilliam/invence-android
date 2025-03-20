@@ -1,4 +1,4 @@
-package com.lexwilliam.firebase
+package com.lexwilliam.firebase.extensions
 
 import com.google.firebase.Timestamp
 import kotlinx.datetime.Instant

@@ -135,14 +135,6 @@ class InventoryViewModel
                 InventoryUiEvent.BarcodeScannerClicked -> handleBarcodeScannerClicked()
                 is InventoryUiEvent.CategoryClicked -> handleCategoryClicked(event.category)
                 InventoryUiEvent.CategorySettingClicked -> handleCategorySettingClicked()
-                InventoryUiEvent.BackStackClicked -> handleBackStackClicked()
-            }
-        }
-
-        private fun handleBackStackClicked() {
-            viewModelScope.launch {
-                _navigation.send(InventoryNavigationTarget.BackStack)
-                _state.update { old -> old.copy(isScanBarcodeShowing = false) }
             }
         }
 

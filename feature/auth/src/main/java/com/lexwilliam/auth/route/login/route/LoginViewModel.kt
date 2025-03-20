@@ -105,7 +105,8 @@ class LoginViewModel
                                 name = userData.username ?: "",
                                 email = userData.email ?: "",
                                 imageUrl = userData.profilePictureUrl,
-                                createdAt = Clock.System.now()
+                                createdAt = Clock.System.now(),
+                                role = null
                             )
 
                         val userDoc = fetchUser(user.uuid).getOrNull()

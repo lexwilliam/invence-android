@@ -87,7 +87,7 @@ class AppViewModel
                 when {
                     user == null -> _destination.update { Screen.LOGIN }
                     user.branchUUID == null -> _destination.update { Screen.COMPANY_SEARCH }
-                    else -> _destination.update { Screen.HOME }
+                    else -> _destination.update { Screen.INVENTORY }
                 }
                 _isLoading.update { false }
             }

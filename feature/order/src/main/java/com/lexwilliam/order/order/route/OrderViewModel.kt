@@ -75,23 +75,29 @@ class OrderViewModel
                     else ->
                         observeSingleOrderGroup(uuid)
                             .onEach { group ->
-                                _cart.value = group?.orders?.map {
-                                        order ->
-                                    UiCartItem(
-                                        product =
-                                            Product(
-                                                sku = order.item.uuid,
-                                                name = order.item.name,
-                                                description = order.item.description,
-                                                categoryName = order.item.categoryName,
-                                                sellPrice = order.item.price,
-                                                items = emptyList(),
-                                                imagePath = order.item.imagePath,
-                                                createdAt = Clock.System.now()
-                                            ),
-                                        quantity = order.quantity
-                                    )
-                                } ?: emptyList()
+                                val cartItems =
+                                    group?.orders?.map {
+                                            order ->
+                                        order.item?.let { item ->
+                                            UiCartItem(
+                                                product =
+                                                    Product(
+                                                        sku = item.uuid,
+                                                        upc = item.upc,
+                                                        name = item.name,
+                                                        description = item.description,
+                                                        categoryName = item.categoryName,
+                                                        sellPrice = item.price,
+                                                        items = emptyList(),
+                                                        imagePath = item.imagePath,
+                                                        createdAt = Clock.System.now()
+                                                    ),
+                                                quantity = order.quantity
+                                            )
+                                        }
+                                    } ?: emptyList()
+
+                                _cart.value = cartItems.filterNotNull()
                             }
                 }
             }
@@ -161,6 +167,7 @@ class OrderViewModel
                             item =
                                 OrderItem(
                                     uuid = item.product.sku,
+                                    upc = item.product.upc,
                                     name = item.product.name,
                                     categoryName = item.product.categoryName,
                                     label = "",

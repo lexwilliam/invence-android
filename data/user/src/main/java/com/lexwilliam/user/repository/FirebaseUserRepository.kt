@@ -6,9 +6,10 @@ import arrow.core.right
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
-import com.lexwilliam.firebase.FirestoreConfig
+import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.user.model.EmployeeShift
 import com.lexwilliam.user.model.EmployeeShiftDto
+import com.lexwilliam.user.model.Role
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.model.UserDto
 import com.lexwilliam.user.util.FetchUserFailure
@@ -72,7 +73,8 @@ fun firebaseUserRepository(
                     name = username,
                     createdAt = Clock.System.now(),
                     imageUrl = null,
-                    branchUUID = null
+                    branchUUID = null,
+                    role = Role.OWNER
                 )
             when (upsertUser(user)) {
                 is Either.Left -> return SignUpFailure.UpsertUserToFirestoreFail.left()
@@ -179,7 +181,7 @@ fun firebaseUserRepository(
         return Either.catch {
             store
                 .collection(FirestoreConfig.COLLECTION_EMPLOYEE_SHIFT)
-                .document(shift.userUUID.toString())
+                .document(shift.userUUID)
                 .set(EmployeeShiftDto.fromDomain(shift))
             shift
         }.mapLeft { t ->

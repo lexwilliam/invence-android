@@ -6,14 +6,14 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 data class Product(
-    val sku: String = "",
-    val upc: String = "",
-    val name: String = "",
-    val description: String = "",
-    val categoryName: String = "",
-    val sellPrice: Double = 0.0,
-    val items: List<ProductItem> = emptyList(),
-    val imagePath: Uri? = null,
+    val sku: String,
+    val upc: String?,
+    val name: String,
+    val description: String,
+    val categoryName: String,
+    val sellPrice: Double,
+    val items: List<ProductItem>,
+    val imagePath: Uri?,
     val createdAt: Instant = Clock.System.now(),
     val updatedAt: Instant? = null
 ) {

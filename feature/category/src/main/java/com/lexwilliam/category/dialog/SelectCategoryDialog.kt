@@ -1,6 +1,5 @@
 package com.lexwilliam.category.dialog
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +41,7 @@ fun SelectCategoryDialog(
     onDismiss: () -> Unit,
     categories: List<ProductCategory>,
     onCategoryClicked: (ProductCategory) -> Unit,
-    onFormConfirm: (String, Bitmap?) -> Unit
+    onFormConfirm: (String, Any?) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var isFormShowing by remember { mutableStateOf(false) }
@@ -157,8 +156,8 @@ fun SelectCategoryDialog(
         CategoryFormDialog(
             onDismiss = { isFormShowing = false },
             category = null,
-            onConfirm = { title, bitmap ->
-                onFormConfirm(title, bitmap)
+            onConfirm = { title, image ->
+                onFormConfirm(title, image)
                 isFormShowing = false
             }
         )

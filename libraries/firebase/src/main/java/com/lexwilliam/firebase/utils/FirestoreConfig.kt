@@ -1,4 +1,4 @@
-package com.lexwilliam.firebase
+package com.lexwilliam.firebase.utils
 
 object FirestoreConfig {
     const val COLLECTION_BRANCH = "branch"

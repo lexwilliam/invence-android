@@ -4,5 +4,6 @@ import java.util.UUID
 
 data class CompanyBranch(
     val uuid: UUID,
-    val name: String
+    val name: String,
+    val imageUrl: String?
 )

@@ -11,7 +11,7 @@ import com.lexwilliam.company.util.DeleteCompanyFailure
 import com.lexwilliam.company.util.FetchCompanyFailure
 import com.lexwilliam.company.util.UnknownFailure
 import com.lexwilliam.company.util.UpsertCompanyFailure
-import com.lexwilliam.firebase.FirestoreConfig
+import com.lexwilliam.firebase.utils.FirestoreConfig
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

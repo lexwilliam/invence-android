@@ -3,8 +3,8 @@ package com.lexwilliam.product.usecase
 import android.graphics.Bitmap
 import android.net.Uri
 import arrow.core.Either
+import com.lexwilliam.core.util.UploadImageFailure
 import com.lexwilliam.product.repository.ProductRepository
-import com.lexwilliam.product.util.UploadImageFailure
 import java.util.UUID
 import javax.inject.Inject
 

@@ -22,14 +22,18 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.company.navigation.CompanyFormNavigationTarget
@@ -50,6 +54,7 @@ fun CompanyFormRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
@@ -57,10 +62,28 @@ fun CompanyFormRoute(
         }
     }
 
+    if (uiState.messages.isNotEmpty()) {
+        val currentMessage = uiState.messages.first()
+
+        LaunchedEffect(key1 = currentMessage, key2 = snackbarHostState) {
+            val result =
+                snackbarHostState.showSnackbar(
+                    message = currentMessage.message,
+                    actionLabel = currentMessage.actionLabel
+                )
+
+            if (result == SnackbarResult.Dismissed) {
+                currentMessage.action?.invoke()
+            }
+
+            viewModel.onEvent(CompanyFormUiEvent.DismissMessage(currentMessage.id))
+        }
+    }
+
     dialogState?.let { state ->
         FormDialogWithImage(
             onDismiss = { viewModel.onDialogEvent(CompanyFormDialogEvent.Dismiss) },
-            image = state.bitmap,
+            image = state.image,
             onImageChanged = { bmp ->
                 viewModel.onDialogEvent(
                     CompanyFormDialogEvent.ImageChanged(bmp)
@@ -188,7 +211,7 @@ fun CompanyFormBranchList(
             ColumnCardWithImage(
                 modifier = Modifier.fillMaxWidth(),
                 imageModifier = Modifier.size(64.dp),
-                imagePath = null
+                imagePath = branch.imageUrl?.toUri()
             ) {
                 Row(
                     modifier =

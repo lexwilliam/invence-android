@@ -3,8 +3,8 @@ package com.lexwilliam.product.model.dto
 import androidx.core.net.toUri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
@@ -38,7 +38,7 @@ data class ProductDto(
     fun toDomain() =
         Product(
             sku = sku ?: "",
-            upc = upc ?: "",
+            upc = upc,
             name = name ?: "",
             description = description ?: "",
             categoryName = categoryName ?: "",

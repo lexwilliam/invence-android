@@ -2,8 +2,8 @@ package com.lexwilliam.user.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.lexwilliam.firebase.toKtxInstant
-import com.lexwilliam.firebase.toTimestamp
+import com.lexwilliam.firebase.extensions.toKtxInstant
+import com.lexwilliam.firebase.extensions.toTimestamp
 import kotlinx.datetime.Instant
 import java.util.UUID
 
@@ -12,8 +12,10 @@ data class UserDto(
     @JvmField @PropertyName("branch_uuid")
     val branchUUID: String? = null,
     val name: String? = null,
+    @JvmField @PropertyName("image_url")
     val imageUrl: String? = null,
     val email: String? = null,
+    val role: String? = null,
     @JvmField @PropertyName("created_at")
     val createdAt: Timestamp? = null
 ) {
@@ -24,6 +26,7 @@ data class UserDto(
             name = name ?: "",
             imageUrl = imageUrl,
             email = email ?: "",
+            role = Role.entries.firstOrNull { it.title == role },
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )
 
@@ -33,8 +36,9 @@ data class UserDto(
                 uuid = domain.uuid,
                 branchUUID = domain.branchUUID?.toString(),
                 name = domain.name,
-                imageUrl = domain.imageUrl?.toString(),
+                imageUrl = domain.imageUrl,
                 email = domain.email,
+                role = domain.role?.title,
                 createdAt = domain.createdAt.toTimestamp()
             )
     }
