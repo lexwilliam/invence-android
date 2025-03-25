@@ -48,10 +48,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
-    kotlinOptions.languageVersion = "1.9"
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -97,6 +93,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.library)
     implementation(libs.hilt.nav)
+    implementation(libs.material3.android)
     kapt(libs.hilt.kapt)
 
     implementation(libs.google.play.service.auth)

@@ -45,7 +45,6 @@
             <option value="$PROJECT_DIR$/libraries/firebase" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

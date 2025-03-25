@@ -8,11 +8,12 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.9.21"
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
     alias(libs.plugins.android.app.plugin) apply false
     alias(libs.plugins.android.lib.plugin) apply false
     alias(libs.plugins.kotlin.plugin) apply false
+    alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.hilt.plugin) apply false
     alias(libs.plugins.realm.plugin)
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"

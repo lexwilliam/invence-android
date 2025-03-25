@@ -7,13 +7,12 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
 android {
     namespace = "com.lexwilliam.firebase"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26

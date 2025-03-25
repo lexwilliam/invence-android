@@ -7,15 +7,19 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lexwilliam.company.model.Company
 import com.lexwilliam.company.model.CompanyDto
+import com.lexwilliam.company.model.CompanyInviteRequest
 import com.lexwilliam.company.util.DeleteCompanyFailure
 import com.lexwilliam.company.util.FetchCompanyFailure
+import com.lexwilliam.company.util.InviteCompanyFailure
 import com.lexwilliam.company.util.UnknownFailure
 import com.lexwilliam.company.util.UpsertCompanyFailure
 import com.lexwilliam.firebase.utils.FirestoreConfig
+import com.lexwilliam.user.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.datetime.Clock
 
 fun firebaseCompanyRepository(
     analytics: FirebaseCrashlytics,
@@ -86,5 +90,30 @@ fun firebaseCompanyRepository(
 
     override suspend fun deleteCompany(company: Company): Either<DeleteCompanyFailure, Company> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun sendInvite(
+        company: Company,
+        user: User
+    ): Either<InviteCompanyFailure, Company> {
+        return Either.catch {
+            val modifiedCompany =
+                company.copy(
+                    inviteRequest =
+                        company.inviteRequest +
+                            CompanyInviteRequest(
+                                userId = user.uuid,
+                                email = user.email,
+                                imageUrl = user.imageUrl,
+                                createdAt = Clock.System.now()
+                            )
+                )
+            upsertCompany(modifiedCompany)
+            modifiedCompany
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            UnknownFailure(t.message)
+        }
     }
 }

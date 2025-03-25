@@ -2,14 +2,11 @@ package com.lexwilliam.company.route.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,8 +21,9 @@ import com.lexwilliam.company.navigation.CompanySearchNavigationTarget
 import com.lexwilliam.company.route.search.dialog.SelectBranchDialog
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.ObserveAsEvents
-import com.lexwilliam.core_ui.component.button.InvenceOutlineButton
-import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
+import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
+import com.lexwilliam.core_ui.component.button.InvenceTextButton
+import com.lexwilliam.core_ui.component.textfield.InvenceOutlineTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
@@ -55,29 +53,28 @@ fun CompanySearchRoute(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(InvenceTheme.colors.secondary),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically)
+                    .background(InvenceTheme.colors.secondary)
+                    .padding(top = 100.dp)
+                    .padding(16.dp)
+                    .systemBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Text(
-                text = "Set Your Company",
+                text = "Company",
                 style = InvenceTheme.typography.brand,
                 color = InvenceTheme.colors.primary
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = "Search your company", style = InvenceTheme.typography.labelLarge)
-                InvenceSearchTextField(
-                    modifier =
-                        Modifier
-                            .width(300.dp),
+                InvenceOutlineTextField(
+                    modifier = Modifier.fillMaxWidth(),
                     value = uiState.query,
                     onValueChange = { viewModel.onEvent(CompanySearchUiEvent.QueryChanged(it)) },
                     placeholder = {
                         Text(
-                            text = "Search",
+                            text = "company_name#123",
                             style = InvenceTheme.typography.bodyLarge
                         )
                     },
@@ -91,52 +88,31 @@ fun CompanySearchRoute(
                     singleLine = true
                 )
             }
-            Row(
-                modifier = Modifier.width(300.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .background(InvenceTheme.colors.primary)
-                )
-                Text(text = "or", style = InvenceTheme.typography.bodyMedium)
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .background(InvenceTheme.colors.primary)
-                )
-            }
             Column(
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "If you don't have a company yet",
-                    style = InvenceTheme.typography.labelLarge
-                )
-                InvenceOutlineButton(
-                    modifier =
-                        Modifier
-                            .width(300.dp),
-                    onClick = { viewModel.onEvent(CompanySearchUiEvent.CreateCompanyClicked) }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "add company icon")
-                        Text(
-                            text = "Create new company",
-                            style = InvenceTheme.typography.labelLarge
-                        )
+                InvencePrimaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        viewModel.onEvent(CompanySearchUiEvent.ConfirmClicked)
                     }
+                ) {
+                    Text(
+                        text = "Search",
+                        style = InvenceTheme.typography.labelLarge
+                    )
+                }
+                InvenceTextButton(
+                    onClick = {
+                        viewModel.onEvent(CompanySearchUiEvent.CreateCompanyClicked)
+                    }
+                ) {
+                    Text(
+                        text = "Don't have a company yet ? Create one",
+                        style = InvenceTheme.typography.labelLarge
+                    )
                 }
             }
         }

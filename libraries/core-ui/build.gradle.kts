@@ -4,12 +4,13 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
+    alias(libs.plugins.kotlin.compose)
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
 android {
     namespace = "com.lexwilliam.core_ui"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
@@ -31,10 +32,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
-    kotlinOptions.languageVersion = "1.9"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

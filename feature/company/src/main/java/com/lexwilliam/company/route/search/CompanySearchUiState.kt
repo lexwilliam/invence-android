@@ -7,5 +7,6 @@ data class CompanySearchUiState(
     val branches: List<CompanyBranch> = emptyList(),
     val error: String? = null,
     val isDialogShown: Boolean = false,
-    val showSearch: Boolean = false
+    val showSearch: Boolean = false,
+    val isLoadingSearch: Boolean = false
 )

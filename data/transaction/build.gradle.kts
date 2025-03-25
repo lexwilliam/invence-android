@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.lexwilliam.transaction"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26

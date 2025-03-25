@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.model.OrderItem
 import com.lexwilliam.order.order.model.UiCartItem
@@ -184,10 +187,23 @@ class OrderViewModel
                     }
                 upsertOrderGroup(orderGroup.copy(orders = orders)).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Upsert Order Group Failed"
+                                )
+                        )
                         _state.update { old -> old.copy(isLoading = false) }
                     },
                     ifRight = {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.SUCCESS,
+                                    message = "Upsert Order Group Success"
+                                )
+                        )
                         _state.update { old -> old.copy(isLoading = false) }
                         _navigation.send(OrderNavigationTarget.CheckOut(orderUUID))
                     }

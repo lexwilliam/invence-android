@@ -15,6 +15,9 @@ import com.example.barcode.model.BarCodeResult
 import com.example.barcode.model.ScanningResult
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.inventory.scan.ProductScanEvent
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
@@ -242,7 +245,12 @@ class ProductFormViewModel
                         image = image
                     ).fold(
                         ifLeft = {
-                            Log.d("TAG", it.toString())
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(
+                                    message = "Failed to upload image",
+                                    type = SnackbarTypeEnum.ERROR
+                                )
+                            )
                         },
                         ifRight = {
                             val category =
@@ -420,7 +428,12 @@ class ProductFormViewModel
                         bmp = image
                     ).fold(
                         ifLeft = { failure ->
-                            Log.d("TAG", failure.toString())
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(
+                                    message = "Failed to upload image",
+                                    type = SnackbarTypeEnum.ERROR
+                                )
+                            )
                             _state.update { old -> old.copy(isLoading = false) }
                         },
                         ifRight = { uri ->
@@ -437,7 +450,12 @@ class ProductFormViewModel
                     product
                 ).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                message = "Failed to upsert product",
+                                type = SnackbarTypeEnum.ERROR
+                            )
+                        )
                         _state.update { old -> old.copy(isLoading = false) }
                     },
                     ifRight = {

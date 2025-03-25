@@ -1,11 +1,14 @@
 package com.lexwilliam.company.route.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.company.model.CompanyBranch
 import com.lexwilliam.company.navigation.CompanySearchNavigationTarget
 import com.lexwilliam.company.usecase.FetchCompanyUseCase
+import com.lexwilliam.company.usecase.SendInviteCompanyUseCase
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import com.lexwilliam.user.usecase.UpsertUserUseCase
@@ -27,7 +30,8 @@ class CompanySearchViewModel
         private val fetchCompany: FetchCompanyUseCase,
         observeSession: ObserveSessionUseCase,
         private val fetchUser: FetchUserUseCase,
-        private val upsertUser: UpsertUserUseCase
+        private val upsertUser: UpsertUserUseCase,
+        private val sendInvite: SendInviteCompanyUseCase
     ) : ViewModel() {
         private val _state = MutableStateFlow(CompanySearchUiState())
         val uiState = _state.asStateFlow()
@@ -77,10 +81,21 @@ class CompanySearchViewModel
                 val user = user.firstOrNull()?.getOrNull() ?: return@launch
                 upsertUser(user.copy(branchUUID = branch.uuid)).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                type = SnackbarTypeEnum.ERROR,
+                                message = failure.toString()
+                            )
+                        )
                     },
                     ifRight = {
                         _navigation.send(CompanySearchNavigationTarget.Home)
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                type = SnackbarTypeEnum.SUCCESS,
+                                message = ""
+                            )
+                        )
                     }
                 )
             }
@@ -97,19 +112,33 @@ class CompanySearchViewModel
         }
 
         private fun handleConfirmClicked() {
-            _state.update { old -> old.copy(error = null) }
+            _state.update { old -> old.copy(error = null, isLoadingSearch = true) }
             viewModelScope.launch {
                 fetchCompany(_state.value.query).fold(
                     ifLeft = { failure ->
-                        _state.update { old -> old.copy(error = failure.toString()) }
+                        _state.update {
+                                old ->
+                            old.copy(error = failure.toString(), isLoadingSearch = false)
+                        }
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                type = SnackbarTypeEnum.ERROR,
+                                message = "Invite Request Failed"
+                            )
+                        )
                     },
                     ifRight = {
                         _state.update { old ->
                             old.copy(
-                                isDialogShown = true,
-                                branches = it.branches
+                                isLoadingSearch = false
                             )
                         }
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                type = SnackbarTypeEnum.SUCCESS,
+                                message = "Invite sent successfully"
+                            )
+                        )
                     }
                 )
             }

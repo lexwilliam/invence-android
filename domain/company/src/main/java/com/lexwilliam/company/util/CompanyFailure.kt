@@ -10,6 +10,10 @@ sealed interface UpsertCompanyFailure
 
 sealed interface DeleteCompanyFailure
 
+sealed interface InviteCompanyFailure {
+    data object CompanyNotFound : InviteCompanyFailure
+}
+
 data class UnknownFailure(
     val message: String?
-) : FetchCompanyFailure, UpsertCompanyFailure, DeleteCompanyFailure
+) : FetchCompanyFailure, UpsertCompanyFailure, DeleteCompanyFailure, InviteCompanyFailure

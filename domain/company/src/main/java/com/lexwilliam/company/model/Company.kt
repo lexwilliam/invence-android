@@ -7,5 +7,6 @@ data class Company(
     val name: String,
     val logoUrl: String?,
     val branches: List<CompanyBranch>,
+    val inviteRequest: List<CompanyInviteRequest>,
     val createdAt: Instant
 )

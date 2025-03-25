@@ -18,6 +18,9 @@ import com.lexwilliam.company.util.UnknownFailure
 import com.lexwilliam.company.util.UpsertCompanyFailure
 import com.lexwilliam.core.model.SnackbarMessage
 import com.lexwilliam.core.util.UploadImageFailure
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.user.model.Role
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
@@ -73,6 +76,7 @@ class CompanyFormViewModel
                         name = _state.value.companyName,
                         logoUrl = null,
                         branches = _state.value.branchList,
+                        inviteRequest = emptyList(),
                         createdAt = Clock.System.now()
                     )
                 val branches =
@@ -105,7 +109,13 @@ class CompanyFormViewModel
                                     ?.let { fetchUser(userID = it) }
                             user?.fold(
                                 ifLeft = { failure ->
-                                    Log.d("TAG", failure.toString())
+                                    SnackbarController.sendEvent(
+                                        event =
+                                            SnackbarEvent(
+                                                type = SnackbarTypeEnum.ERROR,
+                                                message = "Upsert User Failed"
+                                            )
+                                    )
                                 },
                                 ifRight = { userResult ->
                                     _state.value.selectedBranch?.let { branch ->
@@ -116,9 +126,22 @@ class CompanyFormViewModel
                                             )
                                         ).fold(
                                             ifLeft = { failure ->
-                                                Log.d("TAG", failure.toString())
+                                                SnackbarController.sendEvent(
+                                                    event =
+                                                        SnackbarEvent(
+                                                            type = SnackbarTypeEnum.ERROR,
+                                                            message = "Upsert User Failed"
+                                                        )
+                                                )
                                             },
                                             ifRight = {
+                                                SnackbarController.sendEvent(
+                                                    event =
+                                                        SnackbarEvent(
+                                                            type = SnackbarTypeEnum.SUCCESS,
+                                                            message = "Upsert User Success"
+                                                        )
+                                                )
                                                 _navigation.send(
                                                     CompanyFormNavigationTarget.Home
                                                 )

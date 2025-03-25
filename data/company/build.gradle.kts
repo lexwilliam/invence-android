@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.lexwilliam.company"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
@@ -51,6 +51,7 @@ ktlint {
 
 dependencies {
     api(project(":domain:company"))
+    api(project(":domain:user"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:firebase"))
 

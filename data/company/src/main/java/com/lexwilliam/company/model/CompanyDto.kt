@@ -12,6 +12,7 @@ data class CompanyDto(
     @JvmField @PropertyName("logo_url")
     val logoUrl: String? = null,
     val branches: List<CompanyBranchDto>? = null,
+    val inviteRequest: List<CompanyInviteRequestDto>? = null,
     @JvmField @PropertyName("created_at")
     val createdAt: Timestamp? = null
 ) {
@@ -21,6 +22,7 @@ data class CompanyDto(
             name = name ?: "",
             logoUrl = logoUrl,
             branches = branches?.map { branch -> branch.toDomain() } ?: emptyList(),
+            inviteRequest = inviteRequest?.map { request -> request.toDomain() } ?: emptyList(),
             createdAt = createdAt?.toKtxInstant() ?: Instant.DISTANT_PAST
         )
 
@@ -31,6 +33,11 @@ data class CompanyDto(
                 name = domain.name,
                 logoUrl = domain.logoUrl,
                 branches = domain.branches.map { branch -> CompanyBranchDto.fromDomain(branch) },
+                inviteRequest =
+                    domain.inviteRequest.map {
+                            request ->
+                        CompanyInviteRequestDto.fromDomain(request)
+                    },
                 createdAt = domain.createdAt.toTimestamp()
             )
     }

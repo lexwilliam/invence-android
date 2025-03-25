@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import arrow.optics.copy
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.usecase.DeleteProductCategoryUseCase
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
@@ -132,16 +135,37 @@ class CategoryViewModel
                         image = image ?: return@launch
                     ).fold(
                         ifLeft = {
-                            Log.d("TAG", it.toString())
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(
+                                    message = "Failed to upload image",
+                                    type = SnackbarTypeEnum.ERROR
+                                )
+                            )
                         },
                         ifRight = {
                             when (val result = upsertProductCategory(category = modifiedCategory)) {
-                                is Either.Left -> Log.d("TAG", result.value.toString())
-                                is Either.Right ->
+                                is Either.Left -> {
+                                    SnackbarController.sendEvent(
+                                        event =
+                                            SnackbarEvent(
+                                                type = SnackbarTypeEnum.ERROR,
+                                                message = "Upsert Product Category Failed"
+                                            )
+                                    )
+                                }
+                                is Either.Right -> {
+                                    SnackbarController.sendEvent(
+                                        event =
+                                            SnackbarEvent(
+                                                type = SnackbarTypeEnum.SUCCESS,
+                                                message = "Upsert Product Category Success"
+                                            )
+                                    )
                                     _state.update {
                                             old ->
                                         old.copy(isEditing = false, selectedCategory = null)
                                     }
+                                }
                             }
                         }
                     )
@@ -154,7 +178,12 @@ class CategoryViewModel
                             image = image
                         ).fold(
                             ifLeft = {
-                                Log.d("TAG", it.toString())
+                                SnackbarController.sendEvent(
+                                    SnackbarEvent(
+                                        message = "Failed to upload image",
+                                        type = SnackbarTypeEnum.ERROR
+                                    )
+                                )
                             },
                             ifRight = {
                                 val modifiedCategory =

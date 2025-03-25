@@ -4,13 +4,14 @@ plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
     id("kotlin-kapt")
+    alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
 android {
     namespace = "com.lexwilliam.profile"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
@@ -38,10 +39,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
-    kotlinOptions.languageVersion = "1.9"
 }
 
 tasks.getByPath("preBuild").dependsOn("ktlintFormat")

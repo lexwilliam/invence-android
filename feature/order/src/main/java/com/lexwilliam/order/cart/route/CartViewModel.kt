@@ -1,8 +1,10 @@
 package com.lexwilliam.order.cart.route
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.order.cart.navigation.CartNavigationTarget
 import com.lexwilliam.order.model.OrderGroup
 import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
@@ -77,9 +79,22 @@ class CartViewModel
             viewModelScope.launch {
                 deleteOrderGroup(order).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Delete Order Group Failed"
+                                )
+                        )
                     },
                     ifRight = {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.SUCCESS,
+                                    message = "${order.uuid} Order Group Deleted"
+                                )
+                        )
                     }
                 )
             }
@@ -103,10 +118,23 @@ class CartViewModel
                     )
                 upsertOrderGroup(orderGroup).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Upsert Order Group Failed"
+                                )
+                        )
                         _isLoading.value = false
                     },
                     ifRight = {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.SUCCESS,
+                                    message = "Upsert Order Group Success"
+                                )
+                        )
                     }
                 )
             }

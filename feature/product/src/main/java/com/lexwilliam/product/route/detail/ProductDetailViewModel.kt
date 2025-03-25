@@ -1,11 +1,13 @@
 package com.lexwilliam.product.route.detail
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.product.model.ProductItem
 import com.lexwilliam.product.navigation.ProductDetailNavigationTarget
 import com.lexwilliam.product.route.detail.dialog.RestockDialogEvent
@@ -116,7 +118,6 @@ class ProductDetailViewModel
         private fun handleDeleteConfirm() {
             viewModelScope.launch {
                 val category = category.firstOrNull() ?: return@launch
-                val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 upsertProductCategory(
                     category =
                         category.copy(
@@ -126,10 +127,23 @@ class ProductDetailViewModel
                         )
                 ).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Delete Product Failed"
+                                )
+                        )
                     },
                     ifRight = {
                         _navigation.send(ProductDetailNavigationTarget.BackStack)
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Delete Product Success"
+                                )
+                        )
                     }
                 )
             }
@@ -147,7 +161,6 @@ class ProductDetailViewModel
         }
 
         private fun handleCopyDescription() {
-            TODO("Not yet implemented")
         }
 
         private fun handleBackStackClicked() {
@@ -199,9 +212,22 @@ class ProductDetailViewModel
                     )
                 upsertProductCategory(modifiedCategory).fold(
                     ifLeft = { failure ->
-                        Log.d("TAG", failure.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Upsert Product Category Failed"
+                                )
+                        )
                     },
                     ifRight = {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.SUCCESS,
+                                    message = "Upsert Product Category Success"
+                                )
+                        )
                         _dialogState.update { null }
                     }
                 )
