@@ -1,6 +1,6 @@
 package com.lexwilliam.invence.ui
 
-import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.core.navigation.Screen
@@ -25,6 +25,21 @@ class AppViewModel
         observeSession: ObserveSessionUseCase,
         fetchUser: FetchUserUseCase
     ) : ViewModel() {
+        val visiblePermissionsDialogQueue = mutableStateListOf<String>()
+
+        fun dismissDialog() {
+            visiblePermissionsDialogQueue.removeAt(visiblePermissionsDialogQueue.lastIndex)
+        }
+
+        fun onPermissionResult(
+            permission: String,
+            isGranted: Boolean
+        ) {
+            if (!isGranted) {
+                visiblePermissionsDialogQueue.add(0, permission)
+            }
+        }
+
         private val branchUUID =
             observeSession().map { session ->
                 session.userUUID
@@ -81,8 +96,6 @@ class AppViewModel
                                 ?.getOrNull()
                         }
                         .firstOrNull()
-
-                Log.d("TAG", "user: $user")
 
                 when {
                     user == null -> _destination.update { Screen.LOGIN }

@@ -15,6 +15,7 @@ import com.lexwilliam.company.util.UnknownFailure
 import com.lexwilliam.company.util.UpsertCompanyFailure
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.user.model.User
+import com.lexwilliam.user.repository.UserRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -23,9 +24,10 @@ import kotlinx.datetime.Clock
 
 fun firebaseCompanyRepository(
     analytics: FirebaseCrashlytics,
-    store: FirebaseFirestore
+    store: FirebaseFirestore,
+    userRepository: UserRepository
 ) = object : CompanyRepository {
-    override fun observeCompany(companyUUID: String): Flow<Company> =
+    override fun observeCompany(companyUUID: String): Flow<Company?> =
         callbackFlow {
             val reference =
                 store
@@ -36,7 +38,39 @@ fun firebaseCompanyRepository(
                 reference.addSnapshotListener { value, error ->
                     error?.let { exception ->
                         analytics.recordException(exception)
-                        trySend(CompanyDto().toDomain())
+                        trySend(null)
+                    }
+
+                    trySend(
+                        value
+                            ?.toObject(CompanyDto::class.java)
+                            ?.toDomain()
+                            ?: CompanyDto().toDomain()
+                    )
+                }
+
+            awaitClose { registration.remove() }
+        }
+
+    override fun observeCurrentCompany(): Flow<Company?> =
+        callbackFlow {
+            val currentUser: User? = userRepository.fetchCurrentUser().getOrNull()
+            val companyUUID: String? = currentUser?.companyUUID?.toString()
+            if (companyUUID == null) {
+                analytics.recordException(NullPointerException("companyUUID is null"))
+                trySend(null)
+                return@callbackFlow
+            }
+            val reference =
+                store
+                    .collection(FirestoreConfig.COLLECTION_COMPANY)
+                    .document(companyUUID)
+
+            val registration =
+                reference.addSnapshotListener { value, error ->
+                    error?.let { exception ->
+                        analytics.recordException(exception)
+                        trySend(null)
                     }
 
                     trySend(

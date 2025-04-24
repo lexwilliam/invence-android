@@ -1,15 +1,25 @@
 package com.lexwilliam.profile.route
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -17,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +39,7 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvenceTextButton
 import com.lexwilliam.core_ui.component.button.defaults.InvenceButtonDefaults
+import com.lexwilliam.core_ui.component.dialog.InvenceAlertDialog
 import com.lexwilliam.core_ui.component.drawer.InvenceNavigationDrawer
 import com.lexwilliam.core_ui.component.image.NetworkImage
 import com.lexwilliam.core_ui.component.topbar.InvenceCenterAlignedTopBar
@@ -40,14 +52,43 @@ import kotlinx.coroutines.launch
 fun ProfileRoute(
     viewModel: ProfileViewModel = hiltViewModel(),
     toLogin: () -> Unit,
+    toMyCompany: () -> Unit,
     onDrawerNavigation: (String) -> Unit
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
+    val isLogoutShowing by viewModel.isLogoutShowing.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) {
         when (it) {
             is ProfileNavigationTarget.Login -> toLogin()
+            ProfileNavigationTarget.MyCompany -> toMyCompany()
         }
+    }
+
+    if (isLogoutShowing) {
+        InvenceAlertDialog(
+            title = "Logout",
+            description = "Are you sure you want to logout?",
+            onDismissRequest = { viewModel.onLogoutDismissed() },
+            confirmButton = {
+                InvenceTextButton(
+                    onClick = { viewModel.onLogoutConfirmed() },
+                    colors =
+                        InvenceButtonDefaults.textButtonColors(
+                            contentColor = InvenceTheme.colors.error
+                        )
+                ) {
+                    Text("Logout", style = InvenceTheme.typography.bodyMedium)
+                }
+            },
+            dismissButton = {
+                InvenceTextButton(
+                    onClick = { viewModel.onLogoutDismissed() }
+                ) {
+                    Text("Cancel", style = InvenceTheme.typography.bodyMedium)
+                }
+            }
+        )
     }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -73,6 +114,19 @@ fun ProfileRoute(
                         ) {
                             Icon(Icons.Default.Menu, contentDescription = "menu icon")
                         }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                viewModel.onLogoutClicked()
+                            }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "logout icon",
+                                tint = InvenceTheme.colors.error
+                            )
+                        }
                     }
                 )
             },
@@ -82,11 +136,11 @@ fun ProfileRoute(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp),
+                        .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                Box(modifier = Modifier.height(16.dp))
                 NetworkImage(
                     imagePath = user?.imageUrl,
                     modifier =
@@ -100,19 +154,31 @@ fun ProfileRoute(
                     Text(text = user?.name ?: "", style = InvenceTheme.typography.titleMedium)
                     Text(text = user?.email ?: "", style = InvenceTheme.typography.bodyMedium)
                 }
-                InvenceTextButton(
-                    onClick = {
-                        viewModel.onLogoutClicked()
-                    },
-                    colors =
-                        InvenceButtonDefaults.textButtonColors(
-                            contentColor = InvenceTheme.colors.error
-                        )
+                HorizontalDivider(
+                    thickness = 4.dp,
+                    color = InvenceTheme.colors.neutral20,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = "Logout",
-                        style = InvenceTheme.typography.bodyMedium
-                    )
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth().clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = toMyCompany
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Store,
+                            contentDescription = "my company icon"
+                        )
+                        Text("Company", style = InvenceTheme.typography.bodyMedium)
+                    }
                 }
             }
         }

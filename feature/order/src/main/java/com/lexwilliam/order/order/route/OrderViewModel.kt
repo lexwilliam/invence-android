@@ -197,13 +197,13 @@ class OrderViewModel
                         _state.update { old -> old.copy(isLoading = false) }
                     },
                     ifRight = {
-                        SnackbarController.sendEvent(
-                            event =
-                                SnackbarEvent(
-                                    type = SnackbarTypeEnum.SUCCESS,
-                                    message = "Upsert Order Group Success"
-                                )
-                        )
+//                        SnackbarController.sendEvent(
+//                            event =
+//                                SnackbarEvent(
+//                                    type = SnackbarTypeEnum.SUCCESS,
+//                                    message = "Upsert Order Group Success"
+//                                )
+//                        )
                         _state.update { old -> old.copy(isLoading = false) }
                         _navigation.send(OrderNavigationTarget.CheckOut(orderUUID))
                     }
@@ -231,7 +231,15 @@ class OrderViewModel
         }
 
         private fun handleBarcodeScannerClicked() {
-            TODO("Not yet implemented")
+            viewModelScope.launch {
+                SnackbarController.sendEvent(
+                    event =
+                        SnackbarEvent(
+                            type = SnackbarTypeEnum.SUCCESS,
+                            message = "Order Scan Feature is coming soon"
+                        )
+                )
+            }
         }
 
         private fun handleQueryChanged(value: String) {

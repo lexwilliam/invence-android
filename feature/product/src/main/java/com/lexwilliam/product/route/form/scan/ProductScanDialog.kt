@@ -7,18 +7,17 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,13 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -50,6 +47,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.lexwilliam.barcode.R
+import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.inventory.scan.ProductScanEvent
 import com.lexwilliam.product.route.form.ProductFormViewModel
@@ -167,10 +165,24 @@ fun ProductScanDialog(viewModel: ProductFormViewModel) {
                 dismissOnBackPress = true
             )
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
+        Scaffold(
+            topBar = {
+                InvenceTopBar(
+                    title = {
+                        Text("Scan Product", style = InvenceTheme.typography.titleMedium)
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { viewModel.onScanEvent(ProductScanEvent.Dismiss) }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "back"
+                            )
+                        }
+                    }
+                )
+            }
         ) {
             when (cameraPermissionState.status) {
                 is PermissionStatus.Granted -> {
@@ -252,16 +264,6 @@ fun ProductScanDialog(viewModel: ProductFormViewModel) {
                     }
                 }
             }
-        }
-        IconButton(
-            modifier =
-                Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clip(CircleShape)
-                    .background(InvenceTheme.colors.neutral10),
-            onClick = { viewModel.onScanEvent(ProductScanEvent.Dismiss) }
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "nav back stack")
         }
     }
 }

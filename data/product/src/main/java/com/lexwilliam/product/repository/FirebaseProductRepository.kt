@@ -1,6 +1,7 @@
 package com.lexwilliam.product.repository
 
 import android.net.Uri
+import android.util.Log
 import arrow.core.Either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -92,6 +93,7 @@ internal fun firebaseProductRepository(
                     "category" to jsonCategory,
                     "product" to jsonProduct
                 )
+            Log.d("TAG", data.toString())
             functions
                 .getHttpsCallable("setProduct")
                 .call(data)

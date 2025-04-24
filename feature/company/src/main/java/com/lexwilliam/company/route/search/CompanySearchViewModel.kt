@@ -3,9 +3,11 @@ package com.lexwilliam.company.route.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lexwilliam.company.model.CompanyBranch
+import com.lexwilliam.company.model.CompanyInviteRequest
 import com.lexwilliam.company.navigation.CompanySearchNavigationTarget
 import com.lexwilliam.company.usecase.FetchCompanyUseCase
 import com.lexwilliam.company.usecase.SendInviteCompanyUseCase
+import com.lexwilliam.company.usecase.UpsertCompanyUseCase
 import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.controller.SnackbarEvent
 import com.lexwilliam.core_ui.model.SnackbarTypeEnum
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +31,7 @@ class CompanySearchViewModel
     @Inject
     constructor(
         private val fetchCompany: FetchCompanyUseCase,
+        private val upsertCompany: UpsertCompanyUseCase,
         observeSession: ObserveSessionUseCase,
         private val fetchUser: FetchUserUseCase,
         private val upsertUser: UpsertUserUseCase,
@@ -127,17 +131,41 @@ class CompanySearchViewModel
                             )
                         )
                     },
-                    ifRight = {
-                        _state.update { old ->
-                            old.copy(
-                                isLoadingSearch = false
+                    ifRight = { company ->
+                        val user = user.firstOrNull()?.getOrNull() ?: return@launch
+                        val inviteRequest =
+                            CompanyInviteRequest(
+                                userId = user.uuid,
+                                email = user.email,
+                                imageUrl = user.imageUrl,
+                                createdAt = Clock.System.now()
                             )
-                        }
-                        SnackbarController.sendEvent(
-                            SnackbarEvent(
-                                type = SnackbarTypeEnum.SUCCESS,
-                                message = "Invite sent successfully"
+                        upsertCompany(
+                            company.copy(
+                                inviteRequest = company.inviteRequest + inviteRequest
                             )
+                        ).fold(
+                            ifLeft = { failure ->
+                                SnackbarController.sendEvent(
+                                    SnackbarEvent(
+                                        type = SnackbarTypeEnum.ERROR,
+                                        message = "Invite Request Failed"
+                                    )
+                                )
+                            },
+                            ifRight = {
+                                _state.update { old ->
+                                    old.copy(
+                                        isLoadingSearch = false
+                                    )
+                                }
+                                SnackbarController.sendEvent(
+                                    SnackbarEvent(
+                                        type = SnackbarTypeEnum.SUCCESS,
+                                        message = "Invite sent successfully"
+                                    )
+                                )
+                            }
                         )
                     }
                 )

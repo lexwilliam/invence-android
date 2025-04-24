@@ -16,9 +16,13 @@ import com.lexwilliam.auth.route.signup.navigation.signUpNavigation
 import com.lexwilliam.category.navigation.categoryNavigation
 import com.lexwilliam.category.navigation.navigateToCategory
 import com.lexwilliam.company.navigation.companyFormNavigation
+import com.lexwilliam.company.navigation.companyMemberNavigation
 import com.lexwilliam.company.navigation.companySearchNavigation
+import com.lexwilliam.company.navigation.myCompanyNavigation
 import com.lexwilliam.company.navigation.navigateToCompanyForm
+import com.lexwilliam.company.navigation.navigateToCompanyMember
 import com.lexwilliam.company.navigation.navigateToCompanySearch
+import com.lexwilliam.company.navigation.navigateToMyCompany
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
@@ -34,7 +38,6 @@ import com.lexwilliam.product.navigation.productDetailNavigation
 import com.lexwilliam.product.navigation.productFormNavigation
 import com.lexwilliam.profile.navigation.navigateToProfile
 import com.lexwilliam.profile.navigation.profileNavigation
-import com.lexwilliam.transaction.detail.navigation.navigateToTransactionDetail
 import com.lexwilliam.transaction.detail.navigation.transactionDetailNavigation
 import com.lexwilliam.transaction.history.navigation.navigateToTransactionHistory
 import com.lexwilliam.transaction.history.navigation.transactionHistoryNavigation
@@ -97,7 +100,8 @@ fun RootNavGraph(
         )
         companySearchNavigation(
             toCompanyForm = navController::navigateToCompanyForm,
-            toHome = navController::navigateToInventory
+            toHome = navController::navigateToInventory,
+            toLogin = navController::navigateToLogin
         )
         companyFormNavigation(
             toHome = navController::navigateToInventory
@@ -119,15 +123,6 @@ fun RootNavGraph(
                             .setPopUpTo(Screen.CART, true)
                             .build()
                 )
-            },
-            toTransactionDetail = { transactionUUID ->
-                navController.navigateToTransactionDetail(
-                    transactionUUID = transactionUUID,
-                    options =
-                        NavOptions.Builder()
-                            .setPopUpTo(Screen.CART, true)
-                            .build()
-                )
             }
         )
         transactionDetailNavigation(
@@ -138,10 +133,18 @@ fun RootNavGraph(
         )
         profileNavigation(
             toLogin = navController::navigateToLogin,
+            toMyCompany = navController::navigateToMyCompany,
             onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         analyticsNavigation(
             onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
+        )
+        myCompanyNavigation(
+            onBackStack = navController::navigateUp,
+            toCompanyMember = navController::navigateToCompanyMember
+        )
+        companyMemberNavigation(
+            onBackStack = navController::navigateUp
         )
         composable(route = Screen.SPLASH) {}
     }

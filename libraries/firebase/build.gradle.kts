@@ -4,7 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
@@ -55,7 +55,7 @@ dependencies {
     implementation(project(":libraries:core"))
 
     implementation(libs.hilt.library)
-    kapt(libs.hilt.kapt)
+    ksp(libs.hilt.kapt)
 
     api(platform(libs.firebase.bom))
     api(libs.bundles.firebase.dependencies)

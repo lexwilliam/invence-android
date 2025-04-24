@@ -4,7 +4,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.ChipBorder
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ChipElevation
 import androidx.compose.material3.Text
@@ -25,7 +24,6 @@ fun InvenceChip(
     shape: Shape = CircleShape,
     colors: ChipColors = InvenceChipDefaults.assistChipColors(),
     elevation: ChipElevation? = AssistChipDefaults.assistChipElevation(),
-    border: ChipBorder? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     AssistChip(
@@ -38,7 +36,7 @@ fun InvenceChip(
         shape = shape,
         colors = colors,
         elevation = elevation,
-        border = border,
+        border = null,
         interactionSource = interactionSource
     )
 }

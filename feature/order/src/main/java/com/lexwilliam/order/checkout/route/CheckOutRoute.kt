@@ -37,21 +37,22 @@ import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialog
+import com.lexwilliam.order.checkout.dialog.OrderSuccessDialog
+import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.order.component.SmallOrderProductCard
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckOutRoute(
     viewModel: CheckOutViewModel = hiltViewModel(),
     onBackStack: () -> Unit,
-    toCart: () -> Unit,
-    toTransactionDetail: (UUID) -> Unit
+    toCart: () -> Unit
 ) {
     val orders by viewModel.orders.collectAsStateWithLifecycle()
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+    val successDialogState by viewModel.successDialogState.collectAsStateWithLifecycle()
 
     val subtotal = orders.sumOf { order -> order.quantity * (order.item?.price ?: 0.0) }
 
@@ -59,7 +60,6 @@ fun CheckOutRoute(
         when (target) {
             CheckOutNavigationTarget.BackStack -> onBackStack()
             CheckOutNavigationTarget.Cart -> toCart()
-            is CheckOutNavigationTarget.TransactionDetail -> toTransactionDetail(target.uuid)
         }
     }
 
@@ -72,6 +72,15 @@ fun CheckOutRoute(
             state = state,
             onEvent = viewModel::onDialogEvent,
             subtotal = subtotal
+        )
+    }
+
+    successDialogState?.let { state ->
+        OrderSuccessDialog(
+            transaction = state.transaction,
+            onDone = {
+                viewModel.onSuccessDialogEvent(OrderSuccessDialogEvent.Confirm)
+            }
         )
     }
 

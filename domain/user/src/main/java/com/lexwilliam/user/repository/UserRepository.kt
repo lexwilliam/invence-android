@@ -26,6 +26,8 @@ interface UserRepository {
 
     suspend fun fetchUser(uuid: String): Either<FetchUserFailure, User>
 
+    suspend fun fetchCurrentUser(): Either<FetchUserFailure, User>
+
     suspend fun upsertUser(user: User): Either<UpsertUserFailure, User>
 
     fun observeShift(uuid: String): Flow<EmployeeShift?>

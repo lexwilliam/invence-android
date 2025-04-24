@@ -1,18 +1,24 @@
 package com.lexwilliam.company.route.search
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,7 +36,8 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 fun CompanySearchRoute(
     viewModel: CompanySearchViewModel = hiltViewModel(),
     toCompanyForm: () -> Unit,
-    toHome: () -> Unit
+    toHome: () -> Unit,
+    toLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -59,6 +66,14 @@ fun CompanySearchRoute(
                     .systemBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            Icon(
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .clickable { toLogin() },
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "login icon"
+            )
             Text(
                 text = "Company",
                 style = InvenceTheme.typography.brand,

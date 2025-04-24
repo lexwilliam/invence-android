@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.lexwilliam.auth.route.login.navigation.LoginNavigationTarget
 import com.lexwilliam.auth.util.SignInResult
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.LoginUseCase
@@ -49,10 +52,14 @@ class LoginViewModel
             viewModelScope.launch {
                 when (val result = loginUseCase(state.value.email, state.value.password)) {
                     is Either.Left ->
-                        _state.update {
-                                old ->
-                            old.copy(error = result.value.toString())
-                        }
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type =
+                                        SnackbarTypeEnum.ERROR,
+                                    message = "Incorrect email or password"
+                                )
+                        )
                     is Either.Right -> {
                         when (result.value.branchUUID) {
                             null -> _navigation.send(LoginNavigationTarget.CompanySearch)
@@ -92,12 +99,24 @@ class LoginViewModel
                 val errorMessage = result.errorMessage
                 val userData = result.data
                 when {
-                    errorMessage != null -> _state.update { old -> old.copy(error = errorMessage) }
+                    errorMessage != null ->
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type =
+                                        SnackbarTypeEnum.ERROR,
+                                    message = errorMessage
+                                )
+                        )
                     userData == null ->
-                        _state.update {
-                                old ->
-                            old.copy(error = "Can't find user data")
-                        }
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type =
+                                        SnackbarTypeEnum.ERROR,
+                                    message = "Can't find user data"
+                                )
+                        )
                     else -> {
                         val user =
                             User(
@@ -106,12 +125,13 @@ class LoginViewModel
                                 email = userData.email ?: "",
                                 imageUrl = userData.profilePictureUrl,
                                 createdAt = Clock.System.now(),
-                                role = null
+                                role = null,
+                                companyUUID = null
                             )
 
                         val userDoc = fetchUser(user.uuid).getOrNull()
                         if (userDoc != null) {
-                            if (userDoc.branchUUID != null) {
+                            if (userDoc.branchUUID != null && userDoc.companyUUID != null) {
                                 _navigation.send(LoginNavigationTarget.Home)
                             } else {
                                 _navigation.send(LoginNavigationTarget.CompanySearch)
@@ -121,10 +141,14 @@ class LoginViewModel
 
                         when (val upsertResult = upsertUser(user)) {
                             is Either.Left ->
-                                _state.update {
-                                        old ->
-                                    old.copy(error = "${upsertResult.value}: Insert User Failed")
-                                }
+                                SnackbarController.sendEvent(
+                                    event =
+                                        SnackbarEvent(
+                                            type =
+                                                SnackbarTypeEnum.ERROR,
+                                            message = "${upsertResult.value}: Insert User Failed"
+                                        )
+                                )
                             is Either.Right -> {
                                 if (upsertResult.value.branchUUID != null) {
                                     _navigation.send(LoginNavigationTarget.Home)

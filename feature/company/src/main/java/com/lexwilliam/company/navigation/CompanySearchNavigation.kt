@@ -9,14 +9,16 @@ import com.lexwilliam.core.navigation.Screen
 
 fun NavGraphBuilder.companySearchNavigation(
     toCompanyForm: () -> Unit,
-    toHome: () -> Unit
+    toHome: () -> Unit,
+    toLogin: () -> Unit
 ) {
     composable(
         route = Screen.COMPANY_SEARCH
     ) {
         CompanySearchRoute(
             toCompanyForm = toCompanyForm,
-            toHome = toHome
+            toHome = toHome,
+            toLogin = toLogin
         )
     }
 }

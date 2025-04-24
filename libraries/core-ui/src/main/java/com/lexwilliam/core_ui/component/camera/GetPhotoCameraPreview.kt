@@ -23,11 +23,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
@@ -36,7 +34,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -124,84 +121,77 @@ fun GetPhotoCameraPreview(
                 usePlatformDefaultWidth = false
             )
     ) {
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = InvenceTheme.colors.neutral100,
-                            navigationIconContentColor = InvenceTheme.colors.neutral10,
-                            actionIconContentColor = InvenceTheme.colors.neutral10,
-                            titleContentColor = InvenceTheme.colors.neutral10
-                        ),
-                    title = {
-                        Text(
-                            text = "Take Photo",
-                            style = InvenceTheme.typography.titleMedium
+        Column(
+            modifier =
+                Modifier
+                    .background(InvenceTheme.colors.neutral100)
+                    .padding(bottom = 80.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            CenterAlignedTopAppBar(
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = InvenceTheme.colors.neutral100,
+                        navigationIconContentColor = InvenceTheme.colors.neutral10,
+                        actionIconContentColor = InvenceTheme.colors.neutral10,
+                        titleContentColor = InvenceTheme.colors.neutral10
+                    ),
+                title = {
+                    Text(
+                        text = "Take Photo",
+                        style = InvenceTheme.typography.titleMedium
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        dismissCamera()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "dismiss camera icon"
                         )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            dismissCamera()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "dismiss camera icon"
-                            )
-                        }
                     }
-                )
-            }
-        ) { innerPadding ->
-            Column(
+                }
+            )
+            AndroidView(
+                factory = { previewView },
+                modifier = Modifier.weight(1f)
+            )
+            Row(
                 modifier =
                     Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                        .background(InvenceTheme.colors.neutral100),
-                verticalArrangement = Arrangement.SpaceEvenly
+                        .fillMaxWidth()
+                        .background(InvenceTheme.colors.neutral100)
+                        .padding(horizontal = 16.dp, vertical = 32.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                AndroidView(
-                    factory = { previewView },
-                    modifier = Modifier.wrapContentSize()
-                )
-                Row(
+                Box(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .background(InvenceTheme.colors.neutral100)
-                            .padding(horizontal = 16.dp, vertical = 32.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(InvenceTheme.colors.neutral10)
-                                .clickable {
-                                    imageCapture.takePicture(
-                                        ContextCompat.getMainExecutor(context),
-                                        object : OnImageCapturedCallback() {
-                                            override fun onCaptureSuccess(image: ImageProxy) {
-                                                super.onCaptureSuccess(image)
-                                                val croppedBitmap = cropToSquare(image.toBitmap())
-                                                val rotatedBitmap = rotateBitmap(croppedBitmap, 90f)
-                                                onPhotoTaken(rotatedBitmap)
-                                                dismissCamera()
-                                            }
-
-                                            override fun onError(exception: ImageCaptureException) {
-                                                super.onError(exception)
-                                                Log.e("Camera", "Error")
-                                            }
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(InvenceTheme.colors.neutral10)
+                            .clickable {
+                                imageCapture.takePicture(
+                                    ContextCompat.getMainExecutor(context),
+                                    object : OnImageCapturedCallback() {
+                                        override fun onCaptureSuccess(image: ImageProxy) {
+                                            super.onCaptureSuccess(image)
+                                            val croppedBitmap = cropToSquare(image.toBitmap())
+                                            val rotatedBitmap = rotateBitmap(croppedBitmap, 90f)
+                                            onPhotoTaken(rotatedBitmap)
+                                            dismissCamera()
                                         }
-                                    )
-                                },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = "take a picture")
-                    }
+
+                                        override fun onError(exception: ImageCaptureException) {
+                                            super.onError(exception)
+                                        }
+                                    }
+                                )
+                            },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = "take a picture")
                 }
             }
         }

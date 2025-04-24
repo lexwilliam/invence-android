@@ -12,8 +12,7 @@ import java.util.UUID
 
 fun NavGraphBuilder.checkOutNavigation(
     onBackStack: () -> Unit,
-    toCart: () -> Unit,
-    toTransactionDetail: (UUID) -> Unit
+    toCart: () -> Unit
 ) {
     composable(
         route = "${Screen.CHECK_OUT}?orderUUID={orderUUID}",
@@ -27,8 +26,7 @@ fun NavGraphBuilder.checkOutNavigation(
     ) {
         CheckOutRoute(
             onBackStack = onBackStack,
-            toCart = toCart,
-            toTransactionDetail = toTransactionDetail
+            toCart = toCart
         )
     }
 }

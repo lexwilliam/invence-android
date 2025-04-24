@@ -12,6 +12,8 @@ object Screen {
     const val CATEGORY = "category"
     const val COMPANY_SEARCH = "company_search"
     const val COMPANY_FORM = "company_form"
+    const val MY_COMPANY = "my_company"
+    const val COMPANY_MEMBER = "company_member"
     const val BARCODE = "barcode"
     const val ORDER = "order"
     const val CART = "cart"

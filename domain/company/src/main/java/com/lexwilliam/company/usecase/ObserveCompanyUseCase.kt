@@ -10,7 +10,7 @@ class ObserveCompanyUseCase
     constructor(
         private val companyRepository: CompanyRepository
     ) {
-        operator fun invoke(companyUUID: String): Flow<Company> {
+        operator fun invoke(companyUUID: String): Flow<Company?> {
             return companyRepository.observeCompany(companyUUID)
         }
     }

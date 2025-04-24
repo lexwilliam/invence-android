@@ -4,7 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
@@ -54,7 +54,7 @@ dependencies {
     api(libs.bundles.coroutine.dependencies)
 
     implementation(libs.hilt.library)
-    kapt(libs.hilt.kapt)
+    ksp(libs.hilt.kapt)
 
     api(libs.kotlinx.datetime)
     api(libs.kotlinx.serialization.json)

@@ -9,6 +9,8 @@ import java.util.UUID
 
 data class UserDto(
     val uuid: String? = null,
+    @JvmField @PropertyName("company_uuid")
+    val companyUUID: String? = null,
     @JvmField @PropertyName("branch_uuid")
     val branchUUID: String? = null,
     val name: String? = null,
@@ -22,6 +24,7 @@ data class UserDto(
     fun toDomain(): User =
         User(
             uuid = uuid ?: "",
+            companyUUID = companyUUID?.let { UUID.fromString(it) },
             branchUUID = branchUUID?.let { UUID.fromString(it) },
             name = name ?: "",
             imageUrl = imageUrl,
@@ -34,6 +37,7 @@ data class UserDto(
         fun fromDomain(domain: User): UserDto =
             UserDto(
                 uuid = domain.uuid,
+                companyUUID = domain.companyUUID?.toString(),
                 branchUUID = domain.branchUUID?.toString(),
                 name = domain.name,
                 imageUrl = domain.imageUrl,

@@ -41,10 +41,10 @@
             <option value="$PROJECT_DIR$/libraries" />
             <option value="$PROJECT_DIR$/libraries/core" />
             <option value="$PROJECT_DIR$/libraries/core-ui" />
-            <option value="$PROJECT_DIR$/libraries/db" />
             <option value="$PROJECT_DIR$/libraries/firebase" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

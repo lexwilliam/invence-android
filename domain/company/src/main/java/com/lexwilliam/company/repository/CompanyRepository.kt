@@ -10,7 +10,9 @@ import com.lexwilliam.user.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface CompanyRepository {
-    fun observeCompany(companyUUID: String): Flow<Company>
+    fun observeCompany(companyUUID: String): Flow<Company?>
+
+    fun observeCurrentCompany(): Flow<Company?>
 
     suspend fun fetchCompany(companyUUID: String): Either<FetchCompanyFailure, Company>
 

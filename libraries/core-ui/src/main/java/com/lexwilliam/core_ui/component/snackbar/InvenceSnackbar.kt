@@ -325,7 +325,7 @@ object InvenceSnackbarDefaults {
     val errorContentColor: Color @Composable get() = InvenceTheme.colors.neutral10
 
     /** Default content color of a snackbar. */
-    val contentColor: Color @Composable get() = InvenceTheme.colors.neutral100
+    val contentColor: Color @Composable get() = InvenceTheme.colors.neutral10
 
 //    /** Default action color of a snackbar. */
 //    val actionColor: Color @Composable get() = SnackbarTokens.ActionLabelTextColor.value

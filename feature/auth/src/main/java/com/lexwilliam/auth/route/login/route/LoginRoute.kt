@@ -105,7 +105,6 @@ fun LoginRoute(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(text = "Login", style = InvenceTheme.typography.brand)
-                state.error?.let { Text(text = it, style = InvenceTheme.typography.bodyMedium) }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(text = "Email", style = InvenceTheme.typography.bodyMedium)
                     InvenceOutlineTextField(

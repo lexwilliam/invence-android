@@ -21,6 +21,5 @@ data class ProductFormUiState(
         sku.isNotBlank() &&
             title.isNotBlank() &&
             sellPrice.isNotBlank() &&
-            selectedCategory != null &&
-            !isLoading
+            selectedCategory != null
 }

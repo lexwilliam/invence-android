@@ -4,7 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
@@ -61,5 +61,5 @@ dependencies {
     implementation(project(":libraries:core-ui"))
 
     implementation(libs.hilt.library)
-    kapt(libs.hilt.kapt)
+    ksp(libs.hilt.kapt)
 }

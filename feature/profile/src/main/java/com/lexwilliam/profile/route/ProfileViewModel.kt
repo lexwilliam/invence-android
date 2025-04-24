@@ -10,7 +10,9 @@ import com.lexwilliam.user.usecase.LogoutUseCase
 import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -28,6 +30,9 @@ class ProfileViewModel
         private val _navigation = Channel<ProfileNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
 
+        private val _isLogoutShowing = MutableStateFlow(false)
+        val isLogoutShowing = _isLogoutShowing.asStateFlow()
+
         val user =
             observeSession()
                 .map { session ->
@@ -42,6 +47,14 @@ class ProfileViewModel
                 )
 
         fun onLogoutClicked() {
+            _isLogoutShowing.value = true
+        }
+
+        fun onLogoutDismissed() {
+            _isLogoutShowing.value = false
+        }
+
+        fun onLogoutConfirmed() {
             viewModelScope.launch {
                 when (val result = logout()) {
                     is Either.Left -> Log.d("TAG", "$result: Logout Error")

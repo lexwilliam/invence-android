@@ -74,7 +74,8 @@ fun firebaseUserRepository(
                     createdAt = Clock.System.now(),
                     imageUrl = null,
                     branchUUID = null,
-                    role = Role.OWNER
+                    role = Role.OWNER,
+                    companyUUID = null
                 )
             when (upsertUser(user)) {
                 is Either.Left -> return SignUpFailure.UpsertUserToFirestoreFail.left()
@@ -135,6 +136,11 @@ fun firebaseUserRepository(
             analytics.recordException(t)
             UnknownFailure(t.message)
         }
+    }
+
+    override suspend fun fetchCurrentUser(): Either<FetchUserFailure, User> {
+        val userId = auth.currentUser?.uid ?: return FetchUserFailure.UserIsNull.left()
+        return fetchUser(userId)
     }
 
     override suspend fun upsertUser(user: User): Either<UpsertUserFailure, User> {

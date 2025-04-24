@@ -1,13 +1,14 @@
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
+    id("com.google.devtools.ksp")
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    alias(libs.plugins.kotlin.compose)
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
 }
 
@@ -94,7 +95,7 @@ dependencies {
     implementation(libs.hilt.library)
     implementation(libs.hilt.nav)
     implementation(libs.material3.android)
-    kapt(libs.hilt.kapt)
+    ksp(libs.hilt.kapt)
 
     implementation(libs.google.play.service.auth)
 

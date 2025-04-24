@@ -9,6 +9,8 @@ import arrow.core.right
 import com.lexwilliam.branch.usecase.ObserveBranchUseCase
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogState
+import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
+import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogState
 import com.lexwilliam.order.checkout.navigation.CheckOutNavigationTarget
 import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.model.OrderDiscount
@@ -97,7 +99,7 @@ class CheckOutViewModel
         private val _dialogState = MutableStateFlow<OrderAddOnDialogState?>(null)
         val dialogState = _dialogState.asStateFlow()
 
-        private val orderGroup =
+        val orderGroup =
             orderUUID.flatMapLatest { uuid ->
                 when (uuid) {
                     null -> flowOf(null)
@@ -115,6 +117,9 @@ class CheckOutViewModel
                     .firstOrNull()?.orders ?: emptyList()
             }
         }
+
+        private val _successDialogState = MutableStateFlow<OrderSuccessDialogState?>(null)
+        val successDialogState = _successDialogState.asStateFlow()
 
         init {
             initializeOrder()
@@ -180,10 +185,7 @@ class CheckOutViewModel
                                 Log.d("TAG", result.value.toString())
                             }
                             is Either.Right -> {
-                                _navigation
-                                    .send(
-                                        CheckOutNavigationTarget.TransactionDetail(transactionUUID)
-                                    )
+                                _successDialogState.update { OrderSuccessDialogState(transaction) }
                             }
                         }
                     }
@@ -329,5 +331,17 @@ class CheckOutViewModel
             val orderGroup = orderGroup.firstOrNull() ?: return false.right()
             return upsertOrderGroup(orderGroup.copy(orders = orders))
                 .map { true }
+        }
+
+        fun onSuccessDialogEvent(event: OrderSuccessDialogEvent) {
+            when (event) {
+                OrderSuccessDialogEvent.Confirm -> handleSuccessConfirm()
+            }
+        }
+
+        private fun handleSuccessConfirm() {
+            viewModelScope.launch {
+                _navigation.send(CheckOutNavigationTarget.Cart)
+            }
         }
     }

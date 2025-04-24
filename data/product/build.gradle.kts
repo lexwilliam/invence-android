@@ -4,7 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     alias(libs.plugins.android.lib.plugin)
     alias(libs.plugins.kotlin.plugin)
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     kotlin("plugin.serialization")
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
@@ -57,7 +57,7 @@ dependencies {
     implementation(project(":libraries:firebase"))
 
     implementation(libs.hilt.library)
-    kapt(libs.hilt.kapt)
+    ksp(libs.hilt.kapt)
 
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)

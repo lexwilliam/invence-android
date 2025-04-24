@@ -541,7 +541,6 @@ class ProductFormViewModel
             viewModelScope.launch(
                 CoroutineExceptionHandler { _, exception ->
                     notifyErrorResult(exception)
-                    Log.e("TAG", "$exception")
                 }
             ) {
                 if (isResultBottomSheetShowing) {

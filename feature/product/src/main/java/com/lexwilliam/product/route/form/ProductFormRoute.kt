@@ -107,6 +107,7 @@ fun ProductFormRoute(
                             .fillMaxWidth()
                             .padding(16.dp),
                     enabled = uiState.isValid,
+                    isLoading = uiState.isLoading,
                     onClick = {
                         viewModel.onEvent(ProductFormUiEvent.SaveClicked)
                     }

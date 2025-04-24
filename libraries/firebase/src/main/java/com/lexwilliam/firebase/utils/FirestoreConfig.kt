@@ -7,6 +7,7 @@ object FirestoreConfig {
     const val COLLECTION_USER = "user"
     const val COLLECTION_COMPANY = "company"
     const val COLLECTION_LOG = "log"
+    const val COLLECTION_ORDER = "order"
     const val COLLECTION_EMPLOYEE_SHIFT = "employee_shift"
 
     object Field {
