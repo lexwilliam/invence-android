@@ -52,37 +52,32 @@ fun firebaseCompanyRepository(
             awaitClose { registration.remove() }
         }
 
-    override fun observeCurrentCompany(): Flow<Company?> =
-        callbackFlow {
-            val currentUser: User? = userRepository.fetchCurrentUser().getOrNull()
-            val companyUUID: String? = currentUser?.companyUUID?.toString()
-            if (companyUUID == null) {
-                analytics.recordException(NullPointerException("companyUUID is null"))
-                trySend(null)
-                return@callbackFlow
-            }
-            val reference =
+    override suspend fun fetchCurrentCompany(): Either<FetchCompanyFailure, Company> {
+        return Either.catch {
+            val companyUUID: String? =
+                userRepository.fetchCurrentUser().getOrNull()?.companyUUID?.toString()
+            if (companyUUID == null) return FetchCompanyFailure.CompanyIsNull.left()
+            val documentSnapshot =
                 store
                     .collection(FirestoreConfig.COLLECTION_COMPANY)
                     .document(companyUUID)
+                    .get()
+                    .await()
 
-            val registration =
-                reference.addSnapshotListener { value, error ->
-                    error?.let { exception ->
-                        analytics.recordException(exception)
-                        trySend(null)
-                    }
-
-                    trySend(
-                        value
-                            ?.toObject(CompanyDto::class.java)
-                            ?.toDomain()
-                            ?: CompanyDto().toDomain()
-                    )
-                }
-
-            awaitClose { registration.remove() }
+            if (documentSnapshot.exists()) {
+                val company =
+                    documentSnapshot.toObject(CompanyDto::class.java)
+                        ?.toDomain()
+                return company?.right() ?: FetchCompanyFailure.CompanyIsNull.left()
+            } else {
+                return FetchCompanyFailure.DocumentNotFound.left()
+            }
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            UnknownFailure(t.message)
         }
+    }
 
     override suspend fun fetchCompany(companyUUID: String): Either<FetchCompanyFailure, Company> {
         return Either.catch {

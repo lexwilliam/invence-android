@@ -1,6 +1,5 @@
 package com.lexwilliam.company.route.my
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,7 +28,7 @@ fun MyCompanyRoute(
     toCompanyMember: () -> Unit,
     viewModel: MyCompanyViewModel = hiltViewModel()
 ) {
-    val company by viewModel.company.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = InvenceTheme.colors.neutral10,
@@ -44,7 +41,7 @@ fun MyCompanyRoute(
                     IconButton(onClick = onBackStack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back icon")
                     }
-                },
+                }
             )
         }
     ) { innerPadding ->
@@ -56,11 +53,10 @@ fun MyCompanyRoute(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp)
             ) {
-                Text(company?.name ?: "", style = InvenceTheme.typography.titleLarge)
+                Text(state.company?.name ?: "", style = InvenceTheme.typography.titleLarge)
             }
-
         }
     }
 }

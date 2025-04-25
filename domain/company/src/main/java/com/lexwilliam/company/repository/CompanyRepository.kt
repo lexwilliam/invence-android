@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface CompanyRepository {
     fun observeCompany(companyUUID: String): Flow<Company?>
 
-    fun observeCurrentCompany(): Flow<Company?>
+    suspend fun fetchCurrentCompany(): Either<FetchCompanyFailure, Company>
 
     suspend fun fetchCompany(companyUUID: String): Either<FetchCompanyFailure, Company>
 
