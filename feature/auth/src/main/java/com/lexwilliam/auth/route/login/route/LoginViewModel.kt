@@ -11,6 +11,7 @@ import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.usecase.FetchUserUseCase
 import com.lexwilliam.user.usecase.LoginUseCase
+import com.lexwilliam.user.usecase.LogoutUseCase
 import com.lexwilliam.user.usecase.UpsertUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class LoginViewModel
     @Inject
     constructor(
-        private val loginUseCase: LoginUseCase,
+        private val login: LoginUseCase,
+        private val logout: LogoutUseCase,
         private val upsertUser: UpsertUserUseCase,
         private val fetchUser: FetchUserUseCase
     ) : ViewModel() {
@@ -50,7 +52,7 @@ class LoginViewModel
 
         private fun handleSignInClicked() {
             viewModelScope.launch {
-                when (val result = loginUseCase(state.value.email, state.value.password)) {
+                when (login(state.value.email, state.value.password)) {
                     is Either.Left ->
                         SnackbarController.sendEvent(
                             event =
@@ -61,10 +63,7 @@ class LoginViewModel
                                 )
                         )
                     is Either.Right -> {
-                        when (result.value.branchUUID) {
-                            null -> _navigation.send(LoginNavigationTarget.CompanySearch)
-                            else -> _navigation.send(LoginNavigationTarget.Home)
-                        }
+                        _navigation.send(LoginNavigationTarget.Home)
                     }
                 }
             }
@@ -124,40 +123,35 @@ class LoginViewModel
                                 name = userData.username ?: "",
                                 email = userData.email ?: "",
                                 imageUrl = userData.profilePictureUrl,
-                                createdAt = Clock.System.now(),
-                                role = null,
-                                companyUUID = null
+                                createdAt = Clock.System.now()
                             )
 
                         val userDoc = fetchUser(user.uuid).getOrNull()
                         if (userDoc != null) {
-                            if (userDoc.branchUUID != null && userDoc.companyUUID != null) {
-                                _navigation.send(LoginNavigationTarget.Home)
-                            } else {
-                                _navigation.send(LoginNavigationTarget.CompanySearch)
-                            }
-                            return@launch
-                        }
-
-                        when (val upsertResult = upsertUser(user)) {
-                            is Either.Left ->
-                                SnackbarController.sendEvent(
-                                    event =
-                                        SnackbarEvent(
-                                            type =
-                                                SnackbarTypeEnum.ERROR,
-                                            message = "${upsertResult.value}: Insert User Failed"
-                                        )
-                                )
-                            is Either.Right -> {
-                                if (upsertResult.value.branchUUID != null) {
-                                    _navigation.send(LoginNavigationTarget.Home)
-                                } else {
-                                    _navigation.send(LoginNavigationTarget.CompanySearch)
-                                }
-                            }
+                            upsertNewUser(user)
+                        } else {
+                            _navigation.send(LoginNavigationTarget.Home)
                         }
                     }
+                }
+            }
+        }
+
+        private suspend fun upsertNewUser(user: User) {
+            when (val upsertResult = upsertUser(user)) {
+                is Either.Left -> {
+                    SnackbarController.sendEvent(
+                        event =
+                            SnackbarEvent(
+                                type =
+                                    SnackbarTypeEnum.ERROR,
+                                message = "${upsertResult.value}: Insert User Failed"
+                            )
+                    )
+                    logout()
+                }
+                is Either.Right -> {
+                    _navigation.send(LoginNavigationTarget.Home)
                 }
             }
         }

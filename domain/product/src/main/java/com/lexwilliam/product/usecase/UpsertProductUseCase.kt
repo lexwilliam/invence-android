@@ -1,5 +1,6 @@
 package com.lexwilliam.product.usecase
 
+import android.net.Uri
 import arrow.core.Either
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
@@ -14,10 +15,12 @@ class UpsertProductUseCase
     ) {
         suspend operator fun invoke(
             category: ProductCategory,
-            product: Product
+            product: Product,
+            image: Uri?
         ): Either<UpsertProductFailure, Product> =
             repository.upsertProduct(
                 category,
-                product
+                product,
+                image
             )
     }

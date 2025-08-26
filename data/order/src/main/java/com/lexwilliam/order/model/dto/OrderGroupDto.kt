@@ -10,8 +10,8 @@ import kotlinx.datetime.Instant
 
 data class OrderGroupDto(
     val uuid: String? = null,
-    @JvmField @PropertyName("branch_uuid")
-    val branchUUID: String? = null,
+    @JvmField @PropertyName("user_uuid")
+    val userUUID: String? = null,
     @JvmField @PropertyName("created_by")
     val createdBy: String? = null,
     val orders: Map<String, OrderDto>? = null,
@@ -27,7 +27,7 @@ data class OrderGroupDto(
     fun toDomain() =
         OrderGroup(
             uuid = uuid.validateUUID(),
-            branchUUID = branchUUID.validateUUID(),
+            userUUID = userUUID ?: "",
             createdBy = createdBy ?: "",
             orders = orders?.map { it.value.toDomain() } ?: emptyList(),
             taxes = taxes?.map { it.value.toDomain() } ?: emptyList(),
@@ -41,7 +41,7 @@ data class OrderGroupDto(
         fun fromDomain(domain: OrderGroup) =
             OrderGroupDto(
                 uuid = domain.uuid.toString(),
-                branchUUID = domain.branchUUID.toString(),
+                userUUID = domain.userUUID,
                 createdBy = domain.createdBy,
                 orders =
                     domain.orders

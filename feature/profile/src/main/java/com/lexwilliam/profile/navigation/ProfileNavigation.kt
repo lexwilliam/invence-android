@@ -9,7 +9,6 @@ import com.lexwilliam.profile.route.ProfileRoute
 
 fun NavGraphBuilder.profileNavigation(
     toLogin: () -> Unit,
-    toMyCompany: () -> Unit,
     onDrawerNavigation: (String) -> Unit
 ) {
     composable(
@@ -17,7 +16,6 @@ fun NavGraphBuilder.profileNavigation(
     ) {
         ProfileRoute(
             toLogin = toLogin,
-            toMyCompany = toMyCompany,
             onDrawerNavigation = onDrawerNavigation
         )
     }

@@ -9,12 +9,12 @@ import com.lexwilliam.core.navigation.Screen
 
 fun NavGraphBuilder.signUpNavigation(
     onBackStack: () -> Unit,
-    toCompanySearch: () -> Unit
+    toHome: () -> Unit
 ) {
     composable(route = Screen.SIGN_UP) {
         SignUpRoute(
             onBackStack = onBackStack,
-            toCompanySearch = toCompanySearch
+            toHome = toHome
         )
     }
 }

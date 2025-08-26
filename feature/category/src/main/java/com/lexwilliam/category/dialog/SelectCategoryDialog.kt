@@ -3,12 +3,13 @@ package com.lexwilliam.category.dialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
-import com.lexwilliam.core_ui.component.card.ColumnCardWithImage
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.product.model.ProductCategory
@@ -38,7 +38,7 @@ fun SelectCategoryDialog(
     onDismiss: () -> Unit,
     categories: List<ProductCategory>,
     onCategoryClicked: (ProductCategory) -> Unit,
-    onFormConfirm: (String, Any?) -> Unit
+    onFormConfirm: (String) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var isFormShowing by remember { mutableStateOf(false) }
@@ -93,13 +93,13 @@ fun SelectCategoryDialog(
                 when (filteredCategories.isNotEmpty()) {
                     true -> {
                         items(items = filteredCategories) { category ->
-                            ColumnCardWithImage(
+                            Row(
+                                horizontalArrangement = Arrangement.Start,
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .clickable { onCategoryClicked(category) },
-                                imageModifier = Modifier.size(64.dp),
-                                imagePath = category.imageUrl
+                                        .height(48.dp)
+                                        .clickable { onCategoryClicked(category) }
                             ) {
                                 Text(
                                     text = category.name,
@@ -139,8 +139,8 @@ fun SelectCategoryDialog(
         CategoryFormDialog(
             onDismiss = { isFormShowing = false },
             category = null,
-            onConfirm = { title, image ->
-                onFormConfirm(title, image)
+            onConfirm = { title ->
+                onFormConfirm(title)
                 isFormShowing = false
             }
         )

@@ -12,6 +12,8 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.lexwilliam.core.session.SessionManager
+import com.lexwilliam.firebase.session.firebaseSessionManager
 import com.lexwilliam.firebase.utils.StorageUploader
 import com.lexwilliam.firebase.utils.TimestampSerializer
 import dagger.Module
@@ -80,4 +82,11 @@ object FirebaseModule {
         storage: FirebaseStorage,
         @ApplicationContext context: Context
     ) = StorageUploader(analytics, storage, context)
+
+    @Singleton
+    @Provides
+    fun providesSessionManager(
+        auth: FirebaseAuth,
+        crashlytics: FirebaseCrashlytics
+    ): SessionManager = firebaseSessionManager(auth, crashlytics)
 }

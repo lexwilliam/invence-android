@@ -3,6 +3,7 @@ package com.lexwilliam.product.di
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.StorageUploader
 import com.lexwilliam.product.repository.ProductRepository
 import com.lexwilliam.product.repository.firebaseProductRepository
@@ -19,6 +20,7 @@ object ProductModule {
     @Singleton
     @Provides
     fun providesProductRepository(
+        observeSession: ObserveSessionUseCase,
         analytics: FirebaseCrashlytics,
         store: FirebaseFirestore,
         storageUploader: StorageUploader,
@@ -26,6 +28,7 @@ object ProductModule {
         json: Json
     ): ProductRepository =
         firebaseProductRepository(
+            observeSession,
             analytics,
             store,
             storageUploader,

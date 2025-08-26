@@ -70,8 +70,8 @@ fun ProductFormRoute(
             onCategoryClicked = {
                 viewModel.onEvent(ProductFormUiEvent.CategorySelected(it))
             },
-            onFormConfirm = { name, image ->
-                viewModel.onEvent(ProductFormUiEvent.AddCategory(name, image))
+            onFormConfirm = { name ->
+                viewModel.onEvent(ProductFormUiEvent.AddCategory(name))
             }
         )
     }

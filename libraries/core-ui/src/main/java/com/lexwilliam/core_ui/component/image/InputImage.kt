@@ -1,6 +1,9 @@
 package com.lexwilliam.core_ui.component.image
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,20 +34,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.FileProvider
 import com.lexwilliam.core_ui.R
 import com.lexwilliam.core_ui.component.button.InvenceTextButton
 import com.lexwilliam.core_ui.component.camera.GetPhotoCameraPreview
 import com.lexwilliam.core_ui.extension.dashedBorder
 import com.lexwilliam.core_ui.theme.InvenceTheme
+import java.io.File
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun InputImage(
     modifier: Modifier = Modifier,
     imageModifier: Modifier = Modifier,
-    image: Any? = null,
+    image: Uri? = null,
     label: String? = null,
-    onImageChanged: (Any?) -> Unit
+    onImageChanged: (Uri?) -> Unit
 ) {
     val context = LocalContext.current
     var isDialogShowing by remember { mutableStateOf(false) }
@@ -115,7 +120,7 @@ fun InputImage(
         GetPhotoCameraPreview(
             onDismiss = { cameraOpen = false },
             onPhotoTaken = { bmp ->
-                onImageChanged(bmp)
+                onImageChanged(bitmapToUri(context, bmp))
                 cameraOpen = false
                 isDialogShowing = false
             }
@@ -175,5 +180,29 @@ fun InputImage(
                 }
             }
         }
+    }
+}
+
+fun bitmapToUri(
+    context: Context,
+    bitmap: Bitmap
+): Uri? {
+    return try {
+        // Create a file in cache directory
+        val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.png")
+        file.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+
+        // Get URI with FileProvider
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            // make sure this matches in manifest
+            file
+        )
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

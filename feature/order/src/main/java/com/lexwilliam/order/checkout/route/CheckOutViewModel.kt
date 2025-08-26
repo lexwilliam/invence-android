@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import arrow.core.right
-import com.lexwilliam.branch.usecase.ObserveBranchUseCase
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogState
 import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
@@ -26,8 +25,7 @@ import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.usecase.UpsertTransactionUseCase
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
+import com.lexwilliam.user.usecase.FetchCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -53,11 +51,9 @@ class CheckOutViewModel
         private val upsertOrderGroup: UpsertOrderGroupUseCase,
         private val deleteOrderGroup: DeleteOrderGroupUseCase,
         private val upsertTransaction: UpsertTransactionUseCase,
-        private val observeProductCategory: ObserveProductCategoryUseCase,
+        observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
-        private val fetchUser: FetchUserUseCase,
-        observeSession: ObserveSessionUseCase,
-        observeBranch: ObserveBranchUseCase,
+        private val fetchCurrentUserUseCase: FetchCurrentUserUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
         private val orderUUID =
@@ -68,30 +64,7 @@ class CheckOutViewModel
         private val _navigation = Channel<CheckOutNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
 
-        private val user =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-            }
-
-        private val branchUUID = user.map { it?.branchUUID }
-
-        private val branch =
-            branchUUID.flatMapLatest { uuid ->
-                when (uuid) {
-                    null -> flowOf(null)
-                    else -> observeBranch(uuid)
-                }
-            }
-
-        private val categories =
-            branchUUID.flatMapLatest {
-                when (it) {
-                    null -> flowOf(emptyList())
-                    else -> observeProductCategory(it)
-                }
-            }
+        private val categories = observeProductCategory()
 
         private val _state = MutableStateFlow(CheckOutUiState())
         val state = _state.asStateFlow()
@@ -153,9 +126,8 @@ class CheckOutViewModel
         private fun handleConfirmClicked() {
             viewModelScope.launch {
                 val orderGroup = orderGroup.firstOrNull() ?: return@launch
-                val branchUUID = branchUUID.firstOrNull() ?: return@launch
-                val user = user.firstOrNull() ?: return@launch
                 val categories = categories.firstOrNull() ?: return@launch
+                val user = fetchCurrentUserUseCase().getOrNull() ?: return@launch
                 val orders = _orders.value
                 val transactionUUID = UUID.randomUUID()
                 val soldItemsWithProfit =
@@ -166,7 +138,7 @@ class CheckOutViewModel
                 val transaction =
                     Transaction(
                         uuid = transactionUUID,
-                        branchUUID = branchUUID,
+                        userUUID = user.uuid,
                         orderGroup = orderGroup.copy(orders = orders),
                         customer = "",
                         total = orderGroup.totalPrice,

@@ -3,7 +3,6 @@ package com.lexwilliam.transaction.history.route
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
@@ -14,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +22,6 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.core_ui.component.drawer.InvenceNavigationDrawer
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.transaction.component.TransactionCard
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +30,7 @@ fun TransactionHistoryRoute(
     viewModel: TransactionHistoryViewModel = hiltViewModel(),
     onDrawerNavigation: (String) -> Unit
 ) {
-    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
+    val transactions = viewModel.transactions.collectAsStateWithLifecycle()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -73,19 +70,20 @@ fun TransactionHistoryRoute(
                         .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                transactions.forEach { entry ->
-                    item {
-                        Text(text = entry.key, style = InvenceTheme.typography.labelLarge)
-                    }
-                    items(
-                        items = entry.value,
-                        key = { it.uuid }
-                    ) { transaction ->
-                        TransactionCard(
-                            transaction = transaction
-                        )
-                    }
-                }
+                // TODO: implement paging
+//                transactions.forEach { entry ->
+//                    item {
+//                        Text(text = entry.key, style = InvenceTheme.typography.labelLarge)
+//                    }
+//                    items(
+//                        items = entry.value,
+//                        key = { it.uuid }
+//                    ) { transaction ->
+//                        TransactionCard(
+//                            transaction = transaction
+//                        )
+//                    }
+//                }
             }
         }
     }

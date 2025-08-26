@@ -68,18 +68,13 @@ ktlint {
 }
 
 dependencies {
-    implementation(project(":data:branch"))
-    implementation(project(":data:company"))
     implementation(project(":data:product"))
     implementation(project(":data:user"))
-    implementation(project(":domain:branch"))
-    implementation(project(":domain:company"))
     implementation(project(":domain:product"))
     implementation(project(":domain:user"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:barcode"))
     implementation(project(":feature:category"))
-    implementation(project(":feature:company"))
     implementation(project(":feature:inventory"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:order"))

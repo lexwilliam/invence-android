@@ -93,7 +93,7 @@ class SignUpViewModel
                         _state.update { old ->
                             old.copy(error = localizeSignUpFailure(result.value))
                         }
-                    is Either.Right -> _navigation.send(SignUpNavigationTarget.CompanySearch)
+                    is Either.Right -> _navigation.send(SignUpNavigationTarget.Home)
                 }
             }
         }

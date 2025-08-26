@@ -62,4 +62,7 @@ dependencies {
     implementation(libs.hilt.library)
     implementation(project(":domain:order"))
     ksp(libs.hilt.kapt)
+
+    implementation(libs.android.paging.runtime)
+    implementation(libs.android.paging.compose)
 }

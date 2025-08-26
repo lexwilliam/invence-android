@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class OrderGroup(
     val uuid: UUID = UUID.randomUUID(),
-    val branchUUID: UUID = UUID.randomUUID(),
+    val userUUID: String,
     val createdBy: String = "",
     val orders: List<Order> = emptyList(),
     val taxes: List<OrderTax> = emptyList(),

@@ -15,14 +15,6 @@ import com.lexwilliam.auth.route.signup.navigation.navigateToSignUp
 import com.lexwilliam.auth.route.signup.navigation.signUpNavigation
 import com.lexwilliam.category.navigation.categoryNavigation
 import com.lexwilliam.category.navigation.navigateToCategory
-import com.lexwilliam.company.navigation.companyFormNavigation
-import com.lexwilliam.company.navigation.companyMemberNavigation
-import com.lexwilliam.company.navigation.companySearchNavigation
-import com.lexwilliam.company.navigation.myCompanyNavigation
-import com.lexwilliam.company.navigation.navigateToCompanyForm
-import com.lexwilliam.company.navigation.navigateToCompanyMember
-import com.lexwilliam.company.navigation.navigateToCompanySearch
-import com.lexwilliam.company.navigation.navigateToMyCompany
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
@@ -52,14 +44,6 @@ fun RootNavGraph(
         startDestination = startDestination
     ) {
         loginNavigation(
-            toCompanySearch = {
-                navController.navigateToCompanySearch(
-                    options =
-                        NavOptions.Builder()
-                            .setPopUpTo(Screen.LOGIN, true)
-                            .build()
-                )
-            },
             toHome = {
                 navController.navigateToInventory(
                     options =
@@ -73,7 +57,7 @@ fun RootNavGraph(
         )
         signUpNavigation(
             onBackStack = navController::navigateUp,
-            toCompanySearch = navController::navigateToCompanySearch
+            toHome = navController::navigateToInventory
         )
         forgotNavigation(
             onBackStack = navController::navigateUp
@@ -97,14 +81,6 @@ fun RootNavGraph(
             toProductForm = { productUUID ->
                 navController.navigateToProductForm(productUUID)
             }
-        )
-        companySearchNavigation(
-            toCompanyForm = navController::navigateToCompanyForm,
-            toHome = navController::navigateToInventory,
-            toLogin = navController::navigateToLogin
-        )
-        companyFormNavigation(
-            toHome = navController::navigateToInventory
         )
         cartNavigation(
             toOrder = { orderUUID -> navController.navigateToOrder(orderUUID) },
@@ -133,18 +109,10 @@ fun RootNavGraph(
         )
         profileNavigation(
             toLogin = navController::navigateToLogin,
-            toMyCompany = navController::navigateToMyCompany,
             onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         analyticsNavigation(
             onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
-        )
-        myCompanyNavigation(
-            onBackStack = navController::navigateUp,
-            toCompanyMember = navController::navigateToCompanyMember
-        )
-        companyMemberNavigation(
-            onBackStack = navController::navigateUp
         )
         composable(route = Screen.SPLASH) {}
     }

@@ -1,34 +1,49 @@
 package com.lexwilliam.transaction.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import arrow.core.Either
 import arrow.core.raise.catch
 import arrow.core.raise.either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.dto.TransactionDto
+import com.lexwilliam.transaction.source.TransactionPagingSource
 import com.lexwilliam.transaction.util.DeleteTransactionFailure
 import com.lexwilliam.transaction.util.UpsertTransactionFailure
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 fun firebaseTransactionRepository(
+    observeSession: ObserveSessionUseCase,
     store: FirebaseFirestore,
     analytics: FirebaseCrashlytics
 ) = object : TransactionRepository {
-    override fun observeTransaction(
-        branchUUID: UUID,
-        limit: Int?
-    ): Flow<List<Transaction>> =
+    val userUUID = observeSession().map { it.getUserId() }
+
+    override fun observeTransaction(limit: Int?): Flow<List<Transaction>> =
         callbackFlow {
+            val userUUID = userUUID.firstOrNull()
+            if (userUUID == null) trySend(emptyList())
+
             var reference =
                 store
                     .collection(FirestoreConfig.COLLECTION_TRANSACTION)
-                    .whereEqualTo(FirestoreConfig.Field.BRANCH_UUID, branchUUID.toString())
+                    .whereEqualTo(FirestoreConfig.Field.USER_UUID, userUUID.toString())
                     .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
 
             if (limit != null) reference = reference.limit(limit.toLong())
@@ -48,6 +63,28 @@ fun firebaseTransactionRepository(
 
             awaitClose { registration.remove() }
         }
+
+    override fun observePagedTransaction(): Flow<PagingData<Transaction>> {
+        return userUUID
+            .map { it ?: return@map null } // emit null if no user
+            .distinctUntilChanged()
+            .flatMapLatest { uuid ->
+                if (uuid == null) {
+                    flowOf(PagingData.empty())
+                } else {
+                    val query =
+                        store
+                            .collection(FirestoreConfig.COLLECTION_TRANSACTION)
+                            .whereEqualTo(FirestoreConfig.Field.USER_UUID, uuid.toString())
+                            .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
+
+                    Pager(
+                        config = PagingConfig(pageSize = 20),
+                        pagingSourceFactory = { TransactionPagingSource(query) }
+                    ).flow
+                }
+            }
+    }
 
     override fun observeSingleTransaction(uuid: UUID): Flow<Transaction?> =
         callbackFlow {

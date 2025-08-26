@@ -7,16 +7,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lexwilliam.firebase.utils.FirestoreConfig
-import com.lexwilliam.user.model.EmployeeShift
-import com.lexwilliam.user.model.EmployeeShiftDto
-import com.lexwilliam.user.model.Role
 import com.lexwilliam.user.model.User
 import com.lexwilliam.user.model.UserDto
 import com.lexwilliam.user.util.FetchUserFailure
 import com.lexwilliam.user.util.LoginFailure
 import com.lexwilliam.user.util.SignUpFailure
 import com.lexwilliam.user.util.UnknownFailure
-import com.lexwilliam.user.util.UpsertShiftFailure
 import com.lexwilliam.user.util.UpsertUserFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -72,14 +68,11 @@ fun firebaseUserRepository(
                     email = email,
                     name = username,
                     createdAt = Clock.System.now(),
-                    imageUrl = null,
-                    branchUUID = null,
-                    role = Role.OWNER,
-                    companyUUID = null
+                    imageUrl = null
                 )
-            when (upsertUser(user)) {
-                is Either.Left -> return SignUpFailure.UpsertUserToFirestoreFail.left()
-                is Either.Right -> return user.right()
+            return when (upsertUser(user)) {
+                is Either.Left -> SignUpFailure.UpsertUserToFirestoreFail.left()
+                is Either.Right -> user.right()
             }
         }.mapLeft { t ->
             t.printStackTrace()
@@ -150,46 +143,6 @@ fun firebaseUserRepository(
                 .document(user.uuid)
                 .set(UserDto.fromDomain(user))
             user
-        }.mapLeft { t ->
-            t.printStackTrace()
-            analytics.recordException(t)
-            UnknownFailure(t.message)
-        }
-    }
-
-    override fun observeShift(uuid: String): Flow<EmployeeShift?> =
-        callbackFlow {
-            val reference =
-                store
-                    .collection(FirestoreConfig.COLLECTION_EMPLOYEE_SHIFT)
-                    .document(uuid)
-
-            val registration =
-                reference.addSnapshotListener { value, error ->
-                    error?.let { exception ->
-                        analytics.recordException(exception)
-                        trySend(null)
-                    }
-
-                    trySend(
-                        value
-                            ?.toObject(EmployeeShiftDto::class.java)
-                            ?.toDomain()
-                    )
-                }
-
-            awaitClose { registration.remove() }
-        }
-
-    override suspend fun upsertShift(
-        shift: EmployeeShift
-    ): Either<UpsertShiftFailure, EmployeeShift> {
-        return Either.catch {
-            store
-                .collection(FirestoreConfig.COLLECTION_EMPLOYEE_SHIFT)
-                .document(shift.userUUID)
-                .set(EmployeeShiftDto.fromDomain(shift))
-            shift
         }.mapLeft { t ->
             t.printStackTrace()
             analytics.recordException(t)

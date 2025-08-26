@@ -1,11 +1,12 @@
 package com.lexwilliam.product.route.form
 
+import android.net.Uri
 import com.lexwilliam.product.model.ProductCategory
 
 sealed interface ProductFormUiEvent {
     data object BackStackClicked : ProductFormUiEvent
 
-    data class InputImageChanged(val image: Any?) : ProductFormUiEvent
+    data class InputImageChanged(val image: Uri?) : ProductFormUiEvent
 
     data object CameraClicked : ProductFormUiEvent
 
@@ -29,7 +30,7 @@ sealed interface ProductFormUiEvent {
 
     data object SelectCategoryClicked : ProductFormUiEvent
 
-    data class AddCategory(val name: String, val image: Any?) : ProductFormUiEvent
+    data class AddCategory(val name: String) : ProductFormUiEvent
 
     data class CategorySelected(val category: ProductCategory) : ProductFormUiEvent
 

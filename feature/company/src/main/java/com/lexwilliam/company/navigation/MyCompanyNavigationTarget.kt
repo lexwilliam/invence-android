@@ -1,3 +1,0 @@
-package com.lexwilliam.company.navigation
-
-sealed interface MyCompanyNavigationTarget

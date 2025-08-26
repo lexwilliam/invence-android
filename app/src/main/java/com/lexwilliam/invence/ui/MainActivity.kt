@@ -36,10 +36,14 @@ import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
+
+    @Inject
+    lateinit var cameraPermissionTextProvider: CameraPermissionTextProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +54,7 @@ class MainActivity : ComponentActivity() {
                     darkScrim = Color.BLACK
                 )
         )
-        installSplashScreen().apply {
-            setKeepOnScreenCondition { viewModel.isLoading.value }
-        }
+        installSplashScreen()
 
         setContent {
             InvenceTheme {
@@ -120,7 +122,7 @@ class MainActivity : ComponentActivity() {
                     PermissionDialog(
                         permission =
                             when (permission) {
-                                Manifest.permission.CAMERA -> CameraPermissionTextProvider()
+                                Manifest.permission.CAMERA -> cameraPermissionTextProvider
                                 else -> return@forEach
                             },
                         isPermanentlyDeclined =

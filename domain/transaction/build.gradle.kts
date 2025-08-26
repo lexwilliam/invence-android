@@ -59,4 +59,6 @@ dependencies {
     testImplementation(libs.test.junit.unit)
     androidTestImplementation(libs.test.junit.android)
     androidTestImplementation(libs.test.espresso.core)
+
+    implementation(libs.android.paging.runtime)
 }

@@ -4,18 +4,19 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
+import arrow.core.computations.result
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
 import com.lexwilliam.profile.navigation.ProfileNavigationTarget
-import com.lexwilliam.user.usecase.FetchUserUseCase
+import com.lexwilliam.user.model.User
+import com.lexwilliam.user.usecase.FetchCurrentUserUseCase
 import com.lexwilliam.user.usecase.LogoutUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,8 +24,7 @@ import javax.inject.Inject
 class ProfileViewModel
     @Inject
     constructor(
-        private val fetchUser: FetchUserUseCase,
-        observeSession: ObserveSessionUseCase,
+        private val fetchCurrentUser: FetchCurrentUserUseCase,
         private val logout: LogoutUseCase
     ) : ViewModel() {
         private val _navigation = Channel<ProfileNavigationTarget>()
@@ -33,18 +33,26 @@ class ProfileViewModel
         private val _isLogoutShowing = MutableStateFlow(false)
         val isLogoutShowing = _isLogoutShowing.asStateFlow()
 
-        val user =
-            observeSession()
-                .map { session ->
-                    session.userUUID
-                        ?.let { fetchUser(it) }
-                        ?.getOrNull()
+        private val _user = MutableStateFlow<User?>(null)
+        val user = _user.asStateFlow()
+
+        init {
+            viewModelScope.launch {
+                when (val result = fetchCurrentUser()) {
+                    is Either.Left -> {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    message = result.toString()
+                                )
+                        )
+                    }
+                    is Either.Right -> {
+                        _user.update { result.value }
+                    }
                 }
-                .stateIn(
-                    viewModelScope,
-                    SharingStarted.WhileSubscribed(5_000),
-                    null
-                )
+            }
+        }
 
         fun onLogoutClicked() {
             _isLogoutShowing.value = true

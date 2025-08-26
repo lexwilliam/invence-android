@@ -4,25 +4,20 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
-import arrow.optics.copy
 import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.controller.SnackbarEvent
 import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.usecase.DeleteProductCategoryUseCase
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
-import com.lexwilliam.product.usecase.UploadCategoryImageUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
+import com.lexwilliam.user.usecase.FetchCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -39,28 +34,12 @@ class CategoryViewModel
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val deleteProductCategory: DeleteProductCategoryUseCase,
-        private val uploadCategoryImageUseCase: UploadCategoryImageUseCase,
-        observeSession: ObserveSessionUseCase,
-        private val fetchUser: FetchUserUseCase
+        private val fetchCurrentUser: FetchCurrentUserUseCase
     ) : ViewModel() {
         private val _state = MutableStateFlow(CategoryUiState())
         val state = _state.asStateFlow()
 
-        private val branchUUID =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-                    ?.branchUUID
-            }
-
-        private val _categories =
-            branchUUID.flatMapLatest {
-                when (it) {
-                    null -> flowOf(emptyList())
-                    else -> observeProductCategory(it)
-                }
-            }
+        private val _categories = observeProductCategory()
 
         val filteredCategories =
             _state.flatMapLatest { state ->
@@ -83,8 +62,7 @@ class CategoryViewModel
                 is CategoryUiEvent.ConfirmForm ->
                     handleConfirmForm(
                         event.category,
-                        event.name,
-                        event.image
+                        event.name
                     )
                 CategoryUiEvent.DismissForm -> handleDismissForm()
                 is CategoryUiEvent.DeleteCategory -> handleDeleteCategory(event.category)
@@ -110,126 +88,58 @@ class CategoryViewModel
 
         private fun handleConfirmForm(
             category: ProductCategory?,
-            name: String,
-            image: Any?
+            name: String
         ) {
             viewModelScope.launch {
                 val isEditing = _state.value.isEditing
-                val branchUUID = branchUUID.firstOrNull() ?: return@launch
                 if (isEditing) {
                     val modifiedCategory =
                         category?.copy(
                             name = name
                         ) ?: return@launch
+                    when (upsertProductCategory(category = modifiedCategory)) {
+                        is Either.Left -> {
+                            SnackbarController.sendEvent(
+                                event =
+                                    SnackbarEvent(
+                                        type = SnackbarTypeEnum.ERROR,
+                                        message = "Upsert Product Category Failed"
+                                    )
+                            )
+                        }
+                        is Either.Right -> {
+                            SnackbarController.sendEvent(
+                                event =
+                                    SnackbarEvent(
+                                        type = SnackbarTypeEnum.SUCCESS,
+                                        message = "Upsert Product Category Success"
+                                    )
+                            )
+                            _state.update {
+                                    old ->
+                                old.copy(isEditing = false, selectedCategory = null)
+                            }
+                        }
+                    }
+                } else {
+                    val user = fetchCurrentUser().getOrNull() ?: return@launch
+                    val categoryUUID = UUID.randomUUID()
+                    val modifiedCategory =
+                        ProductCategory(
+                            uuid = categoryUUID,
+                            userUUID = user.uuid,
+                            name = name,
+                            products = emptyList(),
+                            createdAt = Clock.System.now(),
+                            deletedAt = null
+                        )
                     when (val result = upsertProductCategory(category = modifiedCategory)) {
                         is Either.Left -> Log.d("TAG", result.value.toString())
                         is Either.Right ->
                             _state.update {
                                     old ->
-                                old.copy(isEditing = false, selectedCategory = null)
+                                old.copy(shouldNavigateBack = true)
                             }
-                    }
-                    uploadCategoryImageUseCase(
-                        branchUUID = branchUUID,
-                        categoryUUID = modifiedCategory.uuid,
-                        image = image ?: return@launch
-                    ).fold(
-                        ifLeft = {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = "Failed to upload image",
-                                    type = SnackbarTypeEnum.ERROR
-                                )
-                            )
-                        },
-                        ifRight = {
-                            when (val result = upsertProductCategory(category = modifiedCategory)) {
-                                is Either.Left -> {
-                                    SnackbarController.sendEvent(
-                                        event =
-                                            SnackbarEvent(
-                                                type = SnackbarTypeEnum.ERROR,
-                                                message = "Upsert Product Category Failed"
-                                            )
-                                    )
-                                }
-                                is Either.Right -> {
-                                    SnackbarController.sendEvent(
-                                        event =
-                                            SnackbarEvent(
-                                                type = SnackbarTypeEnum.SUCCESS,
-                                                message = "Upsert Product Category Success"
-                                            )
-                                    )
-                                    _state.update {
-                                            old ->
-                                        old.copy(isEditing = false, selectedCategory = null)
-                                    }
-                                }
-                            }
-                        }
-                    )
-                } else {
-                    val categoryUUID = UUID.randomUUID()
-                    if (image != null) {
-                        uploadCategoryImageUseCase(
-                            branchUUID = branchUUID,
-                            categoryUUID = categoryUUID,
-                            image = image
-                        ).fold(
-                            ifLeft = {
-                                SnackbarController.sendEvent(
-                                    SnackbarEvent(
-                                        message = "Failed to upload image",
-                                        type = SnackbarTypeEnum.ERROR
-                                    )
-                                )
-                            },
-                            ifRight = {
-                                val modifiedCategory =
-                                    ProductCategory(
-                                        uuid = categoryUUID,
-                                        branchUUID = branchUUID,
-                                        imageUrl = it,
-                                        name = name,
-                                        products = emptyList(),
-                                        createdAt = Clock.System.now(),
-                                        deletedAt = null
-                                    )
-                                when (
-                                    val result =
-                                        upsertProductCategory(
-                                            category = modifiedCategory
-                                        )
-                                ) {
-                                    is Either.Left -> Log.d("TAG", result.value.toString())
-                                    is Either.Right ->
-                                        _state.update {
-                                                old ->
-                                            old.copy(shouldNavigateBack = true)
-                                        }
-                                }
-                            }
-                        )
-                    } else {
-                        val modifiedCategory =
-                            ProductCategory(
-                                uuid = categoryUUID,
-                                branchUUID = branchUUID,
-                                imageUrl = null,
-                                name = name,
-                                products = emptyList(),
-                                createdAt = Clock.System.now(),
-                                deletedAt = null
-                            )
-                        when (val result = upsertProductCategory(category = modifiedCategory)) {
-                            is Either.Left -> Log.d("TAG", result.value.toString())
-                            is Either.Right ->
-                                _state.update {
-                                        old ->
-                                    old.copy(shouldNavigateBack = true)
-                                }
-                        }
                     }
                 }
             }

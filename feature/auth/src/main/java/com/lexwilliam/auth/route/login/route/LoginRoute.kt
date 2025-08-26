@@ -53,7 +53,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    toCompanySearch: () -> Unit,
     toHome: () -> Unit,
     toSignUp: () -> Unit,
     toForgotPassword: () -> Unit
@@ -66,7 +65,6 @@ fun LoginRoute(
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
-            LoginNavigationTarget.CompanySearch -> toCompanySearch()
             LoginNavigationTarget.Home -> toHome()
             LoginNavigationTarget.ForgotPassword -> toForgotPassword()
             LoginNavigationTarget.SignUp -> toSignUp()

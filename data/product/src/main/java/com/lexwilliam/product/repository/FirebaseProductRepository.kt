@@ -1,12 +1,12 @@
 package com.lexwilliam.product.repository
 
 import android.net.Uri
-import android.util.Log
 import arrow.core.Either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.core.util.UploadImageFailure
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.firebase.utils.StorageUploader
@@ -20,23 +20,29 @@ import com.lexwilliam.product.util.UpsertProductFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
-import java.util.UUID
 
 internal fun firebaseProductRepository(
+    observeSession: ObserveSessionUseCase,
     analytics: FirebaseCrashlytics,
     store: FirebaseFirestore,
     storageUploader: StorageUploader,
     functions: FirebaseFunctions,
     json: Json
 ) = object : ProductRepository {
-    override fun observeProductCategory(branchUUID: UUID): Flow<List<ProductCategory>> =
+    val userUUID: Flow<String?> = observeSession().map { it.getUserId() }
+
+    override fun observeProductCategory(): Flow<List<ProductCategory>> =
         callbackFlow {
+            val userUUID = userUUID.firstOrNull()
+            if (userUUID == null) trySend(emptyList())
             val reference =
                 store
                     .collection(FirestoreConfig.COLLECTION_PRODUCT_CATEGORY)
-                    .whereEqualTo(FirestoreConfig.Field.BRANCH_UUID, branchUUID.toString())
+                    .whereEqualTo(FirestoreConfig.Field.USER_UUID, userUUID.toString())
                     .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
 
             val registration =
@@ -73,9 +79,30 @@ internal fun firebaseProductRepository(
 
     override suspend fun upsertProduct(
         category: ProductCategory,
-        product: Product
+        product: Product,
+        image: Uri?
     ): Either<UpsertProductFailure, Product> {
         return Either.catch {
+            var imageUrl: Uri? = null
+
+            if (image != null) {
+                when (
+                    val result =
+                        uploadProductImage(
+                            product.sku,
+                            image
+                        )
+                ) {
+                    is Either.Left -> {
+                        return Either.Left(UpsertProductFailure.UploadImageFailed)
+                    }
+
+                    is Either.Right -> {
+                        imageUrl = result.value
+                    }
+                }
+            }
+
             val jsonCategory =
                 json
                     .encodeToString(
@@ -86,14 +113,13 @@ internal fun firebaseProductRepository(
                 json
                     .encodeToString(
                         ProductDto.serializer(),
-                        ProductDto.fromDomain(product)
+                        ProductDto.fromDomain(product.copy(imagePath = imageUrl))
                     )
             val data =
                 hashMapOf(
                     "category" to jsonCategory,
                     "product" to jsonProduct
                 )
-            Log.d("TAG", data.toString())
             functions
                 .getHttpsCallable("setProduct")
                 .call(data)
@@ -129,21 +155,13 @@ internal fun firebaseProductRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun uploadProductCategoryImage(
-        branchUUID: UUID,
-        categoryUUID: UUID,
-        image: Any
-    ): Either<UploadImageFailure, Uri> {
-        val path = "$branchUUID/category/$categoryUUID"
-        return storageUploader.imageUploader(path, image)
-    }
-
-    override suspend fun uploadProductImage(
-        branchUUID: UUID,
+    suspend fun uploadProductImage(
         productUUID: String,
-        image: Any
+        image: Uri
     ): Either<UploadImageFailure, Uri> {
-        val path = "$branchUUID/product/$productUUID"
+        val userUUID = userUUID.firstOrNull()
+        if (userUUID == null) return Either.Left(UploadImageFailure.Unauthenticated)
+        val path = "$userUUID/product/$productUUID"
         return storageUploader.imageUploader(path, image)
     }
 }

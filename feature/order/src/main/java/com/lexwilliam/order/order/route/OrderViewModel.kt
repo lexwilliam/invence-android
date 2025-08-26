@@ -19,14 +19,13 @@ import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.util.queryProductCategory
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -47,8 +46,6 @@ class OrderViewModel
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val observeSingleOrderGroup: ObserveSingleOrderGroupUseCase,
-        observeSession: ObserveSessionUseCase,
-        fetchUser: FetchUserUseCase,
         private val upsertOrderGroup: UpsertOrderGroupUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
@@ -63,13 +60,7 @@ class OrderViewModel
         private val _state = MutableStateFlow(OrderUiState())
         val uiState = _state.asStateFlow()
 
-        private val branchUUID =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-                    ?.branchUUID
-            }
+        val _categories = observeProductCategory()
 
         val orderGroup =
             orderUUID.flatMapLatest { uuid ->
@@ -106,25 +97,16 @@ class OrderViewModel
             }
 
         val uiProducts =
-            _state.flatMapLatest { state ->
-                branchUUID.flatMapLatest {
-                    when (it) {
-                        null -> flowOf(emptyList())
-                        else ->
-                            observeProductCategory(it)
-                                .map { categories ->
-                                    queryProductCategory(
-                                        categories,
-                                        state.query
-                                    ).flatMap { category ->
-                                        category.products.map { product ->
-                                            UiProduct(
-                                                category = category,
-                                                product = product
-                                            )
-                                        }
-                                    }
-                                }
+            _state.combine(_categories) { state, categories ->
+                queryProductCategory(
+                    categories,
+                    state.query
+                ).flatMap { category ->
+                    category.products.map { product ->
+                        UiProduct(
+                            category = category,
+                            product = product
+                        )
                     }
                 }
             }.stateIn(

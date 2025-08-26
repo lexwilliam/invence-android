@@ -13,7 +13,6 @@ sealed interface CategoryUiEvent {
 
     data class ConfirmForm(
         val category: ProductCategory?,
-        val name: String,
-        val image: Any?
+        val name: String
     ) : CategoryUiEvent
 }

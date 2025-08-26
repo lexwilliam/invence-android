@@ -46,6 +46,7 @@ fun OrderSuccessDialog(
                 text = "Total ${transaction.total.toCurrency()}",
                 style = InvenceTheme.typography.titleLarge
             )
+            Spacer(modifier = Modifier.height(32.dp))
             Icon(
                 modifier = Modifier.size(56.dp),
                 imageVector = Icons.Default.CheckCircle,

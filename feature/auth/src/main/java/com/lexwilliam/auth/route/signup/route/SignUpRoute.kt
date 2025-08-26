@@ -39,14 +39,14 @@ import com.lexwilliam.core_ui.theme.InvenceTheme
 fun SignUpRoute(
     viewModel: SignUpViewModel = hiltViewModel(),
     onBackStack: () -> Unit,
-    toCompanySearch: () -> Unit
+    toHome: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) {
         when (it) {
             is SignUpNavigationTarget.BackStack -> onBackStack()
-            is SignUpNavigationTarget.CompanySearch -> toCompanySearch()
+            SignUpNavigationTarget.Home -> toHome()
         }
     }
 

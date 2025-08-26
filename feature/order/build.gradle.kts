@@ -57,7 +57,6 @@ dependencies {
     implementation(project(":data:order"))
     implementation(project(":data:product"))
     implementation(project(":data:transaction"))
-    implementation(project(":data:branch"))
     implementation(project(":data:user"))
     implementation(project(":libraries:core"))
     implementation(project(":libraries:core-ui"))

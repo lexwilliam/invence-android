@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class Transaction(
     val uuid: UUID,
-    val branchUUID: UUID,
+    val userUUID: String,
     val orderGroup: OrderGroup,
     val customer: String,
     val total: Double,

@@ -2,6 +2,7 @@ package com.lexwilliam.transaction.di
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.transaction.repository.TransactionRepository
 import com.lexwilliam.transaction.repository.firebaseTransactionRepository
 import dagger.Module
@@ -16,7 +17,8 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun provideTransactionRepository(
+        observeSession: ObserveSessionUseCase,
         store: FirebaseFirestore,
         analytics: FirebaseCrashlytics
-    ): TransactionRepository = firebaseTransactionRepository(store, analytics)
+    ): TransactionRepository = firebaseTransactionRepository(observeSession, store, analytics)
 }

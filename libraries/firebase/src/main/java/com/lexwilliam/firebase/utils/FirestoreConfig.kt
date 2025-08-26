@@ -11,7 +11,7 @@ object FirestoreConfig {
     const val COLLECTION_EMPLOYEE_SHIFT = "employee_shift"
 
     object Field {
-        const val BRANCH_UUID = "branch_uuid"
+        const val USER_UUID = "user_uuid"
         const val DELETED_AT = "deleted_at"
     }
 }

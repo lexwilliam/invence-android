@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="please_enable_camera_permission">It seems like you have declined the Camera Permission, please enable it in the settings</string>
+    <string name="camera_permission_required"><![CDATA[Camera Permission is required to take photos & scanning barcode]]></string>
+</resources>

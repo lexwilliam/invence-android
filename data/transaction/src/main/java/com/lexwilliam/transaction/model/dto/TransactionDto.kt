@@ -11,8 +11,8 @@ import kotlinx.datetime.Instant
 
 data class TransactionDto(
     val uuid: String? = null,
-    @JvmField @PropertyName("branch_uuid")
-    val branchUUID: String? = null,
+    @JvmField @PropertyName("user_uuid")
+    val userUUID: String? = null,
     @JvmField @PropertyName("order_group")
     val orderGroup: OrderGroupDto? = null,
     val customer: String? = null,
@@ -28,7 +28,7 @@ data class TransactionDto(
     fun toDomain() =
         Transaction(
             uuid = uuid.validateUUID(),
-            branchUUID = branchUUID.validateUUID(),
+            userUUID = userUUID ?: "",
             orderGroup = orderGroup?.toDomain() ?: OrderGroupDto().toDomain(),
             customer = customer ?: "",
             total = total ?: 0.0,
@@ -42,7 +42,7 @@ data class TransactionDto(
         fun fromDomain(domain: Transaction) =
             TransactionDto(
                 uuid = domain.uuid.toString(),
-                branchUUID = domain.branchUUID.toString(),
+                userUUID = domain.userUUID,
                 orderGroup = OrderGroupDto.fromDomain(domain.orderGroup),
                 customer = domain.customer,
                 total = domain.total,

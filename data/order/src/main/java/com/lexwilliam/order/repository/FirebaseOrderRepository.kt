@@ -4,6 +4,7 @@ import arrow.core.Either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.order.model.OrderGroup
 import com.lexwilliam.order.model.dto.OrderGroupDto
@@ -13,18 +14,26 @@ import com.lexwilliam.order.util.UpsertGroupFailure
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 fun firebaseOrderRepository(
+    observeSession: ObserveSessionUseCase,
     analytics: FirebaseCrashlytics,
     store: FirebaseFirestore
 ) = object : OrderRepository {
-    override fun observeOrderGroup(branchUUID: UUID): Flow<List<OrderGroup>> =
+    val userUUID = observeSession().map { it.getUserId() }
+
+    override fun observeOrderGroup(): Flow<List<OrderGroup>> =
         callbackFlow {
+            val userUUID = userUUID.firstOrNull()
+            if (userUUID == null) trySend(emptyList())
+
             val reference =
                 store
                     .collection(FirestoreConfig.COLLECTION_ORDER)
-                    .whereEqualTo(FirestoreConfig.Field.BRANCH_UUID, branchUUID.toString())
+                    .whereEqualTo(FirestoreConfig.Field.USER_UUID, userUUID.toString())
                     .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
 
             val registration =

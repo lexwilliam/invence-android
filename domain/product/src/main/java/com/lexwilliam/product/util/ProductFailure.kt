@@ -2,7 +2,9 @@ package com.lexwilliam.product.util
 
 sealed interface FetchProductFailure
 
-sealed interface UpsertProductFailure
+sealed interface UpsertProductFailure {
+    data object UploadImageFailed : UpsertProductFailure
+}
 
 sealed interface DeleteProductFailure
 

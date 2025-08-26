@@ -10,18 +10,13 @@ import com.lexwilliam.order.model.OrderGroup
 import com.lexwilliam.order.usecase.DeleteOrderGroupUseCase
 import com.lexwilliam.order.usecase.ObserveOrderGroupUseCase
 import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
+import com.lexwilliam.user.usecase.FetchCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -37,8 +32,7 @@ class CartViewModel
         observeOrderGroup: ObserveOrderGroupUseCase,
         private val upsertOrderGroup: UpsertOrderGroupUseCase,
         private val deleteOrderGroup: DeleteOrderGroupUseCase,
-        private val fetchUser: FetchUserUseCase,
-        observeSession: ObserveSessionUseCase
+        private val fetchCurrentUser: FetchCurrentUserUseCase
     ) : ViewModel() {
         private val _navigation = Channel<CartNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
@@ -46,26 +40,13 @@ class CartViewModel
         private val _isLoading = MutableStateFlow(false)
         val isLoading = _isLoading.asStateFlow()
 
-        private val user =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-            }
-
-        private val branchUUID = user.map { it?.branchUUID }
-
         val orderGroup =
-            branchUUID.flatMapLatest { uuid ->
-                when (uuid) {
-                    null -> flowOf(emptyList())
-                    else -> observeOrderGroup(uuid)
-                }
-            }.stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                emptyList()
-            )
+            observeOrderGroup()
+                .stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5_000),
+                    emptyList()
+                )
 
         fun onEvent(event: CartUiEvent) {
             when (event) {
@@ -103,13 +84,12 @@ class CartViewModel
         private fun handleAddCartClicked() {
             _isLoading.value = true
             viewModelScope.launch {
-                val username = user.firstOrNull()?.name ?: return@launch
-                val branchUUID = branchUUID.firstOrNull() ?: return@launch
+                val user = fetchCurrentUser().getOrNull() ?: return@launch
                 val orderGroup =
                     OrderGroup(
                         uuid = UUID.randomUUID(),
-                        branchUUID = branchUUID,
-                        createdBy = username,
+                        userUUID = user.uuid,
+                        createdBy = user.name,
                         orders = emptyList(),
                         // TODO: Apply taxes and discount after implemented
                         taxes = emptyList(),
@@ -128,13 +108,6 @@ class CartViewModel
                         _isLoading.value = false
                     },
                     ifRight = {
-//                        SnackbarController.sendEvent(
-//                            event =
-//                                SnackbarEvent(
-//                                    type = SnackbarTypeEnum.SUCCESS,
-//                                    message = "Upsert Order Group Success"
-//                                )
-//                        )
                     }
                 )
             }

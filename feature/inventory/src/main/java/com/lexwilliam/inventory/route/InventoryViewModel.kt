@@ -20,8 +20,6 @@ import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.util.queryProductCategory
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,9 +27,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -47,9 +44,7 @@ class InventoryViewModel
     constructor(
         private val barcodeImageAnalyzer: BarcodeImageAnalyzer,
         private val barcodeResultBoundaryAnalyzer: BarcodeResultBoundaryAnalyzer,
-        observeProductCategory: ObserveProductCategoryUseCase,
-        observeSession: ObserveSessionUseCase,
-        fetchUser: FetchUserUseCase
+        observeProductCategory: ObserveProductCategoryUseCase
     ) : ViewModel() {
         private val _state = MutableStateFlow(InventoryUiState())
         val uiState = _state.asStateFlow()
@@ -57,22 +52,7 @@ class InventoryViewModel
         private val _navigation = Channel<InventoryNavigationTarget>()
         val navigation = _navigation.receiveAsFlow()
 
-        private val branchUUID =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-                    ?.branchUUID
-            }
-
-        private val _categories =
-            branchUUID.flatMapLatest {
-                when (it) {
-                    null -> flowOf(emptyList())
-                    else -> observeProductCategory(it)
-                }
-            }
-
+        private val _categories = observeProductCategory()
         val categories =
             _categories
                 .stateIn(
@@ -82,25 +62,16 @@ class InventoryViewModel
                 )
 
         val uiProducts =
-            _state.flatMapLatest { state ->
-                branchUUID.flatMapLatest {
-                    when (it) {
-                        null -> flowOf(emptyList())
-                        else ->
-                            observeProductCategory(it)
-                                .map { categories ->
-                                    queryProductCategory(
-                                        categories,
-                                        state.query
-                                    ).flatMap { category ->
-                                        category.products.map { product ->
-                                            UiProduct(
-                                                category = category,
-                                                product = product
-                                            )
-                                        }
-                                    }
-                                }
+            _state.combine(_categories) { state, categories ->
+                queryProductCategory(
+                    categories,
+                    state.query
+                ).flatMap { category ->
+                    category.products.map { product ->
+                        UiProduct(
+                            category = category,
+                            product = product
+                        )
                     }
                 }
             }.stateIn(

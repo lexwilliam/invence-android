@@ -3,7 +3,6 @@ package com.lexwilliam.product.route.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.controller.SnackbarEvent
@@ -14,8 +13,6 @@ import com.lexwilliam.product.route.detail.dialog.RestockDialogEvent
 import com.lexwilliam.product.route.detail.dialog.RestockDialogState
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
-import com.lexwilliam.user.usecase.FetchUserUseCase
-import com.lexwilliam.user.usecase.ObserveSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -24,8 +21,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -41,8 +36,6 @@ class ProductDetailViewModel
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
-        observeSession: ObserveSessionUseCase,
-        fetchUser: FetchUserUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
         private val _navigation = Channel<ProductDetailNavigationTarget>()
@@ -52,24 +45,10 @@ class ProductDetailViewModel
             savedStateHandle
                 .getStateFlow<String?>("productUUID", null)
 
-        private val branchUUID =
-            observeSession().map { session ->
-                session.userUUID
-                    ?.let { fetchUser(it) }
-                    ?.getOrNull()
-                    ?.branchUUID
-            }
-
-        private val categories =
-            branchUUID.flatMapLatest {
-                when (it) {
-                    null -> flowOf(emptyList())
-                    else -> observeProductCategory(it)
-                }
-            }
+        private val _categories = observeProductCategory()
 
         private val category =
-            categories.map { categories ->
+            _categories.map { categories ->
                 categories.firstOrNull { category ->
                     category.products.any { product ->
                         product.sku == productUUID.firstOrNull()

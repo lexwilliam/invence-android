@@ -1,5 +1,6 @@
 package com.lexwilliam.product.route.form
 
+import android.net.Uri
 import com.lexwilliam.product.model.ProductCategory
 import com.lexwilliam.product.model.UiPriceAndQuantity
 
@@ -11,7 +12,7 @@ data class ProductFormUiState(
     val buyPriceList: Map<Int, UiPriceAndQuantity> = mapOf(),
     val selectedCategory: ProductCategory? = null,
     val description: String = "",
-    val image: Any? = null,
+    val image: Uri? = null,
     val takePhoto: Boolean = false,
     val isLoading: Boolean = false,
     val isScanBarcodeShowing: Boolean = false,

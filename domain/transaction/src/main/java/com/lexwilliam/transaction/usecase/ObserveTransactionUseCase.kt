@@ -1,9 +1,9 @@
 package com.lexwilliam.transaction.usecase
 
+import androidx.paging.PagingData
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.repository.TransactionRepository
 import kotlinx.coroutines.flow.Flow
-import java.util.UUID
 import javax.inject.Inject
 
 class ObserveTransactionUseCase
@@ -11,10 +11,7 @@ class ObserveTransactionUseCase
     constructor(
         private val repository: TransactionRepository
     ) {
-        operator fun invoke(
-            branchUUID: UUID,
-            limit: Int? = null
-        ): Flow<List<Transaction>> {
-            return repository.observeTransaction(branchUUID, limit)
+        operator fun invoke(): Flow<PagingData<Transaction>> {
+            return repository.observePagedTransaction()
         }
     }
