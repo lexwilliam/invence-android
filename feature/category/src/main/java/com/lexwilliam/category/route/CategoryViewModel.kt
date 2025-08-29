@@ -64,6 +64,7 @@ class CategoryViewModel
                         event.category,
                         event.name
                     )
+
                 CategoryUiEvent.DismissForm -> handleDismissForm()
                 is CategoryUiEvent.DeleteCategory -> handleDeleteCategory(event.category)
             }
@@ -74,8 +75,7 @@ class CategoryViewModel
                 when (val result = deleteProductCategory(category = category)) {
                     is Either.Left -> Log.d("TAG", result.value.toString())
                     is Either.Right ->
-                        _state.update {
-                                old ->
+                        _state.update { old ->
                             old.copy(isEditing = false, selectedCategory = null)
                         }
                 }
@@ -91,12 +91,12 @@ class CategoryViewModel
             name: String
         ) {
             viewModelScope.launch {
-                val isEditing = _state.value.isEditing
+                val isEditing = category != null
                 if (isEditing) {
                     val modifiedCategory =
-                        category?.copy(
+                        category.copy(
                             name = name
-                        ) ?: return@launch
+                        )
                     when (upsertProductCategory(category = modifiedCategory)) {
                         is Either.Left -> {
                             SnackbarController.sendEvent(
@@ -107,22 +107,25 @@ class CategoryViewModel
                                     )
                             )
                         }
+
                         is Either.Right -> {
-                            SnackbarController.sendEvent(
-                                event =
-                                    SnackbarEvent(
-                                        type = SnackbarTypeEnum.SUCCESS,
-                                        message = "Upsert Product Category Success"
-                                    )
-                            )
-                            _state.update {
-                                    old ->
+                            _state.update { old ->
                                 old.copy(isEditing = false, selectedCategory = null)
                             }
                         }
                     }
                 } else {
-                    val user = fetchCurrentUser().getOrNull() ?: return@launch
+                    val user = fetchCurrentUser().getOrNull()
+                    if (user == null) {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "User not found"
+                                )
+                        )
+                        return@launch
+                    }
                     val categoryUUID = UUID.randomUUID()
                     val modifiedCategory =
                         ProductCategory(
@@ -136,9 +139,8 @@ class CategoryViewModel
                     when (val result = upsertProductCategory(category = modifiedCategory)) {
                         is Either.Left -> Log.d("TAG", result.value.toString())
                         is Either.Right ->
-                            _state.update {
-                                    old ->
-                                old.copy(shouldNavigateBack = true)
+                            _state.update { old ->
+                                old.copy(shouldNavigateBack = true, isEditing = false)
                             }
                     }
                 }
@@ -146,8 +148,7 @@ class CategoryViewModel
         }
 
         private fun handleOpenForm(category: ProductCategory?) {
-            _state.update {
-                    old ->
+            _state.update { old ->
                 old.copy(isEditing = true, selectedCategory = category)
             }
         }

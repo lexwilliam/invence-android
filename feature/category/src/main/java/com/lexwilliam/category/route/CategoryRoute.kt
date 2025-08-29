@@ -1,6 +1,5 @@
 package com.lexwilliam.category.route
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -53,7 +52,6 @@ fun CategoryRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val filteredCategories by viewModel.filteredCategories.collectAsStateWithLifecycle()
-    Log.d("TAG", state.query)
 
     if (state.isEditing) {
         CategoryFormDialog(
