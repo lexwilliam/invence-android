@@ -138,6 +138,8 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx"
 firebase-storage = { module = "com.google.firebase:firebase-storage-ktx"}
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle-version"}
 firebase-functions = { module = "com.google.firebase:firebase-functions-ktx" }
+firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
+firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
 
 # Calendar
 calendar = { module = "com.kizitonwose.calendar:view", version.ref = "calendar-version" }
@@ -222,7 +224,9 @@ firebase-dependencies = [
     "firebase-crashlytics",
     "firebase-firestore",
     "firebase-storage",
-    "firebase-functions"
+    "firebase-functions",
+    "firebase-appcheck-playintegrity",
+    "firebase-appcheck-debug"
 ]
 compose-test-dependencies = ["test-manifest-compose", "compose-tooling"]
 navigation-dependencies = ["hilt-nav", "android-navigation-ui", "android-navigation-fragment"]

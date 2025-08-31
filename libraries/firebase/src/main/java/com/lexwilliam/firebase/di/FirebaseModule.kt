@@ -1,6 +1,9 @@
 package com.lexwilliam.firebase.di
 
 import android.content.Context
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -62,6 +65,36 @@ object FirebaseModule {
     @Provides
     fun provideFirebaseFunction(): FirebaseFunctions {
         return Firebase.functions("asia-southeast2")
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseAppCheck(
+        @ApplicationContext context: Context
+    ): FirebaseAppCheck {
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+
+        // Use debug provider for debug builds, Play Integrity for release
+        val appCheckProviderFactory =
+            if (isDebugBuild()) {
+                DebugAppCheckProviderFactory.getInstance()
+            } else {
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            }
+
+        firebaseAppCheck.installAppCheckProviderFactory(appCheckProviderFactory)
+        return firebaseAppCheck
+    }
+
+    private fun isDebugBuild(): Boolean {
+        return try {
+            val buildConfigClass = Class.forName("com.lexwilliam.firebase.BuildConfig")
+            val debugField = buildConfigClass.getDeclaredField("DEBUG")
+            debugField.getBoolean(null)
+        } catch (e: Exception) {
+            // If we can't determine, default to debug for safety
+            true
+        }
     }
 
     @Singleton

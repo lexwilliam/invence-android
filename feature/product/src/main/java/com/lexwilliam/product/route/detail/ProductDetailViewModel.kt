@@ -119,7 +119,7 @@ class ProductDetailViewModel
                         SnackbarController.sendEvent(
                             event =
                                 SnackbarEvent(
-                                    type = SnackbarTypeEnum.ERROR,
+                                    type = SnackbarTypeEnum.SUCCESS,
                                     message = "Delete Product Success"
                                 )
                         )

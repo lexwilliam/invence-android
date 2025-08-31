@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.lexwilliam.core_ui.component.button.defaults.InvenceButtonDefaults
 import com.lexwilliam.core_ui.component.loading.InvenceCircularProgressIndicator
+import com.lexwilliam.core_ui.theme.InvenceTheme
 
 @Composable
 fun InvencePrimaryButton(
@@ -36,7 +38,7 @@ fun InvencePrimaryButton(
     Button(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled,
+        enabled = if (isLoading) false else enabled,
         shape = shape,
         colors = colors,
         elevation = elevation,
@@ -49,10 +51,13 @@ fun InvencePrimaryButton(
         ) {
             if (isLoading) {
                 InvenceCircularProgressIndicator(
+                    color = InvenceTheme.colors.neutral10,
                     modifier = Modifier.size(16.dp)
                 )
+                Text("Loading...")
+            } else {
+                content()
             }
-            content()
         }
     }
 }

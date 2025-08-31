@@ -351,7 +351,12 @@ class ProductFormViewModel
                                 ProductItem(
                                     itemId = id,
                                     buyPrice = item.price.toDouble(),
-                                    quantity = item.quantity.toInt(),
+                                    quantity =
+                                        if (item.quantity.isEmpty()) {
+                                            0
+                                        } else {
+                                            item.quantity.toInt()
+                                        },
                                     createdAt = Clock.System.now()
                                 )
                             },
