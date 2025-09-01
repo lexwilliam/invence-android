@@ -2,13 +2,13 @@ package com.lexwilliam.core_ui.component.button
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -22,19 +22,13 @@ fun GoogleSignInButton(
     isLoading: Boolean = false,
     onClick: () -> Unit
 ) {
-    Button(
+    InvenceOutlineButton(
         modifier = modifier,
-        enabled = !isLoading,
-        colors =
-            ButtonDefaults.buttonColors(
-                containerColor = InvenceTheme.colors.neutral10,
-                contentColor = InvenceTheme.colors.primary,
-                disabledContainerColor = InvenceTheme.colors.neutral60,
-                disabledContentColor = InvenceTheme.colors.neutral30
-            ),
+        isLoading = isLoading,
         onClick = onClick
     ) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isLoading) {
@@ -49,7 +43,6 @@ fun GoogleSignInButton(
                     tint = InvenceTheme.colors.primary,
                     contentDescription = "google logo"
                 )
-                Spacer(modifier = Modifier.size(16.dp))
                 Text(text = "Sign in with Google", style = InvenceTheme.typography.bodyMedium)
             }
         }

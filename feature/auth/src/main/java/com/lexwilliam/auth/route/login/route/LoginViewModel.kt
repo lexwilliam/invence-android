@@ -136,7 +136,7 @@ class LoginViewModel
                             )
 
                         val userDoc = fetchUser(user.uuid).getOrNull()
-                        if (userDoc != null) {
+                        if (userDoc == null) {
                             upsertNewUser(user)
                         } else {
                             _state.update { old -> old.copy(isGoogleSignInLoading = false) }
