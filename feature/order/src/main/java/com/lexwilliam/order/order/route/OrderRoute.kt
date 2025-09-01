@@ -30,6 +30,10 @@ import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
+import com.lexwilliam.order.checkout.dialog.CheckoutDialog
+import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
+import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
+import com.lexwilliam.order.checkout.route.CheckOutUiEvent
 import com.lexwilliam.order.order.navigation.OrderNavigationTarget
 import java.util.UUID
 
@@ -37,18 +41,22 @@ import java.util.UUID
 @Composable
 fun OrderRoute(
     viewModel: OrderViewModel = hiltViewModel(),
-    onBackStack: () -> Unit,
-    toCheckOut: (UUID) -> Unit
+    onBackStack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uiProducts by viewModel.uiProducts.collectAsStateWithLifecycle()
     val orderGroup by viewModel.orderGroup.collectAsStateWithLifecycle(initialValue = null)
     val cart by viewModel.cart.collectAsStateWithLifecycle()
+    
+    // Checkout related state
+    val checkoutState by viewModel.checkoutState.collectAsStateWithLifecycle()
+    val orders by viewModel.orders.collectAsStateWithLifecycle()
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+    val successDialogState by viewModel.successDialogState.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.navigation) { target ->
         when (target) {
             is OrderNavigationTarget.BackStack -> onBackStack()
-            is OrderNavigationTarget.CheckOut -> toCheckOut(target.orderUUID)
         }
     }
 
@@ -164,5 +172,22 @@ fun OrderRoute(
                 )
             }
         }
+    }
+    
+    // Show checkout dialog when orders are available
+    if (orders.isNotEmpty()) {
+        CheckoutDialog(
+            orders = orders,
+            uiState = checkoutState,
+            dialogState = dialogState,
+            successDialogState = successDialogState,
+            onEvent = viewModel::onCheckoutEvent,
+            onDialogEvent = viewModel::onDialogEvent,
+            onSuccessDialogEvent = viewModel::onSuccessDialogEvent,
+            onDismiss = {
+                // Clear orders to hide the dialog
+                viewModel.onCheckoutEvent(CheckOutUiEvent.Dismiss)
+            }
+        )
     }
 }
