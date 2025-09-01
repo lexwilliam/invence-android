@@ -39,6 +39,9 @@ class CategoryViewModel
         private val _state = MutableStateFlow(CategoryUiState())
         val state = _state.asStateFlow()
 
+        private val _deleteState = MutableStateFlow<ProductCategory?>(null)
+        val deleteState = _deleteState.asStateFlow()
+
         private val _categories = observeProductCategory()
 
         val filteredCategories =
@@ -66,20 +69,32 @@ class CategoryViewModel
                     )
 
                 CategoryUiEvent.DismissForm -> handleDismissForm()
+                CategoryUiEvent.ConfirmDelete -> handleConfirmDelete()
+                CategoryUiEvent.DismissDelete -> handleDismissDelete()
                 is CategoryUiEvent.DeleteCategory -> handleDeleteCategory(event.category)
             }
         }
 
         private fun handleDeleteCategory(category: ProductCategory) {
+            _deleteState.update { category }
+        }
+
+        private fun handleConfirmDelete() {
             viewModelScope.launch {
-                when (val result = deleteProductCategory(category = category)) {
+                when (val result = deleteProductCategory(category = _deleteState.value!!)) {
                     is Either.Left -> Log.d("TAG", result.value.toString())
-                    is Either.Right ->
+                    is Either.Right -> {
                         _state.update { old ->
                             old.copy(isEditing = false, selectedCategory = null)
                         }
+                        _deleteState.update { null }
+                    }
                 }
             }
+        }
+
+        private fun handleDismissDelete() {
+            _deleteState.update { null }
         }
 
         private fun handleDismissForm() {

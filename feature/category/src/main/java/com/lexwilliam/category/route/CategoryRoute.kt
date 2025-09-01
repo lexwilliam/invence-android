@@ -39,6 +39,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lexwilliam.category.dialog.CategoryFormDialog
 import com.lexwilliam.core_ui.R
+import com.lexwilliam.core_ui.component.button.InvenceTextButton
+import com.lexwilliam.core_ui.component.button.defaults.InvenceButtonDefaults
+import com.lexwilliam.core_ui.component.dialog.InvenceAlertDialog
 import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -51,15 +54,49 @@ fun CategoryRoute(
     viewModel: CategoryViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
     val filteredCategories by viewModel.filteredCategories.collectAsStateWithLifecycle()
 
     if (state.isEditing) {
         CategoryFormDialog(
             onDismiss = { viewModel.onEvent(CategoryUiEvent.DismissForm) },
             category = state.selectedCategory,
-            onConfirm = {
-                    name ->
+            onConfirm = { name ->
                 viewModel.onEvent(CategoryUiEvent.ConfirmForm(state.selectedCategory, name))
+            }
+        )
+    }
+
+    if (deleteState != null) {
+        InvenceAlertDialog(
+            title = "Delete Category",
+            description =
+                "Are you sure you want to delete this category? " +
+                    "This will delete all products in this category.",
+            onDismissRequest = {
+                viewModel.onEvent(CategoryUiEvent.DismissDelete)
+            },
+            confirmButton = {
+                InvenceTextButton(
+                    colors =
+                        InvenceButtonDefaults.textButtonColors(
+                            contentColor = InvenceTheme.colors.error
+                        ),
+                    onClick = {
+                        viewModel.onEvent(CategoryUiEvent.ConfirmDelete)
+                    }
+                ) {
+                    Text("Delete", style = InvenceTheme.typography.bodyMedium)
+                }
+            },
+            dismissButton = {
+                InvenceTextButton(
+                    onClick = {
+                        viewModel.onEvent(CategoryUiEvent.DismissDelete)
+                    }
+                ) {
+                    Text("Cancel", style = InvenceTheme.typography.bodyMedium)
+                }
             }
         )
     }
@@ -131,6 +168,7 @@ fun CategoryRoute(
                         )
                     }
                 }
+
                 false -> {
                     item {
                         Text(

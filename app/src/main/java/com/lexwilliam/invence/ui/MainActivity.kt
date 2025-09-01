@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     Box(
                         modifier = Modifier.padding(innerPadding),
-                        contentAlignment = Alignment.TopCenter
+                        contentAlignment = Alignment.BottomCenter
                     ) {
                         InvenceApp()
                         SnackbarHost(

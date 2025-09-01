@@ -86,20 +86,25 @@ internal fun firebaseProductRepository(
             var imageUrl: Uri? = null
 
             if (image != null) {
-                when (
-                    val result =
-                        uploadProductImage(
-                            product.sku,
-                            image
-                        )
-                ) {
-                    is Either.Left -> {
-                        return Either.Left(UpsertProductFailure.UploadImageFailed)
-                    }
+                val uriSource = getUriSource(image)
+                if (uriSource == "file" || uriSource == "content") {
+                    when (
+                        val result =
+                            uploadProductImage(
+                                product.sku,
+                                image
+                            )
+                    ) {
+                        is Either.Left -> {
+                            return Either.Left(UpsertProductFailure.UploadImageFailed)
+                        }
 
-                    is Either.Right -> {
-                        imageUrl = result.value
+                        is Either.Right -> {
+                            imageUrl = result.value
+                        }
                     }
+                } else {
+                    imageUrl = image
                 }
             }
 
@@ -163,5 +168,14 @@ internal fun firebaseProductRepository(
         if (userUUID == null) return Either.Left(UploadImageFailure.Unauthenticated)
         val path = "$userUUID/product/$productUUID"
         return storageUploader.imageUploader(path, image)
+    }
+
+    fun getUriSource(uri: Uri): String {
+        return when (uri.scheme) {
+            "file" -> "Internal or External Storage (Direct File Path)"
+            "content" -> "Internal or External Storage (via ContentProvider)"
+            "http", "https" -> "Network"
+            else -> "Unknown Source"
+        }
     }
 }

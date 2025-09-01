@@ -286,11 +286,10 @@ fun ProductDetailRoute(
                             contentDescription = "expand items content icon"
                         )
                     }
-                    Divider(
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Divider()
                     AnimatedVisibility(visible = uiState.itemExpanded) {
                         Column(
+                            modifier = Modifier.padding(top = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             product!!.items.forEach { item ->

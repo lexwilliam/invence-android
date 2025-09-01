@@ -7,12 +7,16 @@ sealed interface CategoryUiEvent {
 
     data class OpenForm(val category: ProductCategory?) : CategoryUiEvent
 
-    data class DeleteCategory(val category: ProductCategory) : CategoryUiEvent
-
     data object DismissForm : CategoryUiEvent
 
     data class ConfirmForm(
         val category: ProductCategory?,
         val name: String
     ) : CategoryUiEvent
+
+    data class DeleteCategory(val category: ProductCategory) : CategoryUiEvent
+
+    data object DismissDelete : CategoryUiEvent
+
+    data object ConfirmDelete : CategoryUiEvent
 }
