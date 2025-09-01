@@ -223,7 +223,8 @@ fun CheckOutRoute(
                         modifier =
                             Modifier
                                 .fillMaxWidth(),
-                        onClick = { viewModel.onEvent(CheckOutUiEvent.ConfirmClicked) }
+                        onClick = { viewModel.onEvent(CheckOutUiEvent.ConfirmClicked) },
+                        isLoading = uiState.isLoading
                     ) {
                         Text(
                             text = "Confirm",

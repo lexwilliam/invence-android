@@ -80,6 +80,7 @@ class SignUpViewModel
         }
 
         private fun handleSignUpClicked() {
+            _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 when (
                     val result =
@@ -89,11 +90,18 @@ class SignUpViewModel
                             password = _state.value.password
                         )
                 ) {
-                    is Either.Left ->
+                    is Either.Left -> {
                         _state.update { old ->
-                            old.copy(error = localizeSignUpFailure(result.value))
+                            old.copy(
+                                isLoading = false,
+                                error = localizeSignUpFailure(result.value)
+                            )
                         }
-                    is Either.Right -> _navigation.send(SignUpNavigationTarget.Home)
+                    }
+                    is Either.Right -> {
+                        _state.update { old -> old.copy(isLoading = false) }
+                        _navigation.send(SignUpNavigationTarget.Home)
+                    }
                 }
             }
         }

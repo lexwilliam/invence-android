@@ -124,6 +124,7 @@ class CheckOutViewModel
         }
 
         private fun handleConfirmClicked() {
+            _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 val orderGroup = orderGroup.firstOrNull() ?: return@launch
                 val categories = categories.firstOrNull() ?: return@launch
@@ -149,14 +150,17 @@ class CheckOutViewModel
 
                 when (val resultTransaction = upsertTransaction(transaction)) {
                     is Either.Left -> {
+                        _state.update { old -> old.copy(isLoading = false) }
                         Log.d("TAG", resultTransaction.value.toString())
                     }
                     is Either.Right -> {
                         when (val result = deleteOrderGroup(orderGroup)) {
                             is Either.Left -> {
+                                _state.update { old -> old.copy(isLoading = false) }
                                 Log.d("TAG", result.value.toString())
                             }
                             is Either.Right -> {
+                                _state.update { old -> old.copy(isLoading = false) }
                                 _successDialogState.update { OrderSuccessDialogState(transaction) }
                             }
                         }

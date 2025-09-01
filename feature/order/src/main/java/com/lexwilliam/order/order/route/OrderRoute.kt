@@ -93,7 +93,8 @@ fun OrderRoute(
                         Modifier
                             .fillMaxWidth(),
                     onClick = { viewModel.onEvent(OrderUiEvent.CheckOutClicked) },
-                    enabled = !(cart.isEmpty() || uiState.isLoading)
+                    enabled = !cart.isEmpty(),
+                    isLoading = uiState.isLoading
                 ) {
                     Text(
                         text = "Check Out",

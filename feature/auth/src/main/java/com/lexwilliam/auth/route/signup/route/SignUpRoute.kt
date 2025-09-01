@@ -237,7 +237,8 @@ fun SignUpRoute(
                     onClick = {
                         viewModel.onEvent(SignUpUiEvent.SignUpClicked)
                     },
-                    enabled = uiState.isValid
+                    enabled = uiState.isValid,
+                    isLoading = uiState.isLoading
                 ) {
                     Text(text = "Sign Up", style = InvenceTheme.typography.bodyMedium)
                 }

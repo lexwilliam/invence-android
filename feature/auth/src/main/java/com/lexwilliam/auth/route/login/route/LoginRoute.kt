@@ -200,13 +200,15 @@ fun LoginRoute(
                 InvencePrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { viewModel.onEvent(LoginUiEvent.SignInClicked) },
-                    enabled = state.isValid
+                    enabled = state.isValid,
+                    isLoading = state.isLoading
                 ) {
                     Text("Sign in", style = InvenceTheme.typography.bodyMedium)
                 }
                 Spacer(Modifier.height(8.dp))
                 GoogleSignInButton(
                     modifier = Modifier.fillMaxWidth(),
+                    isLoading = state.isGoogleSignInLoading,
                     onClick = {
                         coroutineScope.launch {
                             val signInIntentSender = googleAuthUiClient.signIn()

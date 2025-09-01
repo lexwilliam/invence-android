@@ -51,9 +51,11 @@ class LoginViewModel
         }
 
         private fun handleSignInClicked() {
+            _state.update { old -> old.copy(isLoading = true) }
             viewModelScope.launch {
                 when (login(state.value.email, state.value.password)) {
-                    is Either.Left ->
+                    is Either.Left -> {
+                        _state.update { old -> old.copy(isLoading = false) }
                         SnackbarController.sendEvent(
                             event =
                                 SnackbarEvent(
@@ -62,7 +64,9 @@ class LoginViewModel
                                     message = "Incorrect email or password"
                                 )
                         )
+                    }
                     is Either.Right -> {
+                        _state.update { old -> old.copy(isLoading = false) }
                         _navigation.send(LoginNavigationTarget.Home)
                     }
                 }
@@ -94,11 +98,13 @@ class LoginViewModel
         }
 
         private fun handleSignInWithGoogle(result: SignInResult) {
+            _state.update { old -> old.copy(isGoogleSignInLoading = true) }
             viewModelScope.launch {
                 val errorMessage = result.errorMessage
                 val userData = result.data
                 when {
-                    errorMessage != null ->
+                    errorMessage != null -> {
+                        _state.update { old -> old.copy(isGoogleSignInLoading = false) }
                         SnackbarController.sendEvent(
                             event =
                                 SnackbarEvent(
@@ -107,7 +113,9 @@ class LoginViewModel
                                     message = errorMessage
                                 )
                         )
-                    userData == null ->
+                    }
+                    userData == null -> {
+                        _state.update { old -> old.copy(isGoogleSignInLoading = false) }
                         SnackbarController.sendEvent(
                             event =
                                 SnackbarEvent(
@@ -116,6 +124,7 @@ class LoginViewModel
                                     message = "Can't find user data"
                                 )
                         )
+                    }
                     else -> {
                         val user =
                             User(
@@ -130,6 +139,7 @@ class LoginViewModel
                         if (userDoc != null) {
                             upsertNewUser(user)
                         } else {
+                            _state.update { old -> old.copy(isGoogleSignInLoading = false) }
                             _navigation.send(LoginNavigationTarget.Home)
                         }
                     }
@@ -140,6 +150,7 @@ class LoginViewModel
         private suspend fun upsertNewUser(user: User) {
             when (val upsertResult = upsertUser(user)) {
                 is Either.Left -> {
+                    _state.update { old -> old.copy(isGoogleSignInLoading = false) }
                     SnackbarController.sendEvent(
                         event =
                             SnackbarEvent(
@@ -151,6 +162,7 @@ class LoginViewModel
                     logout()
                 }
                 is Either.Right -> {
+                    _state.update { old -> old.copy(isGoogleSignInLoading = false) }
                     _navigation.send(LoginNavigationTarget.Home)
                 }
             }

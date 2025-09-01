@@ -54,7 +54,7 @@ fun InvencePrimaryButton(
                     color = InvenceTheme.colors.neutral10,
                     modifier = Modifier.size(16.dp)
                 )
-                Text("Loading...")
+                Text("Loading...", style = InvenceTheme.typography.bodyMedium)
             } else {
                 content()
             }

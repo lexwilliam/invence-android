@@ -9,7 +9,8 @@ data class SignUpUiState(
     val confirmPassword: String = "",
     val error: String? = null,
     val isPasswordShowing: Boolean = false,
-    val isConfirmPasswordShowing: Boolean = false
+    val isConfirmPasswordShowing: Boolean = false,
+    val isLoading: Boolean = false
 ) {
     val isValid =
         email.isNotBlank() &&
