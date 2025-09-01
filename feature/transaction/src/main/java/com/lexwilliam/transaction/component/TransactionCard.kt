@@ -1,6 +1,8 @@
 package com.lexwilliam.transaction.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,7 @@ import com.lexwilliam.transaction.model.Transaction
 @Composable
 fun TransactionCard(
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
     transaction: Transaction
 ) {
     Row(
@@ -36,6 +41,11 @@ fun TransactionCard(
                 .shadow(1.dp, RoundedCornerShape(8.dp))
                 .clip(RoundedCornerShape(8.dp))
                 .background(InvenceTheme.colors.neutral10)
+                .clickable(
+                    indication = ripple(),
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onClick
+                )
                 .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {

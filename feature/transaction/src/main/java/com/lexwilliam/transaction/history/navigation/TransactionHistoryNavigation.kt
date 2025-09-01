@@ -6,13 +6,18 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.transaction.history.route.TransactionHistoryRoute
+import java.util.UUID
 
-fun NavGraphBuilder.transactionHistoryNavigation(onDrawerNavigation: (String) -> Unit) {
+fun NavGraphBuilder.transactionHistoryNavigation(
+    onDrawerNavigation: (String) -> Unit,
+    toTransactionDetail: (UUID) -> Unit
+) {
     composable(
         route = Screen.TRANSACTION_HISTORY
     ) {
         TransactionHistoryRoute(
-            onDrawerNavigation = onDrawerNavigation
+            onDrawerNavigation = onDrawerNavigation,
+            toTransactionDetail = toTransactionDetail
         )
     }
 }

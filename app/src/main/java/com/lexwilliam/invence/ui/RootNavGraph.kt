@@ -30,6 +30,7 @@ import com.lexwilliam.product.navigation.productDetailNavigation
 import com.lexwilliam.product.navigation.productFormNavigation
 import com.lexwilliam.profile.navigation.navigateToProfile
 import com.lexwilliam.profile.navigation.profileNavigation
+import com.lexwilliam.transaction.detail.navigation.navigateToTransactionDetail
 import com.lexwilliam.transaction.detail.navigation.transactionDetailNavigation
 import com.lexwilliam.transaction.history.navigation.navigateToTransactionHistory
 import com.lexwilliam.transaction.history.navigation.transactionHistoryNavigation
@@ -105,7 +106,10 @@ fun RootNavGraph(
             onBackStack = navController::navigateUp
         )
         transactionHistoryNavigation(
-            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
+            onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) },
+            toTransactionDetail = { uuid ->
+                navController.navigateToTransactionDetail(uuid)
+            }
         )
         profileNavigation(
             toLogin = navController::navigateToLogin,
