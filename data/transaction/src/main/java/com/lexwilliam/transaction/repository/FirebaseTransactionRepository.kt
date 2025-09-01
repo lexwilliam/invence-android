@@ -9,6 +9,7 @@ import arrow.core.raise.either
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.transaction.model.Transaction
@@ -75,8 +76,9 @@ fun firebaseTransactionRepository(
                     val query =
                         store
                             .collection(FirestoreConfig.COLLECTION_TRANSACTION)
-                            .whereEqualTo(FirestoreConfig.Field.USER_UUID, uuid.toString())
+                            .whereEqualTo(FirestoreConfig.Field.USER_UUID, uuid)
                             .whereEqualTo(FirestoreConfig.Field.DELETED_AT, null)
+                            .orderBy(FirestoreConfig.Field.CREATED_AT, Query.Direction.DESCENDING)
 
                     Pager(
                         config = PagingConfig(pageSize = 20),

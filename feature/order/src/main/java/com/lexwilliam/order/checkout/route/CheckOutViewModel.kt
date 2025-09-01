@@ -113,6 +113,8 @@ class CheckOutViewModel
                         event.discount,
                         event.surcharge
                     )
+
+                CheckOutUiEvent.Dismiss -> handleDismiss()
             }
         }
 

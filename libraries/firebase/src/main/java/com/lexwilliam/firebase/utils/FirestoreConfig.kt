@@ -12,6 +12,7 @@ object FirestoreConfig {
 
     object Field {
         const val USER_UUID = "user_uuid"
+        const val CREATED_AT = "created_at"
         const val DELETED_AT = "deleted_at"
     }
 }

@@ -20,8 +20,6 @@ import com.lexwilliam.inventory.navigation.inventoryNavigation
 import com.lexwilliam.inventory.navigation.navigateToInventory
 import com.lexwilliam.order.cart.navigation.cartNavigation
 import com.lexwilliam.order.cart.navigation.navigateToCart
-import com.lexwilliam.order.checkout.navigation.checkOutNavigation
-import com.lexwilliam.order.checkout.navigation.navigateToCheckOut
 import com.lexwilliam.order.order.navigation.navigateToOrder
 import com.lexwilliam.order.order.navigation.orderNavigation
 import com.lexwilliam.product.navigation.navigateToProductDetail
@@ -88,20 +86,19 @@ fun RootNavGraph(
             onDrawerNavigation = { screen -> onDrawerNavigation(navController, screen) }
         )
         orderNavigation(
-            onBackStack = navController::navigateUp,
-            toCheckOut = { orderUUID -> navController.navigateToCheckOut(orderUUID) }
+            onBackStack = navController::navigateUp
         )
-        checkOutNavigation(
-            onBackStack = navController::navigateUp,
-            toCart = {
-                navController.navigateToCart(
-                    options =
-                        NavOptions.Builder()
-                            .setPopUpTo(Screen.CART, true)
-                            .build()
-                )
-            }
-        )
+//        checkOutNavigation(
+//            onBackStack = navController::navigateUp,
+//            toCart = {
+//                navController.navigateToCart(
+//                    options =
+//                        NavOptions.Builder()
+//                            .setPopUpTo(Screen.CART, true)
+//                            .build()
+//                )
+//            }
+//        )
         transactionDetailNavigation(
             onBackStack = navController::navigateUp
         )

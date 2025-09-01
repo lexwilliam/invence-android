@@ -1,11 +1,15 @@
 package com.lexwilliam.order.order.route
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -31,11 +35,8 @@ import com.lexwilliam.core_ui.component.textfield.InvenceSearchTextField
 import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.order.checkout.dialog.CheckoutDialog
-import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
-import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
 import com.lexwilliam.order.checkout.route.CheckOutUiEvent
 import com.lexwilliam.order.order.navigation.OrderNavigationTarget
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +48,7 @@ fun OrderRoute(
     val uiProducts by viewModel.uiProducts.collectAsStateWithLifecycle()
     val orderGroup by viewModel.orderGroup.collectAsStateWithLifecycle(initialValue = null)
     val cart by viewModel.cart.collectAsStateWithLifecycle()
-    
+
     // Checkout related state
     val checkoutState by viewModel.checkoutState.collectAsStateWithLifecycle()
     val orders by viewModel.orders.collectAsStateWithLifecycle()
@@ -173,10 +174,15 @@ fun OrderRoute(
             }
         }
     }
-    
+
     // Show checkout dialog when orders are available
     if (orders.isNotEmpty()) {
+        val bottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
         CheckoutDialog(
+            modifier =
+                Modifier
+                    .background(InvenceTheme.colors.neutral10)
+                    .padding(bottom = bottomPadding + 16.dp),
             orders = orders,
             uiState = checkoutState,
             dialogState = dialogState,

@@ -10,10 +10,7 @@ import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.order.order.route.OrderRoute
 import java.util.UUID
 
-fun NavGraphBuilder.orderNavigation(
-    toCheckOut: (UUID) -> Unit,
-    onBackStack: () -> Unit
-) {
+fun NavGraphBuilder.orderNavigation(onBackStack: () -> Unit) {
     composable(
         route = "${Screen.ORDER}?orderUUID={orderUUID}",
         arguments =
@@ -25,8 +22,7 @@ fun NavGraphBuilder.orderNavigation(
             )
     ) {
         OrderRoute(
-            onBackStack = onBackStack,
-            toCheckOut = toCheckOut
+            onBackStack = onBackStack
         )
     }
 }

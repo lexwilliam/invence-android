@@ -9,15 +9,15 @@ import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.controller.SnackbarEvent
 import com.lexwilliam.core_ui.model.SnackbarTypeEnum
-import com.lexwilliam.order.model.Order
-import com.lexwilliam.order.model.OrderItem
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogState
 import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
 import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogState
 import com.lexwilliam.order.checkout.route.CheckOutUiEvent
 import com.lexwilliam.order.checkout.route.CheckOutUiState
+import com.lexwilliam.order.model.Order
 import com.lexwilliam.order.model.OrderDiscount
+import com.lexwilliam.order.model.OrderItem
 import com.lexwilliam.order.model.OrderTax
 import com.lexwilliam.order.order.model.UiCartItem
 import com.lexwilliam.order.order.model.UiProduct
@@ -61,7 +61,6 @@ class OrderViewModel
         private val upsertOrderGroup: UpsertOrderGroupUseCase,
         private val deleteOrderGroup: DeleteOrderGroupUseCase,
         private val upsertTransaction: UpsertTransactionUseCase,
-        private val upsertProductCategory: UpsertProductCategoryUseCase,
         private val fetchCurrentUserUseCase: FetchCurrentUserUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
@@ -254,11 +253,20 @@ class OrderViewModel
         // Checkout event handlers
         fun onCheckoutEvent(event: CheckOutUiEvent) {
             when (event) {
-                is CheckOutUiEvent.AddOnClicked -> handleAddOnClicked(event.discount, event.surcharge)
-                is CheckOutUiEvent.QuantityChanged -> handleCheckoutQuantityChanged(event.itemUUID, event.quantity)
+                is CheckOutUiEvent.AddOnClicked ->
+                    handleAddOnClicked(
+                        event.discount,
+                        event.surcharge
+                    )
+                is CheckOutUiEvent.QuantityChanged ->
+                    handleCheckoutQuantityChanged(
+                        event.productUUID,
+                        event.quantity
+                    )
                 CheckOutUiEvent.SaveForLaterClicked -> handleSaveForLaterClicked()
                 CheckOutUiEvent.ConfirmClicked -> handleConfirmClicked()
                 CheckOutUiEvent.Dismiss -> handleCheckoutDismiss()
+                CheckOutUiEvent.BackStackClicked -> handleBackStackClicked()
             }
         }
 
@@ -266,10 +274,22 @@ class OrderViewModel
             when (event) {
                 OrderAddOnDialogEvent.Dismiss -> _dialogState.value = null
                 OrderAddOnDialogEvent.Confirm -> handleAddOnConfirmed()
-                is OrderAddOnDialogEvent.DiscountFixedChanged -> handleDiscountFixedChanged(event.value)
-                is OrderAddOnDialogEvent.DiscountPercentChanged -> handleDiscountPercentChanged(event.value)
-                is OrderAddOnDialogEvent.SurchargeFixedChanged -> handleSurchargeFixedChanged(event.value)
-                is OrderAddOnDialogEvent.SurchargePercentChanged -> handleSurchargePercentChanged(event.value)
+                is OrderAddOnDialogEvent.DiscountFixedChanged ->
+                    handleDiscountFixedChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.DiscountPercentChanged ->
+                    handleDiscountPercentChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.SurchargeFixedChanged ->
+                    handleSurchargeFixedChanged(
+                        event.value
+                    )
+                is OrderAddOnDialogEvent.SurchargePercentChanged ->
+                    handleSurchargePercentChanged(
+                        event.value
+                    )
             }
         }
 
@@ -279,12 +299,18 @@ class OrderViewModel
             }
         }
 
-        private fun handleAddOnClicked(discount: OrderDiscount?, surcharge: OrderTax?) {
+        private fun handleAddOnClicked(
+            discount: OrderDiscount?,
+            surcharge: OrderTax?
+        ) {
             // Show add-on dialog
             _dialogState.value = OrderAddOnDialogState.from(discount, surcharge)
         }
 
-        private fun handleCheckoutQuantityChanged(itemUUID: String, quantity: Int) {
+        private fun handleCheckoutQuantityChanged(
+            itemUUID: String,
+            quantity: Int
+        ) {
             _orders.update { orders ->
                 orders.map { order ->
                     if (order.item?.uuid == itemUUID) {
@@ -301,22 +327,24 @@ class OrderViewModel
             viewModelScope.launch {
                 val orderGroup = orderGroup.firstOrNull() ?: return@launch
                 val orders = _orders.value
-                
+
                 upsertOrderGroup(orderGroup.copy(orders = orders)).fold(
                     ifLeft = { failure ->
                         SnackbarController.sendEvent(
-                            event = SnackbarEvent(
-                                type = SnackbarTypeEnum.ERROR,
-                                message = "Failed to save order"
-                            )
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Failed to save order"
+                                )
                         )
                     },
                     ifRight = {
                         SnackbarController.sendEvent(
-                            event = SnackbarEvent(
-                                type = SnackbarTypeEnum.SUCCESS,
-                                message = "Order saved successfully"
-                            )
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.SUCCESS,
+                                    message = "Order saved successfully"
+                                )
                         )
                         // Close checkout dialog
                         _orders.value = emptyList()
@@ -329,33 +357,39 @@ class OrderViewModel
             // Process transaction without creating order doc
             viewModelScope.launch {
                 _checkoutState.update { it.copy(isLoading = true) }
-                
+
                 try {
                     val orders = _orders.value
-                    val currentUser = fetchCurrentUserUseCase()
+                    val currentUser = fetchCurrentUserUseCase().getOrNull() ?: return@launch
                     val orderGroup = orderGroup.firstOrNull() ?: return@launch
-                    
+
                     // Create transaction directly
-                    val transaction = Transaction(
-                        uuid = UUID.randomUUID(),
-                        orders = orders,
-                        total = orders.sumOf { it.quantity * (it.item?.price ?: 0.0) },
-                        userId = currentUser.uuid,
-                        createdAt = Clock.System.now()
-                    )
-                    
+                    val transaction =
+                        Transaction(
+                            uuid = UUID.randomUUID(),
+                            userUUID = currentUser.uuid,
+                            orderGroup = orderGroup,
+                            customer = "",
+                            total = orders.sumOf { it.quantity * (it.item?.price ?: 0.0) },
+                            profit = orders.sumOf { it.quantity * (it.item?.price ?: 0.0) },
+                            createdBy = currentUser.name,
+                            createdAt = Clock.System.now()
+                        )
+
                     upsertTransaction(transaction).fold(
                         ifLeft = { failure ->
                             SnackbarController.sendEvent(
-                                event = SnackbarEvent(
-                                    type = SnackbarTypeEnum.ERROR,
-                                    message = "Transaction failed"
-                                )
+                                event =
+                                    SnackbarEvent(
+                                        type = SnackbarTypeEnum.ERROR,
+                                        message = "Transaction failed"
+                                    )
                             )
                         },
                         ifRight = {
                             // Show success dialog
-                            _successDialogState.value = OrderSuccessDialogState(transaction = transaction)
+                            _successDialogState.value =
+                                OrderSuccessDialogState(transaction = transaction)
                         }
                     )
                 } finally {
@@ -369,28 +403,30 @@ class OrderViewModel
             val dialogState = _dialogState.value ?: return
             val discount = dialogState.getDiscount()
             val surcharge = dialogState.getSurcharge()
-            
-            _checkoutState.update { it.copy(
-                discount = discount,
-                surcharge = surcharge
-            ) }
+
+            _checkoutState.update {
+                it.copy(
+                    discount = discount,
+                    surcharge = surcharge
+                )
+            }
             _dialogState.value = null
         }
 
         private fun handleDiscountFixedChanged(value: String) {
-            _dialogState.update { it.copy(discountFixed = value) }
+            _dialogState.update { it?.copy(discountFixed = value) }
         }
 
         private fun handleDiscountPercentChanged(value: String) {
-            _dialogState.update { it.copy(discountPercent = value) }
+            _dialogState.update { it?.copy(discountPercent = value) }
         }
 
         private fun handleSurchargeFixedChanged(value: String) {
-            _dialogState.update { it.copy(surchargeFixed = value) }
+            _dialogState.update { it?.copy(surchargeFixed = value) }
         }
 
         private fun handleSurchargePercentChanged(value: String) {
-            _dialogState.update { it.copy(surchargePercent = value) }
+            _dialogState.update { it?.copy(surchargePercent = value) }
         }
 
         private fun handleSuccessDialogConfirmed() {
