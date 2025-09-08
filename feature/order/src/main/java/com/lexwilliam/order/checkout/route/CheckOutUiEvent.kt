@@ -12,6 +12,8 @@ sealed interface CheckOutUiEvent {
 
     data object SaveForLaterClicked : CheckOutUiEvent
 
+    data object Dismiss : CheckOutUiEvent
+
     data class AddOnClicked(
         val discount: OrderDiscount? = null,
         val surcharge: OrderTax? = null
