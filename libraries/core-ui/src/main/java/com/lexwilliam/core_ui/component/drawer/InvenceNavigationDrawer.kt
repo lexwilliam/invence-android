@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.lexwilliam.core_ui.component.navigation.InvenceNavigationHeader
 import com.lexwilliam.core_ui.navigation.drawerItems
 import com.lexwilliam.core_ui.navigation.getDrawerItemIndex
 import com.lexwilliam.core_ui.theme.InvenceTheme
@@ -40,7 +41,10 @@ fun InvenceNavigationDrawer(
                 drawerContainerColor = InvenceTheme.colors.secondary.copy(alpha = 0.5f),
                 drawerTonalElevation = 0.dp
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                // Header
+                InvenceNavigationHeader(
+                    modifier = Modifier.padding(16.dp)
+                )
                 drawerItems.forEachIndexed { index, item ->
                     NavigationDrawerItem(
                         colors =

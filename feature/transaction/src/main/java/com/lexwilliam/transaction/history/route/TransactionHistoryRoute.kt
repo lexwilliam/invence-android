@@ -8,12 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -30,14 +26,13 @@ import androidx.paging.compose.itemKey
 import com.lexwilliam.core.extensions.toFormatString
 import com.lexwilliam.core.navigation.Screen
 import com.lexwilliam.core_ui.component.ObserveAsEvents
-import com.lexwilliam.core_ui.component.drawer.InvenceNavigationDrawer
 import com.lexwilliam.core_ui.component.loading.InvenceCircularProgressIndicator
-import com.lexwilliam.core_ui.component.topbar.InvenceTopBar
+import com.lexwilliam.core_ui.component.navigation.InvenceResponsiveNavigation
+import com.lexwilliam.core_ui.component.navigation.InvenceResponsiveTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.transaction.component.TransactionCard
 import com.lexwilliam.transaction.history.navigation.TransactionHistoryNavigationTarget
 import com.lexwilliam.transaction.model.Transaction
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +55,7 @@ fun TransactionHistoryRoute(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    InvenceNavigationDrawer(
+    InvenceResponsiveNavigation(
         currentScreen = Screen.TRANSACTION_HISTORY,
         drawerState = drawerState,
         onNavigationItemClick = onDrawerNavigation
@@ -68,24 +63,9 @@ fun TransactionHistoryRoute(
         Scaffold(
             containerColor = InvenceTheme.colors.neutral10,
             topBar = {
-                InvenceTopBar(
-                    title = {
-                        Text(
-                            text = "Transaction History",
-                            style = InvenceTheme.typography.titleMedium
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    drawerState.open()
-                                }
-                            }
-                        ) {
-                            Icon(Icons.Default.Menu, contentDescription = "back button")
-                        }
-                    }
+                InvenceResponsiveTopBar(
+                    title = "Transaction History",
+                    drawerState = drawerState
                 )
             }
         ) { innerPadding ->

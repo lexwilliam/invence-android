@@ -43,7 +43,7 @@ val drawerItems =
             route = Screen.ANALYTICS
         ),
         DrawerItem(
-            title = "Transaction History",
+            title = "Transaction",
             selectedIcon = Icons.Default.History,
             unselectedIcon = Icons.Outlined.History,
             route = Screen.TRANSACTION_HISTORY

@@ -1,11 +1,14 @@
 package com.lexwilliam.order.checkout.route
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
+import arrow.core.getOrElse
 import arrow.core.right
+import com.lexwilliam.core_ui.controller.SnackbarController
+import com.lexwilliam.core_ui.controller.SnackbarEvent
+import com.lexwilliam.core_ui.model.SnackbarTypeEnum
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogEvent
 import com.lexwilliam.order.checkout.dialog.OrderAddOnDialogState
 import com.lexwilliam.order.checkout.dialog.OrderSuccessDialogEvent
@@ -135,7 +138,17 @@ class CheckOutViewModel
                     decreaseProductItemQuantity(
                         orders = orders,
                         categories = categories
-                    )
+                    ).getOrElse { message ->
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = message
+                                )
+                        )
+                        _state.update { old -> old.copy(isLoading = false) }
+                        return@launch
+                    }
                 val transaction =
                     Transaction(
                         uuid = transactionUUID,
@@ -148,16 +161,28 @@ class CheckOutViewModel
                         createdAt = Clock.System.now()
                     )
 
-                when (val resultTransaction = upsertTransaction(transaction)) {
+                when (upsertTransaction(transaction)) {
                     is Either.Left -> {
                         _state.update { old -> old.copy(isLoading = false) }
-                        Log.d("TAG", resultTransaction.value.toString())
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Insert transaction failed"
+                                )
+                        )
                     }
                     is Either.Right -> {
-                        when (val result = deleteOrderGroup(orderGroup)) {
+                        when (deleteOrderGroup(orderGroup)) {
                             is Either.Left -> {
                                 _state.update { old -> old.copy(isLoading = false) }
-                                Log.d("TAG", result.value.toString())
+                                SnackbarController.sendEvent(
+                                    event =
+                                        SnackbarEvent(
+                                            type = SnackbarTypeEnum.ERROR,
+                                            message = "Delete order group failed"
+                                        )
+                                )
                             }
                             is Either.Right -> {
                                 _state.update { old -> old.copy(isLoading = false) }
@@ -173,50 +198,81 @@ class CheckOutViewModel
         private suspend fun decreaseProductItemQuantity(
             orders: List<Order>,
             categories: List<ProductCategory>
-        ): Pair<List<Product>, Double> {
+        ): Either<String, Pair<List<Product>, Double>> {
             val orderItemUUIDWithQuantityList = orders.associate { it.item?.uuid to it.quantity }
             val soldProduct = mutableListOf<Product>()
             var totalProfit = 0.0
             categories.forEach { category ->
-                val modifiedProducts =
-                    category.products.map { product ->
-                        if (orderItemUUIDWithQuantityList.contains(product.sku)) {
-                            var count = orderItemUUIDWithQuantityList[product.sku] ?: 0
-                            val soldItems = mutableListOf<ProductItem>()
-                            val modifiedItems =
-                                product.items.mapNotNull { item ->
-                                    if (count == 0) return@mapNotNull null
-                                    val quantity = item.quantity - count
-                                    when {
-                                        quantity > 0 -> {
-                                            totalProfit += product.getProfit(item, count)
-                                            soldItems.add(item.copy(quantity = count))
-                                            count = 0
-                                            item.copy(quantity = quantity)
-                                        }
-                                        else -> {
-                                            if (count > 0) {
-                                                totalProfit += product.getProfit(item, count)
-                                                soldItems.add(item)
-                                            }
-                                            count -= item.quantity
-                                            null
-                                        }
-                                    }
-                                }
-                            soldProduct.add(product.copy(items = soldItems))
-                            product.copy(items = modifiedItems)
-                        } else {
-                            product
+                productItemCheck(
+                    orderItemUUIDWithQuantityList = orderItemUUIDWithQuantityList,
+                    category = category,
+                    addTotalProfit = {
+                        totalProfit += it
+                    },
+                    addSoldProduct = {
+                        soldProduct.add(it)
+                    }
+                ).fold(
+                    ifLeft = {
+                        return Either.Left(it)
+                    },
+                    ifRight = { modifiedProducts ->
+                        val modifiedCategory = category.copy(products = modifiedProducts)
+                        upsertProductCategory(modifiedCategory).isLeft { failure ->
+                            return Either.Left(failure.toString())
                         }
                     }
-                val modifiedCategory = category.copy(products = modifiedProducts)
-                upsertProductCategory(modifiedCategory).isLeft { failure ->
-                    Log.d("TAG", failure.toString())
-                    true
-                }
+                )
             }
-            return soldProduct to totalProfit
+            return Either.Right(soldProduct to totalProfit)
+        }
+
+        private fun productItemCheck(
+            orderItemUUIDWithQuantityList: Map<String?, Int>,
+            category: ProductCategory,
+            addTotalProfit: (Double) -> Unit,
+            addSoldProduct: (Product) -> Unit
+        ): Either<String, List<Product>> {
+            val products =
+                category.products.map { product ->
+                    if (orderItemUUIDWithQuantityList.contains(product.sku)) {
+                        var count = orderItemUUIDWithQuantityList[product.sku] ?: 0
+                        val soldItems = mutableListOf<ProductItem>()
+                        if (product.items.isEmpty()) {
+                            return Either.Left("${product.name} is out of stock")
+                        }
+                        val modifiedItems =
+                            product.items.mapNotNull { item ->
+                                if (count == 0) return@mapNotNull null
+                                val quantity = item.quantity - count
+                                when {
+                                    quantity > 0 -> {
+                                        addTotalProfit(product.getProfit(item, count))
+                                        soldItems.add(item.copy(quantity = count))
+                                        count = 0
+                                        item.copy(quantity = quantity)
+                                    }
+                                    quantity == 0 -> {
+                                        addTotalProfit(product.getProfit(item, count))
+                                        soldItems.add(item.copy(quantity = count))
+                                        count = 0
+                                        null
+                                    }
+                                    else -> {
+                                        return Either.Left(
+                                            "${product.name} only has " +
+                                                "${item.quantity} items left in stock"
+                                        )
+                                    }
+                                }
+                            }
+                        addSoldProduct(product.copy(items = soldItems))
+                        product.copy(items = modifiedItems)
+                    } else {
+                        product
+                    }
+                }
+            return Either.Right(products)
         }
 
         private fun handleSaveForLaterClicked() {

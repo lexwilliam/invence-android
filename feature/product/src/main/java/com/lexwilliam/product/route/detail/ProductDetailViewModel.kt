@@ -3,7 +3,6 @@ package com.lexwilliam.product.route.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core_ui.controller.SnackbarController
 import com.lexwilliam.core_ui.controller.SnackbarEvent
 import com.lexwilliam.core_ui.model.SnackbarTypeEnum
@@ -13,6 +12,7 @@ import com.lexwilliam.product.route.detail.dialog.RestockDialogEvent
 import com.lexwilliam.product.route.detail.dialog.RestockDialogState
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.usecase.UpsertProductCategoryUseCase
+import com.lexwilliam.product.usecase.UpsertProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -36,6 +36,7 @@ class ProductDetailViewModel
     constructor(
         observeProductCategory: ObserveProductCategoryUseCase,
         private val upsertProductCategory: UpsertProductCategoryUseCase,
+        private val upsertProduct: UpsertProductUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
         private val _navigation = Channel<ProductDetailNavigationTarget>()
@@ -181,15 +182,11 @@ class ProductDetailViewModel
                         createdAt = Clock.System.now()
                     )
                 val modifiedProduct = product.copy(items = product.items + productItem)
-                val modifiedCategory =
-                    category.copy(
-                        products =
-                            category.products
-                                .addOrUpdateDuplicate(modifiedProduct) { existingItem, newValue ->
-                                    existingItem.sku == newValue.sku
-                                }
-                    )
-                upsertProductCategory(modifiedCategory).fold(
+                upsertProduct(
+                    category = category,
+                    product = modifiedProduct,
+                    image = modifiedProduct.imagePath
+                ).fold(
                     ifLeft = { failure ->
                         SnackbarController.sendEvent(
                             event =

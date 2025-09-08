@@ -34,8 +34,8 @@ import com.lexwilliam.core_ui.component.ObserveAsEvents
 import com.lexwilliam.core_ui.component.button.InvenceTextButton
 import com.lexwilliam.core_ui.component.button.defaults.InvenceButtonDefaults
 import com.lexwilliam.core_ui.component.dialog.InvenceAlertDialog
-import com.lexwilliam.core_ui.component.drawer.InvenceNavigationDrawer
 import com.lexwilliam.core_ui.component.image.NetworkImage
+import com.lexwilliam.core_ui.component.navigation.InvenceResponsiveNavigation
 import com.lexwilliam.core_ui.component.topbar.InvenceCenterAlignedTopBar
 import com.lexwilliam.core_ui.theme.InvenceTheme
 import com.lexwilliam.profile.navigation.ProfileNavigationTarget
@@ -85,7 +85,7 @@ fun ProfileRoute(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    InvenceNavigationDrawer(
+    InvenceResponsiveNavigation(
         currentScreen = Screen.PROFILE,
         drawerState = drawerState,
         onNavigationItemClick = onDrawerNavigation
