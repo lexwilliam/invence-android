@@ -63,7 +63,8 @@ fun CheckoutDialog(
 
     successDialogState?.let { state ->
         OrderSuccessDialog(
-            transaction = state.transaction,
+            total = subtotal,
+            transactionUUID = state.transactionUUID,
             onDone = {
                 onSuccessDialogEvent(OrderSuccessDialogEvent.Confirm)
             }

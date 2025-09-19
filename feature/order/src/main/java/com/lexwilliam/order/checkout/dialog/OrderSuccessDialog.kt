@@ -21,12 +21,12 @@ import androidx.compose.ui.unit.dp
 import com.lexwilliam.core.extensions.toCurrency
 import com.lexwilliam.core_ui.component.button.InvencePrimaryButton
 import com.lexwilliam.core_ui.theme.InvenceTheme
-import com.lexwilliam.transaction.model.Transaction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSuccessDialog(
-    transaction: Transaction,
+    transactionUUID: String,
+    total: Double,
     onDone: () -> Unit
 ) {
     ModalBottomSheet(
@@ -43,7 +43,7 @@ fun OrderSuccessDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Total ${transaction.total.toCurrency()}",
+                text = "Total ${total.toCurrency()}",
                 style = InvenceTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(32.dp))

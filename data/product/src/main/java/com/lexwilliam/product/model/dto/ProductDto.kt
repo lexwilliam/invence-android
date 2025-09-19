@@ -8,9 +8,11 @@ import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.product.model.Product
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
 @Serializable
 data class ProductDto(
     val sku: String? = null,

@@ -2,7 +2,11 @@ package com.lexwilliam.order.model.dto
 
 import com.lexwilliam.core.util.validateUUID
 import com.lexwilliam.order.model.OrderTax
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class OrderTaxDto(
     val uuid: String? = null,
     val name: String? = null,

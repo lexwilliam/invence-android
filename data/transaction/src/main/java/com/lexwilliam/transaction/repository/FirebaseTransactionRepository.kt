@@ -10,8 +10,12 @@ import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.functions.FirebaseFunctions
 import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.FirestoreConfig
+import com.lexwilliam.order.model.OrderGroup
+import com.lexwilliam.order.model.dto.OrderGroupDto
+import com.lexwilliam.order.util.CheckoutFailure
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.dto.TransactionDto
 import com.lexwilliam.transaction.source.TransactionPagingSource
@@ -26,13 +30,18 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 fun firebaseTransactionRepository(
     observeSession: ObserveSessionUseCase,
     store: FirebaseFirestore,
-    analytics: FirebaseCrashlytics
+    analytics: FirebaseCrashlytics,
+    functions: FirebaseFunctions,
+    json: Json
 ) = object : TransactionRepository {
     val userUUID = observeSession().map { it.getUserId() }
 
@@ -144,4 +153,42 @@ fun firebaseTransactionRepository(
             }
             transaction
         }
+
+    override suspend fun checkout(order: OrderGroup): Either<CheckoutFailure, String> {
+        return Either.catch {
+            val request = json.encodeToString(OrderGroupDto.fromDomain(order))
+            val response =
+                functions
+                    .getHttpsCallable("checkout")
+                    .call(request)
+                    .await()
+            val data = response.data
+            if (data == null) {
+                return Either.Left(CheckoutFailure.UnknownFailure("Checkout Failed"))
+            }
+
+            // Firebase Functions returns a Map<String, Any>, not a JSON string
+            val responseMap = data as? Map<String, Any>
+            if (responseMap == null) {
+                return Either.Left(CheckoutFailure.UnknownFailure("Invalid response format"))
+            }
+
+            val success = responseMap["success"] as? Boolean ?: false
+            val message = responseMap["message"] as? String ?: "Unknown error"
+            val transactionId = responseMap["data"] as? String
+
+            if (success) {
+                if (transactionId == null) {
+                    return Either.Left(CheckoutFailure.UnknownFailure("Checkout Failed"))
+                }
+                return Either.Right(transactionId)
+            } else {
+                return Either.Left(CheckoutFailure.UnknownFailure(message))
+            }
+        }.mapLeft { t ->
+            t.printStackTrace()
+            analytics.recordException(t)
+            CheckoutFailure.UnknownFailure(t.message)
+        }
+    }
 }

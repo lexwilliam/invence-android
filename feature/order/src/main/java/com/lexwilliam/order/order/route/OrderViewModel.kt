@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either
 import arrow.optics.copy
 import com.lexwilliam.core.extensions.addOrUpdateDuplicate
 import com.lexwilliam.core_ui.controller.SnackbarController
@@ -28,8 +29,7 @@ import com.lexwilliam.order.usecase.UpsertOrderGroupUseCase
 import com.lexwilliam.product.model.Product
 import com.lexwilliam.product.usecase.ObserveProductCategoryUseCase
 import com.lexwilliam.product.util.queryProductCategory
-import com.lexwilliam.transaction.model.Transaction
-import com.lexwilliam.transaction.usecase.UpsertTransactionUseCase
+import com.lexwilliam.transaction.usecase.CheckoutUseCase
 import com.lexwilliam.user.usecase.FetchCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,7 +60,7 @@ class OrderViewModel
         private val observeSingleOrderGroup: ObserveSingleOrderGroupUseCase,
         private val upsertOrderGroup: UpsertOrderGroupUseCase,
         private val deleteOrderGroup: DeleteOrderGroupUseCase,
-        private val upsertTransaction: UpsertTransactionUseCase,
+        private val checkoutUseCase: CheckoutUseCase,
         private val fetchCurrentUserUseCase: FetchCurrentUserUseCase,
         savedStateHandle: SavedStateHandle
     ) : ViewModel() {
@@ -169,50 +169,30 @@ class OrderViewModel
 
         private fun handleCheckOutClicked() {
             _state.update { old -> old.copy(isLoading = true) }
-            viewModelScope.launch {
-                val cart = _cart.value
-                val orderUUID = orderUUID.firstOrNull() ?: return@launch
-                val orderGroup = orderGroup.firstOrNull() ?: return@launch
-                val orders =
-                    cart.map { item ->
-                        Order(
-                            uuid = UUID.randomUUID(),
-                            item =
-                                OrderItem(
-                                    uuid = item.product.sku,
-                                    upc = item.product.upc,
-                                    name = item.product.name,
-                                    categoryName = item.product.categoryName,
-                                    label = "",
-                                    price = item.product.sellPrice,
-                                    imagePath = item.product.imagePath,
-                                    description = item.product.description
-                                ),
-                            discounts = emptyList(),
-                            quantity = item.quantity,
-                            refundedQuantity = 0,
-                            note = "",
-                            createdAt = Clock.System.now()
-                        )
-                    }
-                upsertOrderGroup(orderGroup.copy(orders = orders)).fold(
-                    ifLeft = { failure ->
-                        SnackbarController.sendEvent(
-                            event =
-                                SnackbarEvent(
-                                    type = SnackbarTypeEnum.ERROR,
-                                    message = "Upsert Order Group Failed"
-                                )
-                        )
-                        _state.update { old -> old.copy(isLoading = false) }
-                    },
-                    ifRight = {
-                        _state.update { old -> old.copy(isLoading = false) }
-                        _orders.value = orders
-                        // Show checkout dialog instead of navigating
-                    }
-                )
-            }
+            val cart = _cart.value
+            val orders =
+                cart.map { item ->
+                    Order(
+                        uuid = UUID.randomUUID(),
+                        item =
+                            OrderItem(
+                                uuid = item.product.sku,
+                                upc = item.product.upc,
+                                name = item.product.name,
+                                categoryName = item.product.categoryName,
+                                label = "",
+                                price = item.product.sellPrice,
+                                imagePath = item.product.imagePath,
+                                description = item.product.description
+                            ),
+                        discounts = emptyList(),
+                        quantity = item.quantity,
+                        refundedQuantity = 0,
+                        note = "",
+                        createdAt = Clock.System.now()
+                    )
+                }
+            _orders.value = orders
         }
 
         private fun handleQuantityChanged(
@@ -348,6 +328,7 @@ class OrderViewModel
                         )
                         // Close checkout dialog
                         _orders.value = emptyList()
+                        _navigation.send(OrderNavigationTarget.BackStack)
                     }
                 )
             }
@@ -358,43 +339,32 @@ class OrderViewModel
             viewModelScope.launch {
                 _checkoutState.update { it.copy(isLoading = true) }
 
-                try {
-                    val orders = _orders.value
-                    val currentUser = fetchCurrentUserUseCase().getOrNull() ?: return@launch
-                    val orderGroup = orderGroup.firstOrNull() ?: return@launch
-
-                    // Create transaction directly
-                    val transaction =
-                        Transaction(
-                            uuid = UUID.randomUUID(),
-                            userUUID = currentUser.uuid,
-                            orderGroup = orderGroup,
-                            customer = "",
-                            total = orders.sumOf { it.quantity * (it.item?.price ?: 0.0) },
-                            profit = orders.sumOf { it.quantity * (it.item?.price ?: 0.0) },
-                            createdBy = currentUser.name,
-                            createdAt = Clock.System.now()
-                        )
-
-                    upsertTransaction(transaction).fold(
-                        ifLeft = { failure ->
-                            SnackbarController.sendEvent(
-                                event =
-                                    SnackbarEvent(
-                                        type = SnackbarTypeEnum.ERROR,
-                                        message = "Transaction failed"
-                                    )
-                            )
-                        },
-                        ifRight = {
-                            // Show success dialog
-                            _successDialogState.value =
-                                OrderSuccessDialogState(transaction = transaction)
-                        }
+                val orders = _orders.value
+                val currentUser = fetchCurrentUserUseCase().getOrNull() ?: return@launch
+                val orderGroup = orderGroup.firstOrNull() ?: return@launch
+                val modifiedOrderGroup =
+                    orderGroup.copy(
+                        orders = orders,
+                        userUUID = currentUser.uuid
                     )
-                } finally {
-                    _checkoutState.update { it.copy(isLoading = false) }
+
+                when (val result = checkoutUseCase(modifiedOrderGroup)) {
+                    is Either.Left -> {
+                        SnackbarController.sendEvent(
+                            event =
+                                SnackbarEvent(
+                                    type = SnackbarTypeEnum.ERROR,
+                                    message = "Failed to checkout"
+                                )
+                        )
+                    }
+                    is Either.Right -> {
+                        _successDialogState.update { OrderSuccessDialogState(result.value) }
+                        _navigation.send(OrderNavigationTarget.BackStack)
+                    }
                 }
+
+                _checkoutState.update { it.copy(isLoading = false) }
             }
         }
 

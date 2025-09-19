@@ -140,6 +140,7 @@ firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlyti
 firebase-functions = { module = "com.google.firebase:firebase-functions-ktx" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
+firebase-emulator = { module = "com.google.firebase:firebase-emulator" }
 
 # Calendar
 calendar = { module = "com.kizitonwose.calendar:view", version.ref = "calendar-version" }

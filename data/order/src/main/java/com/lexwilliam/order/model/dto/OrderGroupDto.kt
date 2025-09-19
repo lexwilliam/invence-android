@@ -7,21 +7,40 @@ import com.lexwilliam.firebase.extensions.toKtxInstant
 import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.order.model.OrderGroup
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class OrderGroupDto(
     val uuid: String? = null,
-    @JvmField @PropertyName("user_uuid")
+    @SerialName("user_uuid")
+    @JvmField
+    @PropertyName("user_uuid")
     val userUUID: String? = null,
-    @JvmField @PropertyName("created_by")
+    @SerialName("created_by")
+    @JvmField
+    @PropertyName("created_by")
     val createdBy: String? = null,
     val orders: Map<String, OrderDto>? = null,
     val taxes: Map<String, OrderTaxDto>? = null,
     val discounts: Map<String, OrderDiscountDto>? = null,
-    @JvmField @PropertyName("created_at")
+    @SerialName("created_at")
+    @JvmField
+    @PropertyName("created_at")
+    @Contextual
     val createdAt: Timestamp? = null,
-    @JvmField @PropertyName("deleted_at")
+    @SerialName("deleted_at")
+    @JvmField
+    @PropertyName("deleted_at")
+    @Contextual
     val deletedAt: Timestamp? = null,
-    @JvmField @PropertyName("completed_at")
+    @SerialName("completed_at")
+    @JvmField
+    @PropertyName("completed_at")
+    @Contextual
     val completedAt: Timestamp? = null
 ) {
     fun toDomain() =

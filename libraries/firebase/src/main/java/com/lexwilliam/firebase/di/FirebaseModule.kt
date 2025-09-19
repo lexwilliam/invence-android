@@ -16,6 +16,7 @@ import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.lexwilliam.core.session.SessionManager
+import com.lexwilliam.firebase.emulator.FirebaseEmulatorConfig
 import com.lexwilliam.firebase.session.firebaseSessionManager
 import com.lexwilliam.firebase.utils.StorageUploader
 import com.lexwilliam.firebase.utils.TimestampSerializer
@@ -32,6 +33,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
+    
+    @Singleton
+    @Provides
+    fun provideFirebaseEmulatorInitializer(): FirebaseEmulatorInitializer {
+        return FirebaseEmulatorInitializer()
+    }
     @Singleton
     @Provides
     fun provideFirestore(): FirebaseFirestore {

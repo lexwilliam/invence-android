@@ -3,7 +3,11 @@ package com.lexwilliam.order.model.dto
 import androidx.core.net.toUri
 import com.google.firebase.firestore.PropertyName
 import com.lexwilliam.order.model.OrderItem
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class OrderItemDto(
     val uuid: String? = null,
     val upc: String? = null,

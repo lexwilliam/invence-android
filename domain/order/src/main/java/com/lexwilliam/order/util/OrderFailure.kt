@@ -11,3 +11,7 @@ object NoBranch : FetchGroupFailure, UpsertGroupFailure, DeleteGroupFailure
 data class UnknownFailure(
     val message: String?
 ) : FetchGroupFailure, UpsertGroupFailure, DeleteGroupFailure
+
+sealed interface CheckoutFailure {
+    data class UnknownFailure(val message: String?) : CheckoutFailure
+}

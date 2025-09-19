@@ -8,21 +8,39 @@ import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.order.model.dto.OrderGroupDto
 import com.lexwilliam.transaction.model.Transaction
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class TransactionDto(
     val uuid: String? = null,
-    @JvmField @PropertyName("user_uuid")
+    @SerialName("user_uuid")
+    @JvmField
+    @PropertyName("user_uuid")
     val userUUID: String? = null,
-    @JvmField @PropertyName("order_group")
+    @SerialName("order_group")
+    @JvmField
+    @PropertyName("order_group")
     val orderGroup: OrderGroupDto? = null,
     val customer: String? = null,
     val total: Double? = null,
     val profit: Double? = null,
-    @JvmField @PropertyName("created_by")
+    @SerialName("created_by")
+    @JvmField
+    @PropertyName("created_by")
     val createdBy: String? = null,
-    @JvmField @PropertyName("created_at")
+    @SerialName("created_at")
+    @JvmField
+    @PropertyName("created_at")
+    @Contextual
     val createdAt: Timestamp? = null,
-    @JvmField @PropertyName("deleted_at")
+    @SerialName("deleted_at")
+    @JvmField
+    @PropertyName("deleted_at")
+    @Contextual
     val deletedAt: Timestamp? = null
 ) {
     fun toDomain() =

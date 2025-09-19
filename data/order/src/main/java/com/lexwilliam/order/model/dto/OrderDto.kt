@@ -7,20 +7,37 @@ import com.lexwilliam.firebase.extensions.toKtxInstant
 import com.lexwilliam.firebase.extensions.toTimestamp
 import com.lexwilliam.order.model.Order
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class OrderDto(
     val uuid: String? = null,
     val item: OrderItemDto? = null,
     val discounts: Map<String, OrderDiscountDto>? = null,
     val quantity: Int? = null,
-    @JvmField @PropertyName("refunded_quantity")
+    @SerialName("refunded_quantity")
+    @JvmField
+    @PropertyName("refunded_quantity")
     val refundedQuantity: Int? = null,
     val note: String? = null,
-    @JvmField @PropertyName("created_at")
+    @SerialName("created_at")
+    @JvmField
+    @PropertyName("created_at")
+    @Contextual
     val createdAt: Timestamp? = null,
-    @JvmField @PropertyName("updated_at")
+    @SerialName("updated_at")
+    @JvmField
+    @PropertyName("updated_at")
+    @Contextual
     val updatedAt: Timestamp? = null,
-    @JvmField @PropertyName("deleted_at")
+    @SerialName("deleted_at")
+    @JvmField
+    @PropertyName("deleted_at")
+    @Contextual
     val deletedAt: Timestamp? = null
 ) {
     fun toDomain() =

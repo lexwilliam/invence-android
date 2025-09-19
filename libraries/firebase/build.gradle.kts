@@ -59,4 +59,7 @@ dependencies {
 
     api(platform(libs.firebase.bom))
     api(libs.bundles.firebase.dependencies)
+    
+    // Firebase Emulator (for development builds)
+    debugImplementation(libs.firebase.emulator)
 }

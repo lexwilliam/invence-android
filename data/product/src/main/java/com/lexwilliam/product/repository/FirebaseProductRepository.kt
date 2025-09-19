@@ -2,12 +2,15 @@ package com.lexwilliam.product.repository
 
 import android.net.Uri
 import arrow.core.Either
+import arrow.core.getOrElse
 import com.google.firebase.Timestamp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.core.util.UploadImageFailure
+import com.lexwilliam.core.util.UriSourceEnum
+import com.lexwilliam.core.util.getUriSource
 import com.lexwilliam.firebase.utils.FirestoreConfig
 import com.lexwilliam.firebase.utils.StorageUploader
 import com.lexwilliam.product.model.Product
@@ -86,8 +89,11 @@ internal fun firebaseProductRepository(
             var imageUrl: Uri? = null
 
             if (image != null) {
-                val uriSource = getUriSource(image)
-                if (uriSource == "file" || uriSource == "content") {
+                val uriSource =
+                    getUriSource(image).getOrElse {
+                        return Either.Left(UpsertProductFailure.UploadImageFailed)
+                    }
+                if (uriSource != UriSourceEnum.NETWORK) {
                     when (
                         val result =
                             uploadProductImage(
@@ -168,14 +174,5 @@ internal fun firebaseProductRepository(
         if (userUUID == null) return Either.Left(UploadImageFailure.Unauthenticated)
         val path = "$userUUID/product/$productUUID"
         return storageUploader.imageUploader(path, image)
-    }
-
-    fun getUriSource(uri: Uri): String {
-        return when (uri.scheme) {
-            "file" -> "Internal or External Storage (Direct File Path)"
-            "content" -> "Internal or External Storage (via ContentProvider)"
-            "http", "https" -> "Network"
-            else -> "Unknown Source"
-        }
     }
 }

@@ -2,7 +2,11 @@ package com.lexwilliam.order.model.dto
 
 import com.lexwilliam.core.util.validateUUID
 import com.lexwilliam.order.model.OrderDiscount
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class OrderDiscountDto(
     val uuid: String? = null,
     val name: String? = null,
