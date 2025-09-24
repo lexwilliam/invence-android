@@ -13,8 +13,6 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.functions.FirebaseFunctions
 import com.lexwilliam.core.session.ObserveSessionUseCase
 import com.lexwilliam.firebase.utils.FirestoreConfig
-import com.lexwilliam.order.model.OrderGroup
-import com.lexwilliam.order.model.dto.OrderGroupDto
 import com.lexwilliam.order.util.CheckoutFailure
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.model.dto.TransactionDto
@@ -31,7 +29,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
 
@@ -154,9 +151,9 @@ fun firebaseTransactionRepository(
             transaction
         }
 
-    override suspend fun checkout(order: OrderGroup): Either<CheckoutFailure, String> {
+    override suspend fun checkout(orderId: UUID): Either<CheckoutFailure, String> {
+        val request = mapOf("orderId" to orderId.toString())
         return Either.catch {
-            val request = json.encodeToString(OrderGroupDto.fromDomain(order))
             val response =
                 functions
                     .getHttpsCallable("checkout")

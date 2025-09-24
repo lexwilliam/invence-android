@@ -14,12 +14,12 @@ plugins {
 
 android {
     namespace = "com.lexwilliam.invence"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.lexwilliam.invence"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -33,9 +33,7 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            buildConfigField("boolean", "USE_FIREBASE_EMULATOR", "true")
         }
         release {
             isMinifyEnabled = false
@@ -43,7 +41,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("boolean", "USE_FIREBASE_EMULATOR", "false")
         }
     }
     compileOptions {

@@ -347,8 +347,9 @@ class OrderViewModel
                         orders = orders,
                         userUUID = currentUser.uuid
                     )
+                val order = upsertOrderGroup(modifiedOrderGroup).getOrNull() ?: return@launch
 
-                when (val result = checkoutUseCase(modifiedOrderGroup)) {
+                when (val result = checkoutUseCase(order.uuid)) {
                     is Either.Left -> {
                         SnackbarController.sendEvent(
                             event =

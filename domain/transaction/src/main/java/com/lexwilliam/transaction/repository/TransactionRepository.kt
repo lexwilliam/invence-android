@@ -2,7 +2,6 @@ package com.lexwilliam.transaction.repository
 
 import androidx.paging.PagingData
 import arrow.core.Either
-import com.lexwilliam.order.model.OrderGroup
 import com.lexwilliam.order.util.CheckoutFailure
 import com.lexwilliam.transaction.model.Transaction
 import com.lexwilliam.transaction.util.DeleteTransactionFailure
@@ -25,5 +24,5 @@ interface TransactionRepository {
         transaction: Transaction
     ): Either<DeleteTransactionFailure, Transaction>
 
-    suspend fun checkout(order: OrderGroup): Either<CheckoutFailure, String>
+    suspend fun checkout(orderId: UUID): Either<CheckoutFailure, String>
 }
